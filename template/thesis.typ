@@ -36,7 +36,7 @@
     title: ("毕业论文中文题目", "GPT2ABC：基于GPT2的ABC音乐生成"),
     title-en: "GPT2ABC: GPT2-Based ABC Music Generation",
     grade: "2024",
-    student-id: "2024013289",
+    student-id: "2024103289",
     author: "谭盟",
     author-en: "Meng Tan",
     secret-level: "无",
