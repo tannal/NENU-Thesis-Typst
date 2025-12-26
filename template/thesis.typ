@@ -33,12 +33,12 @@
   twoside: false,
   print: false,
   info: (
-    title: ("毕业论文中文题目", "有一点长有一点长有一点长有一点长有一点长有一点长"),
-    title-en: "Analysis of the genetic diversity within and between the XX population revealed by AFLP marker",
-    grade: "20XX",
-    student-id: "1234567890",
-    author: "张三",
-    author-en: "San Zhang",
+    title: ("毕业论文中文题目", "GPT2ABC：基于GPT2的ABC音乐生成"),
+    title-en: "GPT2ABC: GPT2-Based ABC Music Generation",
+    grade: "2024",
+    student-id: "2024013289",
+    author: "谭盟",
+    author-en: "Meng Tan",
     secret-level: "无",
     secret-level-en: "Unclassified",
     department: "信息科学与技术学院",
@@ -47,10 +47,10 @@
     discipline-en: "Computer Science and Technology",
     major: "计算机科学",
     major-en: "Computer Science",
-    field: "人工智能",
-    field-en: "Artificial Intelligence",
-    supervisor: ("李四", "教授"),
-    supervisor-en: "Professor My Supervisor",
+    field: "深度学习",
+    field-en: "Deep Learning",
+    supervisor: ("杨贵福", "教授"),
+    supervisor-en: "GuiFu Yang",
     submit-date: datetime.today(),
     reviewers: (
       (name: "张三", workplace: "工作单位", evaluation: "总体评价"),
@@ -90,39 +90,35 @@
 
 //*中文摘要
 #abstract(
-  keywords: ("我", "就是", "测试用", "关键词"),
+  keywords: ("ABC记谱法", "音乐生成", "序列建模", "深度学习", "模型对比"),
 )[
-  #kouhu(builtin-text: "zhufu", length: 100)
+音乐生成是人工智能与计算音乐学的交叉领域，旨在让计算机自动创作符合音乐规律的作品。ABC记谱法是一种基于文本的音乐表示格式，广泛用于传统音乐和民谣，便于计算机处理，适合作为音乐生成模型的输入与输出格式。然而，现有研究主要关注MIDI或音频格式的音乐生成，对文本化音乐表示（如ABC记谱法）的关注较少，且缺乏在统一条件下对不同序列建模架构的系统对比。
 
-  #kouhu(builtin-text: "zhufu", length: 60)
+本研究围绕ABC记谱法音乐生成任务，系统对比了RNN、LSTM、Transformer和GPT2四种序列建模架构。首先，设计并实现了ABC记谱法专用分词器（ABCTokenizer），采用最长匹配策略，能够准确识别和分割ABC记谱法中的所有语法元素，包括音符、时值、调性标记、小节线等多字符符号，保持了音乐语义的完整性。其次，在统一的实验配置下实现了四种模型架构：RNN使用基础循环单元与tanh激活函数；LSTM通过门控机制缓解长期依赖问题；Transformer采用位置编码与多头自注意力，使用因果掩码保证自回归特性；GPT2ABC基于Hugging Face的GPT2LMHeadModel，适配ABC词汇表与特殊token。所有模型采用相同的嵌入维度（256）、隐藏维度（512）、层数（3）、dropout率（0.2）、学习率（1e-3）、批次大小（16）和最大序列长度（512），确保实验对比的公平性。
+
+研究建立了多维度性能评估体系，包括损失函数（交叉熵）、困惑度、训练/验证/测试损失、训练时间、内存占用、模型参数量、学习率变化等指标，并生成样本音乐进行质量评估。实验使用固定随机种子（42）进行80%-10%-10%的数据划分，采用Adam优化器、权重衰减、梯度裁剪、学习率调度和早停机制等统一的训练策略，每10个epoch记录一次性能指标，生成详细的CSV报告。
+
+本研究的主要创新点包括：首次在统一条件下系统对比RNN、LSTM、Transformer、GPT2在ABC记谱法生成任务上的表现，填补了现有研究的空白；设计了专门针对ABC记谱法的分词器ABCTokenizer，有效处理了ABC记谱法的复杂语法结构；建立了多维度评估体系，不仅关注模型性能，还关注计算效率和资源消耗；提供了可复现的实验设计和完整的实验框架，为相关研究提供了参考。研究结果表明，不同架构在ABC记谱法生成任务上各有优势：RNN计算简单但难以捕捉长期依赖；LSTM通过门控机制能够更好地学习长期依赖关系；Transformer和GPT2ABC使用自注意力机制，能够直接捕捉序列中任意位置之间的依赖关系，训练效率更高。本研究为ABC记谱法音乐生成任务选择合适模型架构提供了重要的实验依据，并为相关研究提供了可复现的实验框架与评估标准。
 ]
 
 //* 英文摘要
 #abstract-en(
   keywords: (
-    "I",
-    "am",
-    "just",
-    "a",
-    "test",
-    "keyword",
-    "which",
-    "is",
-    "quite",
-    "long",
-    "really",
-    "very",
-    "long",
-    "indeed",
-    "to",
-    "test",
+    "ABC notation",
+    "music generation",
+    "sequence modeling",
+    "deep learning",
+    "model comparison"
   ),
 )[
-  #lorem(100)
+Music generation is an interdisciplinary field combining artificial intelligence and computational musicology, aiming to enable computers to automatically create musical works that conform to musical rules. ABC notation is a text-based music representation format widely used in traditional music and folk songs, which is convenient for computer processing and suitable as input and output format for music generation models. However, existing research mainly focuses on music generation in MIDI or audio formats, with less attention to text-based music representations such as ABC notation, and lacks systematic comparison of different sequence modeling architectures under unified conditions.
 
-  #lorem(50)
+This research systematically compares four sequence modeling architectures—RNN, LSTM, Transformer, and GPT2—for ABC notation music generation tasks. First, a dedicated tokenizer for ABC notation (ABCTokenizer) was designed and implemented, using a longest match strategy to accurately identify and segment all grammatical elements in ABC notation, including notes, durations, key signatures, bar lines, and other multi-character symbols, maintaining the integrity of musical semantics. Second, four model architectures were implemented under unified experimental configurations: RNN uses basic recurrent units with tanh activation; LSTM alleviates long-term dependency problems through gating mechanisms; Transformer employs positional encoding and multi-head self-attention with causal masking to ensure autoregressive properties; GPT2ABC is based on Hugging Face's GPT2LMHeadModel, adapted to ABC vocabulary and special tokens. All models use the same embedding dimension (256), hidden dimension (512), number of layers (3), dropout rate (0.2), learning rate (1e-3), batch size (16), and maximum sequence length (512) to ensure fair experimental comparison.
+
+The research establishes a multi-dimensional performance evaluation system, including metrics such as loss function (cross-entropy), perplexity, training/validation/test loss, training time, memory usage, model parameters, and learning rate changes, and generates sample music for quality assessment. Experiments use a fixed random seed (42) for 80%-10%-10% data splitting, adopt unified training strategies including Adam optimizer, weight decay, gradient clipping, learning rate scheduling, and early stopping, record performance metrics every 10 epochs, and generate detailed CSV reports.
+
+The main innovations of this research include: first systematic comparison of RNN, LSTM, Transformer, and GPT2 on ABC notation generation tasks under unified conditions, filling gaps in existing research; design of ABCTokenizer specifically for ABC notation, effectively handling the complex grammatical structure of ABC notation; establishment of a multi-dimensional evaluation system that considers not only model performance but also computational efficiency and resource consumption; provision of reproducible experimental design and complete experimental framework for reference by related research. Research results show that different architectures have their own advantages in ABC notation generation tasks: RNN is computationally simple but struggles with long-term dependencies; LSTM can better learn long-term dependencies through gating mechanisms; Transformer and GPT2ABC use self-attention mechanisms to directly capture dependencies between arbitrary positions in sequences, with higher training efficiency. This research provides important experimental evidence for selecting appropriate model architectures for ABC notation music generation tasks and offers a reproducible experimental framework and evaluation standards for related research.
 ]
-
 
 //* 目录
 #outline-page()
@@ -177,50 +173,50 @@
 
 第6章 结论与展望：总结与未来方向
 
-== 列表
+// == 列表
 
-=== 有序列表
+// === 有序列表
 
-+ #kouhu(builtin-text: "aspirin", length: 10)
-+ #kouhu(builtin-text: "aspirin", offset: 2, length: 10)
-  + #kouhu(builtin-text: "aspirin", offset: 3, length: 5)
-  + #kouhu(builtin-text: "aspirin", offset: 3, length: 10)
-  + #kouhu(builtin-text: "aspirin", offset: 3, length: 15)
+// + #kouhu(builtin-text: "aspirin", length: 10)
+// + #kouhu(builtin-text: "aspirin", offset: 2, length: 10)
+//   + #kouhu(builtin-text: "aspirin", offset: 3, length: 5)
+//   + #kouhu(builtin-text: "aspirin", offset: 3, length: 10)
+//   + #kouhu(builtin-text: "aspirin", offset: 3, length: 15)
 
-=== 无序列表
+// === 无序列表
 
-- #kouhu(builtin-text: "zhufu", length: 15)
-- #kouhu(builtin-text: "zhufu", offset: 2, length: 15)
-  - #kouhu(builtin-text: "zhufu", offset: 3, length: 15)
-  - #kouhu(builtin-text: "zhufu", offset: 3, length: 15)
-  - #kouhu(builtin-text: "zhufu", offset: 6, length: 15)
+// - #kouhu(builtin-text: "zhufu", length: 15)
+// - #kouhu(builtin-text: "zhufu", offset: 2, length: 15)
+//   - #kouhu(builtin-text: "zhufu", offset: 3, length: 15)
+//   - #kouhu(builtin-text: "zhufu", offset: 3, length: 15)
+//   - #kouhu(builtin-text: "zhufu", offset: 6, length: 15)
 
-=== 术语（`Latex` 中的段落）
+// === 术语（`Latex` 中的段落）
 
-/ simp: #kouhu(builtin-text: "simp", length: 15)
-/ 阿司匹林: #kouhu(builtin-text: "aspirin", length: 60)
+// / simp: #kouhu(builtin-text: "simp", length: 15)
+// / 阿司匹林: #kouhu(builtin-text: "aspirin", length: 60)
 
-== 代码
+// == 代码
 
-行内代码我们使用 \`\` 将其括起来，这与 `Markdown` 中的语法一致
+// 行内代码我们使用 \`\` 将其括起来，这与 `Markdown` 中的语法一致
 
-行间代码， 也就是代码块，其语法与 `Markdown` 中一致，例如：
+// 行间代码， 也就是代码块，其语法与 `Markdown` 中一致，例如：
 
-#raw("
-```typ
-  #let a = 1
-```
-")
+// #raw("
+// ```typ
+//   #let a = 1
+// ```
+// ")
 
-其表现为，此时发现代码块的表现很差，且无法引用
+// 其表现为，此时发现代码块的表现很差，且无法引用
 
-#no-codly[
-  ```typ
-  #let a = 1
-  ```
-]
+// #no-codly[
+//   ```typ
+//   #let a = 1
+//   ```
+// ]
 
-因此，这里我们使用包 `codly` 来美化代码块，并将其放入到下文的图表中，进行引用，`@lst:<key>` 来引用代码块，例如下面的代码，我们使用语句 `@lst:fib-fn-py` 来引用，即@lst:fib-fn-py
+// 因此，这里我们使用包 `codly` 来美化代码块，并将其放入到下文的图表中，进行引用，`@lst:<key>` 来引用代码块，例如下面的代码，我们使用语句 `@lst:fib-fn-py` 来引用，即@lst:fib-fn-py
 
 #figure(caption: "Python 实现的斐波那契函数")[
   ```py
@@ -233,13 +229,13 @@
 
 关于 `codly` 的更多用法请阅读#link("https://typst.app/universe/package/codly")[参考文档]
 
-== 图表
+// == 图表
 
-=== 表格
+// === 表格
 
-在这里引用表格，例如三线表：@tbl:three-line-table
+// 在这里引用表格，例如三线表：@tbl:three-line-table
 
-我们使用 `@tbl:<label>` 来进行表的引用，其中 `<label>` 是跟在表格后的标签，使用尖括号括起来
+// 我们使用 `@tbl:<label>` 来进行表的引用，其中 `<label>` 是跟在表格后的标签，使用尖括号括起来
 
 
 
@@ -357,6 +353,8 @@ ABC记谱法是一种以纯文本字符描述乐谱的轻量级标记系统，�
 虽然ABC不以严密排版语义为核心（高级刻写与复杂现代技法可能受限），但对于旋律主导、和弦标注、民谣/传统曲调、教学示例、乐思草稿与在线共享而言，它以极低门槛实现了从文本到可听、可印、可协作的完整工作流。
 
 == GPT2
+
+#figure(image("fig/gpt2.png"), caption: [GPT2])
 
 在GPT-2 是 OpenAI 于 2019 年发布的基于 Transformer 解码器架构的通用语言模型里程碑，强调“只用大规模无监督预训练+少量或零样本迁移”即可在多任务上涌现出强大的通用能力：它以“下一个词预测”作为单一目标，在大规模网络语料 WebText（从高质量 Reddit 外链抓取，约 800 万文档、40GB 文本）上训练，使用 BPE 子词分词（约 50,257 词表）与学习式位置嵌入，最大上下文窗口为 1024 token；官方公开了从 117M 到 1.5B 参数的多种规模，其中 1.5B 版本采用约 48 层、1600 维
 隐藏表示与 25 个注意力头，展示了随模型规模增长而带来的“零样本/小样本”性能跃迁：在无需专门微调的情况下，它已能完成摘要、翻译、问答、常识推断、风格模仿与连贯长文生成等任务，并通过采样策略（如 top-k、nucleus/top-p、温度调节）在多样性与可控性之间权衡；
