@@ -524,6 +524,8 @@ GPT2ABC的实现基于Hugging Face Transformers库的`GPT2LMHeadModel`和`GPT2Co
 
 总的来说，GPT2ABC作为基于GPT-2架构的ABC记谱法音乐生成模型，充分利用了Transformer解码器的优势，通过适配ABCTokenizer实现了对ABC记谱法的有效处理。在统一的实验配置下，GPT2ABC与其他模型架构进行系统对比，为ABC记谱法音乐生成任务选择合适模型架构提供了重要的实验依据。
 
+== 实验
+
 = 总结与展望
 
 == 工作总结
@@ -572,11 +574,11 @@ GPT2ABC的实现基于Hugging Face Transformers库的`GPT2LMHeadModel`和`GPT2Co
 
 
 
-= 术语
+// = 术语
 
-*需要注意，标题只支持到四级标题，但目录不支持显示四级标题*，如果需要四级标题，最好请使用术语，也就是：
+// *需要注意，标题只支持到四级标题，但目录不支持显示四级标题*，如果需要四级标题，最好请使用术语，也就是：
 
-\ 术语（term）
+// \ 术语（term）
 
 // = 手动分页
 
@@ -590,20 +592,20 @@ GPT2ABC的实现基于Hugging Face Transformers库的`GPT2LMHeadModel`和`GPT2Co
 // 附录
 // #show: appendix
 
-= 附录标题
+// = 附录标题
 
-第一个附录，引用@app:appendixB
+// 第一个附录，引用@app:appendixB
 
-= 第二个附录<app:appendixB>
+// = 第二个附录<app:appendixB>
 
-附录不允许有子标题
+// 附录不允许有子标题
 
-附录内容，这里也可以加入图片，例如@fig:appendix-img。
+// 附录内容，这里也可以加入图片，例如@fig:appendix-img。
 
-#figure(
-  image("fig/ida-star-2.png", width: 20%),
-  caption: [图片测试],
-) <appendix-img>
+// #figure(
+//   image("fig/ida-star-2.png", width: 20%),
+//   caption: [图片测试],
+// ) <appendix-img>
 
 //* 后记
 #acknowledgement[
