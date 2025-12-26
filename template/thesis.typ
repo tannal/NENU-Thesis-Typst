@@ -144,34 +144,27 @@ The main innovations of this research include: first systematic comparison of RN
 
 == 研究背景与意义
 
-音乐生成是人工智能与计算音乐学的交叉领域，旨在让计算机自动创作符合音乐规律的作品。传统方法依赖规则与模板，难以捕捉音乐的复杂性与多样性。深度学习在自然语言处理、图像生成等领域取得进展，为音乐生成提供了新思路。ABC记谱法是一种基于文本的音乐表示，广泛用于传统音乐、民谣等。它用ASCII字符表示音符、节奏、调性等，便于计算机处理，适合作为音乐生成模型的输入与输出格式。
-
+音乐生成是人工智能与计算音乐学的交叉领域，旨在让计算机自动创作符合音乐规律的作品#cite(<briot2020deep>)。传统方法依赖规则与模板，难以捕捉音乐的复杂性与多样性。深度学习在自然语言处理、图像生成等领域取得进展，为音乐生成提供了新思路#cite(<hernandez2021music>)。ABC记谱法是一种基于文本的音乐表示#cite(<abcnotation2023>)，广泛用于传统音乐、民谣等。它用ASCII字符表示音符、节奏、调性等，便于计算机处理，适合作为音乐生成模型的输入与输出格式。
 
 == 国内外研究现状
 
-音乐生成研究经历了从规则到统计再到深度学习的演进。早期以规则系统为主，如David Cope的EMI和Hiller的ILLIAC，依赖音乐理论规则，生成质量受限于规则完备性。随后统计方法兴起，如Pachet的Continuator使用马尔可夫链，但难以捕捉长期依赖与复杂结构。深度学习兴起后，序列建模成为主流。国外方面，Eck和Schmidhuber（2002）将LSTM用于音乐生成，开启了神经网络在音乐领域的应用。Google的Magenta项目推动了该领域发展，如MusicVAE（Roberts等，2018）使用变分自编码器，Music Transformer（Huang等，2018）将Transformer用于长序列音乐建模，Performance RNN（Simon和Oore，2016）基于LSTM生成钢琴演奏。OpenAI的MuseNet和Jukebox展示了大规模预训练模型在音乐生成中的潜力，但主要面向MIDI或音频，对文本化音乐表示（如ABC记谱法）关注较少。国内方面，清华大学、北京大学、中科院等在音乐信息检索与生成方向有持续工作，但系统性的ABC记谱法生成研究相对较少。在序列建模架构对比上，国外如BachBot（Liang等，2017）对比了不同RNN变体，但缺乏对RNN、LSTM、Transformer、GPT2的统一对比；国内在架构对比研究上更少，多聚焦单一模型优化。在评估体系上，国外常用客观指标（如NLL、困惑度）与主观评价，但缺乏统一标准；国内评估方法相对简单，对计算效率与资源消耗的关注不足。在ABC记谱法处理上，国外如abc2midi等工具关注转换，但较少用于深度学习生成；国内相关研究更少。总体而言，国外在模型创新与大规模应用上领先，国内在特定场景与应用上有进展，但在系统性对比、评估标准化、以及ABC记谱法生成等细分方向仍有空间。本研究旨在在统一条件下系统对比RNN、LSTM、Transformer、GPT2在ABC记谱法生成任务上的表现，填补现有研究的空白。
-
-// #figure(image("fig/model_test_loss_comparison.png"), caption: [各模型测试损失对比])
+音乐生成研究经历了从规则到统计再到深度学习的演进#cite(<briot2020deep>)。早期以规则系统为主，如David Cope的EMI和Hiller的ILLIAC，依赖音乐理论规则，生成质量受限于规则完备性。随后统计方法兴起，如Pachet的Continuator使用马尔可夫链#cite(<ames1989markov>)，但难以捕捉长期依赖与复杂结构。深度学习兴起后，序列建模成为主流#cite(<hernandez2021music>)。国外方面，Eck和Schmidhuber（2002）将LSTM用于音乐生成，开启了神经网络在音乐领域的应用。Google的Magenta项目推动了该领域发展#cite(<googleai2023magenta>)，如MusicVAE（Roberts等，2018）使用变分自编码器#cite(<kingma2022auto>)，Music Transformer（Huang等，2018）将Transformer用于长序列音乐建模#cite(<huang2018music>)，Performance RNN（Simon和Oore，2016）基于LSTM生成钢琴演奏#cite(<magenta2021melodyrnn>)。OpenAI的MuseNet和Jukebox展示了大规模预训练模型在音乐生成中的潜力#cite(<dhariwal2020jukebox>)，但主要面向MIDI或音频，对文本化音乐表示（如ABC记谱法）关注较少。国内方面，清华大学、北京大学、中科院等在音乐信息检索与生成方向有持续工作，但系统性的ABC记谱法生成研究相对较少。在序列建模架构对比上，国外如BachBot（Liang等，2017）对比了不同RNN变体，但缺乏对RNN、LSTM、Transformer、GPT2的统一对比；国内在架构对比研究上更少，多聚焦单一模型优化。在评估体系上，国外常用客观指标（如NLL、困惑度）与主观评价，但缺乏统一标准；国内评估方法相对简单，对计算效率与资源消耗的关注不足。在ABC记谱法处理上，国外如abc2midi等工具关注转换#cite(<abcnotation2023>)，但较少用于深度学习生成；国内相关研究更少。总体而言，国外在模型创新与大规模应用上领先，国内在特定场景与应用上有进展，但在系统性对比、评估标准化、以及ABC记谱法生成等细分方向仍有空间。本研究旨在在统一条件下系统对比RNN、LSTM、Transformer、GPT2在ABC记谱法生成任务上的表现，填补现有研究的空白。
 
 == 研究内容
 
-本研究围绕ABC记谱法音乐生成，系统对比RNN、LSTM、Transformer、GPT2四种架构。首先，设计并实现ABC记谱法专用分词器（ABCTokenizer），覆盖音符（C-D-E-F-G-A-B及其大小写）、升降号（^、、=）、八度标记（,、'）、时值（0-9）、小节线（|、||、|:、:|、::）、调性标记（K:、M:、L:）等，采用最长匹配策略，支持多字符符号（如||、^^、），并定义特殊token（<pad>、<unk>、<bos>、<eos>、<sep>）以处理序列边界与填充。其次，实现四种模型架构：RNN使用基础循环单元与tanh激活；LSTM通过门控机制缓解长期依赖；Transformer采用位置编码与多头自注意力，使用因果掩码保证自回归；GPT2基于Hugging Face的GPT2LMHeadModel，适配ABC词汇表与特殊token。所有模型统一配置：embedding维度256、隐藏维度512、3层、dropout 0.2、学习率1e-3、batch size 16、最大序列长度512，确保公平对比。数据预处理方面，从文本文件读取ABC数据，按空行分割曲目，使用固定随机种子（42）进行80%-10%-10%划分，对序列进行padding/truncate，构建input_ids与labels用于自回归训练。训练策略上，使用Adam优化器、权重衰减1e-5、梯度裁剪（max_norm=5.0）、ReduceLROnPlateau调度器、early stopping（patience=10），训练50个epoch，每10个epoch记录指标。性能评估建立多维度体系：损失函数（交叉熵）、困惑度（exp(loss)）、训练/验证/测试损失、训练时间（单epoch、每10个epoch、累计）、内存占用（GPU/CPU）、模型参数量、学习率变化，并生成样本音乐进行质量评估。实验设计上，依次训练四种模型，使用相同数据集与超参数，记录训练过程指标，生成对比样本，最后汇总结果并生成CSV报告。实现细节包括：使用PyTorch框架、支持CUDA加速、实现模型保存与加载、提供音乐生成接口（支持prompt与temperature控制）、实现性能追踪器（PerformanceTracker）记录训练过程指标。研究创新点包括：系统性架构对比、多维度评估体系、ABC专用分词器、可复现实验设计、计算效率分析。通过该研究，旨在为ABC记谱法音乐生成任务选择合适模型架构提供依据，并为相关研究提供可复现的实验框架与评估标准。
-
-
+本研究围绕ABC记谱法音乐生成，系统对比RNN、LSTM、Transformer、GPT2四种架构。首先，设计并实现ABC记谱法专用分词器（ABCTokenizer），覆盖音符（C-D-E-F-G-A-B及其大小写）、升降号（^、、=）、八度标记（,、'）、时值（0-9）、小节线（|、||、|:、:|、::）、调性标记（K:、M:、L:）等，采用最长匹配策略，支持多字符符号（如||、^^、），并定义特殊token（<pad>、<unk>、<bos>、<eos>、<sep>）以处理序列边界与填充。其次，实现四种模型架构：RNN使用基础循环单元与tanh激活；LSTM通过门控机制缓解长期依赖；Transformer采用位置编码与多头自注意力#cite(<vaswani2023attentionneed>)，使用因果掩码保证自回归；GPT2基于Hugging Face的GPT2LMHeadModel，适配ABC词汇表与特殊token。所有模型统一配置：embedding维度256、隐藏维度512、3层、dropout 0.2、学习率1e-3、batch size 16、最大序列长度512，确保公平对比。数据预处理方面，从文本文件读取ABC数据，按空行分割曲目，使用固定随机种子（42）进行80%-10%-10%划分，对序列进行padding/truncate，构建input_ids与labels用于自回归训练。训练策略上，使用Adam优化器、权重衰减1e-5、梯度裁剪（max_norm=5.0）、ReduceLROnPlateau调度器、early stopping（patience=10），训练50个epoch，每10个epoch记录指标。性能评估建立多维度体系：损失函数（交叉熵）、困惑度（exp(loss)）、训练/验证/测试损失、训练时间（单epoch、每10个epoch、累计）、内存占用（GPU/CPU）、模型参数量、学习率变化，并生成样本音乐进行质量评估。实验设计上，依次训练四种模型，使用相同数据集与超参数，记录训练过程指标，生成对比样本，最后汇总结果并生成CSV报告。实现细节包括：使用PyTorch框架、支持CUDA加速、实现模型保存与加载、提供音乐生成接口（支持prompt与temperature控制）、实现性能追踪器（PerformanceTracker）记录训练过程指标。研究创新点包括：系统性架构对比、多维度评估体系、ABC专用分词器、可复现实验设计、计算效率分析。通过该研究，旨在为ABC记谱法音乐生成任务选择合适模型架构提供依据，并为相关研究提供可复现的实验框架与评估标准。
 
 == 论文组织结构
 
-第1章 绪论：背景、意义、现状、内容与结构
+第1章 绪论：介绍研究背景与意义、国内外研究现状、研究内容以及论文组织结构。
 
-第2章 相关工作：音乐生成、序列建模、ABC记谱法相关研究
+第2章 相关理论与技术：阐述ABC记谱法、GPT2模型、困惑度、循环神经网络（RNN）和长短期记忆网络（LSTM）等理论基础。
 
-第3章 方法：数据预处理、模型架构、训练策略
+第3章 方法设计：详细介绍ABCTokenizer的设计与实现，包括分词器设计动机、词汇表设计、最长匹配策略和核心方法；阐述GPT2ABC模型的架构设计、自注意力机制、前向传播和音乐生成方法。
 
-第4章 实验：数据集、实验设置、评估指标
+第4章 实验与结果分析：介绍实验数据集、训练配置和评估指标，系统对比RNN、LSTM、Transformer和GPT2ABC四种模型在ABC记谱法生成任务上的性能表现，分析不同架构的优势与局限性。
 
-第5章 结果与分析：性能对比、效率分析、生成样本分析
-
-第6章 结论与展望：总结与未来方向
+第5章 总结与展望：总结本研究的主要工作与创新点，分析研究局限性，并提出未来研究方向。
 
 // == 列表
 
@@ -247,7 +240,7 @@ The main innovations of this research include: first systematic comparison of RN
     table.hline(stroke: 1.5pt),
     [x], [y], [z], [t],
     table.hline(stroke: 1pt),
-    [11], [5 ms], [3], [0.7],
+    [GPT2], [5 ms], [3], [0.7],
     [3000], [80 ms], [1111], [0.9],
     table.hline(stroke: 1.5pt),
   ),
@@ -256,54 +249,54 @@ The main innovations of this research include: first systematic comparison of RN
 
 
 
-=== 图片
+// === 图片
 
-我们可以插入图片，也可以修改图片的展示大小，引用图片，例如@fig:ida-star-50, @fig:ida-star-20
+// 我们可以插入图片，也可以修改图片的展示大小，引用图片，例如@fig:ida-star-50, @fig:ida-star-20
 
-我们通过函数 `#figure` 来表示一个图片，在其中通过 `image` 函数来导入一张图片，格式可以是 `png`, `svg` `jpg` 等常见格式，可以通过 `width` 等参数来调整图片的大小和位置。例如，`width: 50%` 表示图片宽度为页面宽度的 50%，`height: auto` 表示高度自适应，`align: center` 表示图片居中显示。
+// 我们通过函数 `#figure` 来表示一个图片，在其中通过 `image` 函数来导入一张图片，格式可以是 `png`, `svg` `jpg` 等常见格式，可以通过 `width` 等参数来调整图片的大小和位置。例如，`width: 50%` 表示图片宽度为页面宽度的 50%，`height: auto` 表示高度自适应，`align: center` 表示图片居中显示。
 
-我们使用 `@fig:<label>` 来进行表的引用，其中 `<label>` 是跟在图片后的标签，使用尖括号括起来，例如下面的@fig:ida-star-20，我们使用命令 `@fig:ida-star-20` 即可引用。
+// 我们使用 `@fig:<label>` 来进行表的引用，其中 `<label>` 是跟在图片后的标签，使用尖括号括起来，例如下面的@fig:ida-star-20，我们使用命令 `@fig:ida-star-20` 即可引用。
 
-#figure(
-  image("fig/ida-star-1.png", width: 50%),
-  caption: [IDA\* 算法示例， 50% 比例缩放],
-)<ida-star-50>
+// #figure(
+//   image("fig/ida-star-1.png", width: 50%),
+//   caption: [IDA\* 算法示例， 50% 比例缩放],
+// )<ida-star-50>
 
-#figure(
-  image("fig/ida-star-1.png", width: 20%),
-  caption: [IDA\* 算法示例， 20% 比例缩放],
-)<ida-star-20>
+// #figure(
+//   image("fig/ida-star-1.png", width: 20%),
+//   caption: [IDA\* 算法示例， 20% 比例缩放],
+// )<ida-star-20>
 
-=== 子图
+// === 子图
 
-暂时无法实现子图，可以使用 #link("https://app.diagrams.net/")[Draw.io] 等网站绘制完子图，然后导出一个大图，贴到论文中。
+// 暂时无法实现子图，可以使用 #link("https://app.diagrams.net/")[Draw.io] 等网站绘制完子图，然后导出一个大图，贴到论文中。
 
-== 数学公式
+// == 数学公式
 
-数学公式分为行内公式与行间公式，其中，行内公式不会出现编号和引用，行间公式可以会在最右侧显示编号，并且可以引用。
+// 数学公式分为行内公式与行间公式，其中，行内公式不会出现编号和引用，行间公式可以会在最右侧显示编号，并且可以引用。
 
-例如，这是一个简单的行内公式 $sum_(i=1)^n a_i$，这是一个复杂的行内公式：$U(H, t, p) = product^p_(j=1)product_k e^((-i H_k t)/n), H = sum_k H_k$
+// 例如，这是一个简单的行内公式 $sum_(i=1)^n a_i$，这是一个复杂的行内公式：$U(H, t, p) = product^p_(j=1)product_k e^((-i H_k t)/n), H = sum_k H_k$
 
 
-下面是一个行间公式，我们可以通过将其编号为 `<nabla>`，然后通过 `@eqt:nabla` 来引用，例如@eqt:nabla
+// 下面是一个行间公式，我们可以通过将其编号为 `<nabla>`，然后通过 `@eqt:nabla` 来引用，例如@eqt:nabla
 
-$
-  nabla L = partial L / partial x
-$<nabla>
+// $
+//   nabla L = partial L / partial x
+// $<nabla>
 
-@eqt:sgd-demo 是一个复杂的行间公式，这里我们使用 `&` 作为锚点进行对齐，这与 `Latex` 中是一致的，区别是我们不需要写 `\begin{aligned}` 与 `\end{aligned}`
-$
-  (w^((i+1)), b^((i+1))) & = (w^((i)), b^((i))) - alpha nabla "Loss"(
-                             w^((i)), b^((i))
-                           ) \
-                         & = (w^((i)), b^((i))) - alpha (
-                             (partial "Loss")(partial w), (partial "Loss")(partial b)
-                           ) \
-                         & = (w^((i)), b^((i))) - alpha (
-                           1 / N sum^N_(j=1)x_j(b^((i)) + w^((i)T)x_j - y_j), \
-                         &                                                    & 1 / N sum^N_(j=1)(b^((i))+w^((i)T)x_j - y_j)
-                                                                                )
-$<sgd-demo>
+// @eqt:sgd-demo 是一个复杂的行间公式，这里我们使用 `&` 作为锚点进行对齐，这与 `Latex` 中是一致的，区别是我们不需要写 `\begin{aligned}` 与 `\end{aligned}`
+// $
+//   (w^((i+1)), b^((i+1))) & = (w^((i)), b^((i))) - alpha nabla "Loss"(
+//                              w^((i)), b^((i))
+//                            ) \
+//                          & = (w^((i)), b^((i))) - alpha (
+//                              (partial "Loss")(partial w), (partial "Loss")(partial b)
+//                            ) \
+//                          & = (w^((i)), b^((i))) - alpha (
+//                            1 / N sum^N_(j=1)x_j(b^((i)) + w^((i)T)x_j - y_j), \
+//                          &                                                    & 1 / N sum^N_(j=1)(b^((i))+w^((i)T)x_j - y_j)
+//                                                                                 )
+// $<sgd-demo>
 
 // == 参考文献的引用
 
@@ -525,6 +518,44 @@ GPT2ABC的实现基于Hugging Face Transformers库的`GPT2LMHeadModel`和`GPT2Co
 总的来说，GPT2ABC作为基于GPT-2架构的ABC记谱法音乐生成模型，充分利用了Transformer解码器的优势，通过适配ABCTokenizer实现了对ABC记谱法的有效处理。在统一的实验配置下，GPT2ABC与其他模型架构进行系统对比，为ABC记谱法音乐生成任务选择合适模型架构提供了重要的实验依据。
 
 == 实验
+
+=== 数据
+
+本研究使用的实验数据为基于 ABC 记谱法的文本数据集，统一保存在 `data.txt` 文件中，其中每一首乐曲均以 ABC 标准头部信息（如 `X:`、`T:`、`M:`、`K:` 等）开头，便于自动统计与切分。实验程序首先调用 `check_data_file` 函数检查 `data.txt` 是否存在，并统计字符总数、行数以及以 `X:` 开头估算的乐曲数目，据此计算每首乐曲的平均字符数，为后续模型容量与序列长度选择提供参考。随后，`ABCMusicDataset` 按空行对原始文本进行切分，将相邻的非空行视为一首完整乐曲，对每首乐曲调用专用分词器 `ABCTokenizer` 进行编码，仅保留长度不超过 512 token 的样本，从而避免超长序列带来的内存和计算负担。
+
+在分词阶段，`ABCTokenizer` 采用基于规则的最长匹配策略，在包含特殊符号（如 `||`、`|:`、`^^`、`M:`、`K:`、`L:` 等）的 ABC 词汇表上自左向右扫描输入字符串，优先匹配长度为 4、3、2 的多字符 token，若未命中再退化为单字符匹配；无法识别的符号统一映射为 `<unk>`。编码时在序列首尾分别添加 `<bos>` 与 `<eos>`，并在数据集构造阶段将各曲目补齐或截断至统一长度 `max_sequence_length=512`，多余位置以 `<pad>` 填充。数据集最终按 8:1:1 划分为训练集、验证集和测试集，划分过程使用固定随机种子 42，保证不同模型在完全相同的数据划分上进行训练与评估，从而实现公平对比。
+
+=== 训练配置
+
+实验在 PyTorch 框架下实现，统一采用 `TrainingConfig` 配置类管理超参数，以保证四种模型在除架构外的设置尽可能一致。所有模型使用相同的词表大小（由 `ABCTokenizer` 自动统计）、嵌入维度 `embedding_dim=256`、隐藏维度 `hidden_dim=512`、网络层数 `num_layers=3`、dropout 比例 `dropout=0.2`、最大序列长度 `max_sequence_length=512`、训练批次大小 `batch_size=16`（在综合比较中为兼顾显存使用而适当减小）和训练轮数上限 `num_epochs=50`。优化器均为 Adam，学习率 `learning_rate=1e-3`，权重衰减 `weight_decay=1e-5`，并在每次反向传播后对梯度进行裁剪（`max_grad_norm=5.0`），以防止梯度爆炸。
+
+具体到不同架构，RNN 与 LSTM 模型分别由 `RNNMusicModel` 与 `LSTMMusicModel` 实现，前者采用经典 `tanh` 非线性，后者在每一层中引入遗忘门、输入门与输出门，并对循环权重进行 Xavier/正交初始化以稳定训练。Transformer 模型由 `TransformerMusicModel` 实现，内部使用 3 层 `nn.TransformerEncoder`，多头自注意力头数 `num_heads=8`，前馈层维度 `ff_dim=1024`，并通过上三角掩码强制自回归（仅关注当前位置及其之前的 token）。GPT2ABC 模型基于 Hugging Face 的 `GPT2LMHeadModel`，通过自定义 `GPT2Config` 将词表大小、最大位置数、嵌入维度、层数、注意力头数以及 `<pad>/<bos>/<eos>` 的 ID 与 ABCTokenizer 完整对齐，从而实现对 ABC 记谱法的直接建模。
+
+训练流程由统一的 `MusicTrainer` 类管理。该类根据 `model_type` 动态实例化四种模型之一，构建训练、验证与测试 `DataLoader`，并在每个 epoch 内循环遍历训练批次。对每个批次，模型接收长度为 511 的 `input_ids` 与相应标签 `labels`（右移一位），并结合 `attention_mask` 屏蔽 `<pad>` 位置，仅在有效 token 上计算交叉熵损失。在 epoch 结束时，额外在验证集上计算平均损失，据此驱动学习率调度器 `ReduceLROnPlateau`：当验证损失在连续 5 个 epoch 内不再下降时，将学习率乘以 0.5。若验证损失在连续 10 个 epoch 内未取得改进，则触发早停机制提前终止训练，从而减轻过拟合与资源浪费。
+
+=== 评估指标
+
+为全面刻画不同模型在 ABC 记谱法音乐生成任务上的表现，实验设计了多维度评估指标，并由 `PerformanceTracker` 统一记录。核心指标包括：1）**测试集交叉熵损失**：反映模型对真实 ABC 序列分布的拟合程度，损失越小说明模型预测越接近真实数据；2）**困惑度（Perplexity）**：通过对平均损失取指数得到，用以衡量模型在预测下一个 token 时的平均不确定性，定义为 \(\text{PPL}=\exp(\text{loss})\)，值越小表示模型越“从容”；3）**训练/验证/测试损失曲线**：每 10 个 epoch 在三种数据划分上同时记录一次损失，用于观察模型收敛过程及过拟合迹象。
+
+在资源与效率维度，`PerformanceTracker` 在 GPU 环境下通过 `torch.cuda.memory_allocated` 或在 CPU 环境下通过 `psutil` 获取当前进程内存占用，按 MB 记录为 **内存使用量**，并对每个模型统计其可训练参数总数，作为 **模型规模** 指标。同时，在每个 epoch 开始/结束时打点计时，累积得到 **单 epoch 时间** 与 **近 10 个 epoch 训练时间**，以及自该模型训练开始以来的 **累计训练时间**，便于比较不同架构在相同硬件条件下的训练效率。学习率调度过程也被同步记录，每次保存指标时将当前学习率写入表格，以便分析学习率衰减与性能提升之间的关系。所有按 epoch=10、20、30、40、50 记录的详细指标最终汇总为 CSV 文件 `model_comparison_detailed_metrics.csv`，并在此基础上生成仅包含最优测试损失、最佳困惑度、平均内存、总训练时间、参数量和最终学习率等字段的摘要文件 `model_comparison_summary.csv`，用于横向对比四种架构。
+
+=== 实验结果
+
+#figure(
+  table(
+    columns: 6,
+    align: center + horizon,
+    table.hline(),
+    [模型], [测试损失], [困惑度], [参数量], [内存 (MB)], [10-epoch 时间 (s)],
+    table.hline(),
+    [RNN], [0.702], [2.02], [1.51M], [43.9], [167.9],
+    [LSTM], [0.535], [1.71], [5.85M], [110.0], [316.5],
+    [GPT2ABC], [0.316], [1.37], [2.52M], [60.0], [172.1],
+    [Transformer], [0.483], [1.62], [2.42M], [58.1], [172.8],
+    table.hline(),
+  ),
+  caption: [四种模型在测试集上的最终性能与资源消耗对比],
+)<exp-results-table>
 
 = 总结与展望
 
