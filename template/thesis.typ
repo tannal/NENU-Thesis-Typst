@@ -305,40 +305,40 @@ $
                                                                                 )
 $<sgd-demo>
 
-== 参考文献的引用
+// == 参考文献的引用
 
-我们通过 `.bib` 文件来导入参考文献，文件名可以任意选择，通过选项：`bibliography: bibliography.with("ref.bib")` 进行导入，这里我们只需要将 网站上赋值的 `biblatex` 引用赋值粘贴到 `ref.bib` 中即可。
+// 我们通过 `.bib` 文件来导入参考文献，文件名可以任意选择，通过选项：`bibliography: bibliography.with("ref.bib")` 进行导入，这里我们只需要将 网站上赋值的 `biblatex` 引用赋值粘贴到 `ref.bib` 中即可。
 
-随后，通过 `#cite(<key>)` 进行引用，其中 `key` 是在 `.bib` 中设置的键。
+// 随后，通过 `#cite(<key>)` 进行引用，其中 `key` 是在 `.bib` 中设置的键。
 
-在示例中，我们可以引用 `ref.bib` 文件中的内容，例如《Deep Learning》#cite(<goodfellow2016deep>)，引用2#cite(<丁文祥2000>)
+// 在示例中，我们可以引用 `ref.bib` 文件中的内容，例如《Deep Learning》#cite(<goodfellow2016deep>)，引用2#cite(<丁文祥2000>)
 
-当然，我们也可以通过简单的方式，`@key` 的语法糖即可引用，例如上述的《Deep Learning》@goodfellow2016deep，引用2@丁文祥2000
+// 当然，我们也可以通过简单的方式，`@key` 的语法糖即可引用，例如上述的《Deep Learning》@goodfellow2016deep，引用2@丁文祥2000
 
-或者可以像这样引用参考文献：图书#[@蒋有绪1998]和会议#[@中国力学学会1990]。
+// 或者可以像这样引用参考文献：图书#[@蒋有绪1998]和会议#[@中国力学学会1990]。
 
-在 `ref.bib` 中，如@lst:ref-demo 所示，引用的部分条目为：
+// 在 `ref.bib` 中，如@lst:ref-demo 所示，引用的部分条目为：
 
-#figure(caption: "参考文献bib文件部分示例")[
-  ```bib
-  @article{丁文祥2000,
-    title={数字革命与竞争国际化},
-    author={丁文祥},
-    journal={中国青年报},
-    year={2000},
-    month={11-20},
-    number={15}
-  }
+// #figure(caption: "参考文献bib文件部分示例")[
+//   ```bib
+//   @article{丁文祥2000,
+//     title={数字革命与竞争国际化},
+//     author={丁文祥},
+//     journal={中国青年报},
+//     year={2000},
+//     month={11-20},
+//     number={15}
+//   }
 
-  @book{goodfellow2016deep,
-    title = {Deep learning},
-    author = {Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron and Bengio, Yoshua},
-    volume = {1},
-    year = {2016},
-    publisher = {MIT Press}
-  }
-  ```
-]<ref-demo>
+//   @book{goodfellow2016deep,
+//     title = {Deep learning},
+//     author = {Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron and Bengio, Yoshua},
+//     volume = {1},
+//     year = {2016},
+//     publisher = {MIT Press}
+//   }
+//   ```
+// ]<ref-demo>
 
 第一行的内容即为引用所需的 `key`。
 
@@ -578,17 +578,17 @@ GPT2ABC的实现基于Hugging Face Transformers库的`GPT2LMHeadModel`和`GPT2Co
 
 \ 术语（term）
 
-= 手动分页
+// = 手动分页
 
-使用 `#pagebreak()` 手动分页
-#pagebreak()
+// 使用 `#pagebreak()` 手动分页
+// #pagebreak()
 
 // 中英双语参考文献
 // 默认使用 gb-7714-2015-numeric 样式
 #bilingual-bibliography(full: true)
 
 // 附录
-#show: appendix
+// #show: appendix
 
 = 附录标题
 
