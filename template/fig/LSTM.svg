@@ -1,0 +1,105 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- 定义箭头 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="black" />
+    </marker>
+  </defs>
+  
+  <!-- 主矩形框 - LSTM单元 -->
+  <rect x="200" y="150" width="400" height="300" fill="none" stroke="black" stroke-width="2" rx="10"/>
+  
+  <!-- 输入 h(t-1) -->
+  <text x="100" y="250" font-size="14">h(t-1)</text>
+  <line x1="130" y1="245" x2="200" y2="245" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 输入 x(t) -->
+  <text x="100" y="350" font-size="14">x(t)</text>
+  <line x1="130" y1="345" x2="200" y2="345" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 细胞状态 C(t-1) 输入 -->
+  <text x="100" y="180" font-size="14">C(t-1)</text>
+  <line x1="130" y1="175" x2="200" y2="175" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 遗忘门 -->
+  <rect x="230" y="270" width="60" height="50" fill="white" stroke="black" stroke-width="2"/>
+  <text x="260" y="300" text-anchor="middle" font-size="14" font-weight="bold">σ</text>
+  <text x="260" y="340" text-anchor="middle" font-size="10">遗忘门</text>
+  
+  <!-- 输入门 -->
+  <rect x="320" y="270" width="60" height="50" fill="white" stroke="black" stroke-width="2"/>
+  <text x="350" y="300" text-anchor="middle" font-size="14" font-weight="bold">σ</text>
+  <text x="350" y="340" text-anchor="middle" font-size="10">输入门</text>
+  
+  <!-- 候选值 -->
+  <rect x="410" y="270" width="60" height="50" fill="white" stroke="black" stroke-width="2"/>
+  <text x="440" y="300" text-anchor="middle" font-size="14" font-weight="bold">tanh</text>
+  <text x="440" y="340" text-anchor="middle" font-size="10">候选值</text>
+  
+  <!-- 输出门 -->
+  <rect x="510" y="270" width="60" height="50" fill="white" stroke="black" stroke-width="2"/>
+  <text x="540" y="300" text-anchor="middle" font-size="14" font-weight="bold">σ</text>
+  <text x="540" y="340" text-anchor="middle" font-size="10">输出门</text>
+  
+  <!-- 乘法操作符 -->
+  <circle cx="260" cy="200" r="15" fill="white" stroke="black" stroke-width="2"/>
+  <text x="260" y="205" text-anchor="middle" font-size="16">×</text>
+  
+  <circle cx="380" cy="200" r="15" fill="white" stroke="black" stroke-width="2"/>
+  <text x="380" y="205" text-anchor="middle" font-size="16">×</text>
+  
+  <circle cx="540" cy="380" r="15" fill="white" stroke="black" stroke-width="2"/>
+  <text x="540" y="385" text-anchor="middle" font-size="16">×</text>
+  
+  <!-- 加法操作符 -->
+  <circle cx="440" cy="200" r="15" fill="white" stroke="black" stroke-width="2"/>
+  <text x="440" y="205" text-anchor="middle" font-size="16">+</text>
+  
+  <!-- tanh操作 -->
+  <rect x="510" y="360" width="60" height="40" fill="white" stroke="black" stroke-width="2"/>
+  <text x="540" y="385" text-anchor="middle" font-size="14" font-weight="bold">tanh</text>
+  
+  <!-- 连接线 -->
+  <!-- 遗忘门到乘法 -->
+  <line x1="260" y1="270" x2="260" y2="215" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 输入门到乘法 -->
+  <line x1="350" y1="270" x2="350" y2="230" stroke="black" stroke-width="2"/>
+  <line x1="350" y1="230" x2="380" y2="230" stroke="black" stroke-width="2"/>
+  <line x1="380" y1="230" x2="380" y2="215" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 候选值到乘法 -->
+  <line x1="440" y1="270" x2="440" y2="240" stroke="black" stroke-width="2"/>
+  <line x1="440" y1="240" x2="395" y2="240" stroke="black" stroke-width="2"/>
+  <line x1="395" y1="240" x2="395" y2="200" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 细胞状态主线 -->
+  <line x1="200" y1="175" x2="245" y2="175" stroke="black" stroke-width="3"/>
+  <line x1="245" y1="175" x2="245" y2="200" stroke="black" stroke-width="3"/>
+  <line x1="275" y1="200" x2="365" y2="200" stroke="black" stroke-width="3"/>
+  <line x1="395" y1="200" x2="425" y2="200" stroke="black" stroke-width="3"/>
+  <line x1="455" y1="200" x2="520" y2="200" stroke="black" stroke-width="3"/>
+  <line x1="520" y1="200" x2="520" y2="360" stroke="black" stroke-width="3"/>
+  
+  <!-- 细胞状态输出 -->
+  <line x1="520" y1="200" x2="600" y2="200" stroke="black" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <text x="620" y="205" font-size="14">C(t)</text>
+  
+  <!-- tanh到乘法 -->
+  <line x1="540" y1="360" x2="540" y2="395" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 输出门到乘法 -->
+  <line x1="540" y1="320" x2="540" y2="365" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 输出 h(t) -->
+  <line x1="540" y1="395" x2="540" y2="420" stroke="black" stroke-width="2"/>
+  <line x1="540" y1="420" x2="600" y2="420" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="620" y="425" font-size="14">h(t)</text>
+  
+  <!-- 图例 -->
+  <text x="50" y="520" font-size="12" font-weight="bold">图例：</text>
+  <text x="50" y="540" font-size="11">σ: Sigmoid激活函数</text>
+  <text x="50" y="560" font-size="11">tanh: 双曲正切激活函数</text>
+  <text x="250" y="540" font-size="11">×: 逐元素相乘</text>
+  <text x="250" y="560" font-size="11">+: 逐元素相加</text>
+</svg>
