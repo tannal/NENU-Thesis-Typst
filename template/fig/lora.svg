@@ -1,0 +1,96 @@
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- 定义样式 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#000"/>
+    </marker>
+    <style>
+      .box { fill: none; stroke: #000; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 14px; text-anchor: middle; }
+      .title { font-size: 16px; font-weight: bold; }
+      .small-text { font-size: 12px; }
+      .arrow { stroke: #000; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    </style>
+  </defs>
+
+  <!-- 标题 -->
+  <text x="400" y="30" class="text title">基于LLaMA的ABC记谱法生成模型架构</text>
+
+  <!-- 输入层 -->
+  <rect x="50" y="80" width="140" height="60" class="box"/>
+  <text x="120" y="105" class="text">ABC记谱法</text>
+  <text x="120" y="125" class="text small-text">训练数据</text>
+
+  <!-- 自定义Tokenizer -->
+  <rect x="250" y="80" width="140" height="60" class="box"/>
+  <text x="320" y="105" class="text">自定义Tokenizer</text>
+  <text x="320" y="125" class="text small-text">扩展词汇表</text>
+
+  <!-- 箭头：输入 -> Tokenizer -->
+  <line x1="190" y1="110" x2="245" y2="110" class="arrow"/>
+
+  <!-- Token Sequence -->
+  <rect x="450" y="80" width="140" height="60" class="box"/>
+  <text x="520" y="105" class="text">Token序列</text>
+  <text x="520" y="125" class="text small-text">[BOS] tokens [EOS]</text>
+
+  <!-- 箭头：Tokenizer -> Token Sequence -->
+  <line x1="390" y1="110" x2="445" y2="110" class="arrow"/>
+
+  <!-- 预训练LLaMA -->
+  <rect x="100" y="200" width="600" height="80" class="box" stroke-dasharray="5,5"/>
+  <text x="400" y="225" class="text title">预训练LLaMA-2-7B模型</text>
+  <text x="400" y="250" class="text small-text">冻结参数 (7B)</text>
+
+  <!-- 箭头：Token -> LLaMA -->
+  <line x1="520" y1="140" x2="520" y2="195" class="arrow"/>
+
+  <!-- LoRA模块 -->
+  <g>
+    <!-- LoRA Q -->
+    <rect x="120" y="310" width="120" height="50" class="box"/>
+    <text x="180" y="330" class="text">LoRA</text>
+    <text x="180" y="348" class="text small-text">Q-proj (r=16)</text>
+    
+    <!-- LoRA K -->
+    <rect x="260" y="310" width="120" height="50" class="box"/>
+    <text x="320" y="330" class="text">LoRA</text>
+    <text x="320" y="348" class="text small-text">K-proj (r=16)</text>
+    
+    <!-- LoRA V -->
+    <rect x="400" y="310" width="120" height="50" class="box"/>
+    <text x="460" y="330" class="text">LoRA</text>
+    <text x="460" y="348" class="text small-text">V-proj (r=16)</text>
+    
+    <!-- LoRA O -->
+    <rect x="540" y="310" width="120" height="50" class="box"/>
+    <text x="600" y="330" class="text">LoRA</text>
+    <text x="600" y="348" class="text small-text">O-proj (r=16)</text>
+  </g>
+
+  <!-- 箭头：LLaMA -> LoRA -->
+  <line x1="180" y1="280" x2="180" y2="305" class="arrow"/>
+  <line x1="320" y1="280" x2="320" y2="305" class="arrow"/>
+  <line x1="460" y1="280" x2="460" y2="305" class="arrow"/>
+  <line x1="600" y1="280" x2="600" y2="305" class="arrow"/>
+
+  <!-- 参数说明 -->
+  <text x="400" y="390" class="text small-text">可训练参数: 4.2M (0.06%)</text>
+
+  <!-- 生成层 -->
+  <rect x="250" y="420" width="300" height="60" class="box"/>
+  <text x="400" y="445" class="text">自回归生成</text>
+  <text x="400" y="465" class="text small-text">Top-p采样 (p=0.9, T=0.8)</text>
+
+  <!-- 箭头：LoRA -> 生成 -->
+  <line x1="400" y1="360" x2="400" y2="415" class="arrow"/>
+
+  <!-- 输出 -->
+  <ellipse cx="680" cy="450" rx="70" ry="30" class="box"/>
+  <text x="680" y="450" class="text">ABC乐曲</text>
+  <text x="680" y="465" class="text small-text">生成结果</text>
+
+  <!-- 箭头：生成 -> 输出 -->
+  <line x1="550" y1="450" x2="605" y2="450" class="arrow"/>
+
+</svg>
