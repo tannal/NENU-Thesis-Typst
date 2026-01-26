@@ -33,7 +33,7 @@
   twoside: false,
   print: false,
   info: (
-    title: ("GPT2ABC：基于GPT2的ABC音乐生成"),
+    title: ("基于大语言模型的ABC音乐生成"),
     title-en: "GPT2ABC: GPT2-Based ABC Music Generation",
     grade: "2024",
     student-id: "2024103289",
@@ -468,7 +468,6 @@ $ bold(y)_t = g(bold(W)_(h y) bold(h)_t + bold(b)_y) $
 
 长短期记忆网络(LSTM)是由Hochreiter和Schmidhuber在1997年提出的一种特殊的循环神经网络架构,它通过精巧的门控机制设计,成功解决了传统RNN在处理长序列时面临的梯度消失和梯度爆炸问题。LSTM的核心思想是引入一个称为"细胞状态"的记忆单元,配合三个门控结构来精确控制信息的流动,使网络能够在长时间跨度内保持和传递重要信息。
 
-
 LSTM的架构可以理解为一个精密的信息处理系统。在每个时间步,LSTM单元接收三个输入:当前时刻的输入数据x(t)、上一时刻的隐藏状态h(t-1)以及上一时刻的细胞状态C(t-1)。细胞状态是LSTM最关键的组成部分,它像一条贯穿整个单元的高速公路,信息可以在上面相对不受干扰地流动。这条"信息高速公路"只通过少量的线性操作进行修改,这确保了梯度在反向传播时能够有效地流过多个时间步,不会出现传统RNN那样的梯度消失问题。
 LSTM通过三个门来控制信息的流动,每个门都有特定的职责。第一个是遗忘门,它决定应该从细胞状态中丢弃哪些信息。遗忘门将当前输入x(t)和上一时刻的隐藏状态h(t-1)作为输入,通过一个sigmoid激活函数输出一个介于0和1之间的向量,这个向量中的每个元素对应细胞状态中的一个元素。如果输出为1,表示"完全保留这个信息",如果输出为0,则表示"完全遗忘这个信息"。通过这种方式,网络可以学会主动遗忘不再需要的旧信息,为新信息腾出空间。
 
@@ -534,6 +533,106 @@ LSTM相比传统RNN的主要优势在于其能够维持长期记忆。在传统R
 #figure(image("fig/architecture.png"), caption: [GPT2ABC架构])
 
 == ABCTokenizer
+
+#figure(
+  table(
+    align: center + horizon,
+    columns: 1,
+    stroke: none,
+    table.hline(stroke: 1.5pt),
+    [算法1],
+    table.hline(stroke: 1pt),
+    ```textile
+    FUNCTION tokenize(text):
+    Initialize an empty list called 'tokens'
+    Set index 'i' to 0
+    
+    WHILE 'i' is less than the length of 'text':
+        Set 'found_token' to False
+        
+        # Try matching substrings from longest (4 chars) to shortest (1 char)
+        FOR each 'length' from 4 down to 1:
+            Extract 'substring' from 'text' starting at 'i' with current 'length'
+            
+            IF 'substring' exists in our vocabulary:
+                Add 'substring' to 'tokens'
+                Move index 'i' forward by 'length'
+                Set 'found_token' to True
+                EXIT the FOR loop (move to next part of text)
+        
+        # If no match was found after checking all lengths
+        IF 'found_token' is False:
+            Add '<unk>' (unknown) to 'tokens'
+            Increment 'i' by 1
+            
+    RETURN 'tokens'
+    ```,
+    table.hline(stroke: 1.5pt),
+  ),
+  caption: [分词算法的伪代码],
+)<three-line-table>
+
+#figure(
+  table(
+    align: center + horizon,
+    columns: 1,
+    stroke: none,
+    table.hline(stroke: 1.5pt),
+    [算法2],
+    table.hline(stroke: 1pt),
+    ```textile
+    FUNCTION encode(text, add_special_tokens):
+    # Convert text to a list of strings first
+    'tokens' = Result of tokenize(text)
+    Initialize an empty list called 'ids'
+    
+    IF 'add_special_tokens' is True:
+        Add the ID for '<bos>' (beginning of sequence) to 'ids'
+        
+    FOR each 'token' in 'tokens':
+        IF 'token' is in the vocabulary:
+            Add its corresponding ID to 'ids'
+        ELSE:
+            Add the ID for '<unk>' to 'ids'
+            
+    IF 'add_special_tokens' is True:
+        Add the ID for '<eos>' (end of sequence) to 'ids'
+        
+    RETURN 'ids'
+    ```,
+    table.hline(stroke: 1.5pt),
+  ),
+  caption: [编码算法的伪代码],
+)<three-line-table>
+
+#figure(
+  table(
+    align: center + horizon,
+    columns: 1,
+    stroke: none,
+    table.hline(stroke: 1.5pt),
+    [算法3],
+    table.hline(stroke: 1pt),
+    ```textile
+    FUNCTION decode(ids):
+    Initialize an empty list called 'tokens'
+    
+    FOR each 'id' in 'ids':
+        IF 'id' exists in our ID-to-Token mapping:
+            Retrieve the 'token' string
+            
+            # Filter out non-musical/structural tokens
+            IF 'token' is NOT one of ['<pad>', '<unk>', '<bos>', '<eos>']:
+                Add 'token' to 'tokens'
+                
+    # Join all tokens together with no space
+    RETURN the concatenated string of all 'tokens'
+    ```,
+    table.hline(stroke: 1.5pt),
+  ),
+  caption: [解码算法的伪代码],
+)<three-line-table>
+
 
 为使模型能够有效理解和生成ABC记谱文本，本文设计并实现了专门面向ABC音乐语料的ABCTokenizer分词器。该分词器的设计充分考虑了ABC记谱法的语法特点和音乐语义结构，与通用自然语言分词器存在本质差异。ABC记谱法作为一种半结构化的符号表示系统，其基本构成单元包括音高符号、时值标记、调性与节拍声明、装饰音记号、和弦标注以及小节线等结构标记。这些元素往往由单个字符或固定字符组合表示，且具有明确的语法规则和语义含义。例如，音高用字母C到B及其大小写变体表示，时值用分数形式如1/8或1/4标注，调性声明以"K:"为前缀后接调名，小节线用竖线"|"及其变体"|:"、":|"等表示重复结构。
 
@@ -643,6 +742,8 @@ GPT2ABC的训练目标是最大化训练集中ABC序列的对数似然。具体�
   ),
   caption: [四种模型在测试集上的最终性能与资源消耗对比],
 )<exp-results-table>
+
+== 本章小结
 
 = 基于预训练模型的音乐生成模型
 
