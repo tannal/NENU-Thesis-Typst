@@ -3,6 +3,8 @@
 #import "@preview/codly:1.3.0": codly, codly-init, no-codly
 #import "@preview/codly-languages:0.1.8": *
 
+#import "@preview/lovelace:0.3.0": *
+
 #show: codly-init.with()
 #codly(languages: codly-languages)
 
@@ -534,104 +536,67 @@ LSTM相比传统RNN的主要优势在于其能够维持长期记忆。在传统R
 
 == ABCTokenizer
 
-#figure(
-  table(
-    align: center + horizon,
-    columns: 1,
-    stroke: none,
-    table.hline(stroke: 1.5pt),
-    [算法1],
-    table.hline(stroke: 1pt),
-    ```textile
-    FUNCTION tokenize(text):
-    Initialize an empty list called 'tokens'
-    Set index 'i' to 0
-    
-    WHILE 'i' is less than the length of 'text':
-        Set 'found_token' to False
-        
-        # Try matching substrings from longest (4 chars) to shortest (1 char)
-        FOR each 'length' from 4 down to 1:
-            Extract 'substring' from 'text' starting at 'i' with current 'length'
-            
-            IF 'substring' exists in our vocabulary:
-                Add 'substring' to 'tokens'
-                Move index 'i' forward by 'length'
-                Set 'found_token' to True
-                EXIT the FOR loop (move to next part of text)
-        
-        # If no match was found after checking all lengths
-        IF 'found_token' is False:
-            Add '<unk>' (unknown) to 'tokens'
-            Increment 'i' by 1
-            
-    RETURN 'tokens'
-    ```,
-    table.hline(stroke: 1.5pt),
-  ),
-  caption: [分词算法的伪代码],
-)<three-line-table>
+这段算法的核心在于**“贪婪匹配” (Greedy Longest-Match)**。在处理 ABC 乐谱时，字符的含义往往取决于其组合方式。例如，^ 表示升号，但 ^^ 表示重升号；C 表示大字组 C，而 Cmaj 表示大调和弦。如果简单地逐字符拆分，就会丢失这种语义。在执行过程中，算法维护一个指针 $i$。对于指针所处的当前位置，它并不会立刻断定当前的字符就是一个 Token，而是像探路一样，先向后看 4 个字符（这是预设的最大 Token 长度），检查这 4 个字符组成的子串是否在词表 $italic("Vocab")$ 中。如果没有，再退而求其次看 3 个字符、2 个字符，直到找到最短的 1 字符匹配。这种“从长到短”的策略确保了 |:（小节线/重复记号）不会被错误地拆分为 | 和 :。如果尝试了所有长度都无法匹配，算法会将其标记为 $angle.l "unk" angle.r$（未知字符），这保证了分词器的鲁棒性，使其不会因遇到非法字符而崩溃。
 
 #figure(
-  table(
-    align: center + horizon,
-    columns: 1,
-    stroke: none,
-    table.hline(stroke: 1.5pt),
-    [算法2],
-    table.hline(stroke: 1pt),
-    ```textile
-    FUNCTION encode(text, add_special_tokens):
-    # Convert text to a list of strings first
-    'tokens' = Result of tokenize(text)
-    Initialize an empty list called 'ids'
-    
-    IF 'add_special_tokens' is True:
-        Add the ID for '<bos>' (beginning of sequence) to 'ids'
-        
-    FOR each 'token' in 'tokens':
-        IF 'token' is in the vocabulary:
-            Add its corresponding ID to 'ids'
-        ELSE:
-            Add the ID for '<unk>' to 'ids'
-            
-    IF 'add_special_tokens' is True:
-        Add the ID for '<eos>' (end of sequence) to 'ids'
-        
-    RETURN 'ids'
-    ```,
-    table.hline(stroke: 1.5pt),
-  ),
-  caption: [编码算法的伪代码],
-)<three-line-table>
+  kind: "algorithm",
+  pseudocode-list(booktabs: true, numbered-title: [ABC Tokenization (Longest-Match)])[
+    + *function* $italic("tokenize")("text")$
+    + $T arrow.l [ ]$, $i arrow.l 0$, $L arrow.l italic("length")("text")$
+    + *while* $i < L$ *do*
+      + $italic("found") arrow.l "False"$
+      + *for* $s z$ in $\{4, 3, 2, 1\}$ *do*
+        + $s arrow.l "text"[i : i + s z]$
+        + *if* $s in italic("Vocab")$ *then*
+          + $T."append"(s)$, $i arrow.l i + s z$, $italic("found") arrow.l "True"$
+          + *break*
+        + *end*
+      + *end*
+      + *if* not $italic("found")$ *then*
+        + $T."append"(angle.l "unk" angle.r)$, $i arrow.l i + 1$
+      + *end*
+    + *end*
+    + *return* $T$
+  ],
+  caption: [分词算法的伪代码]
+) <algo_tokenize>
+
+编码阶段是将人类可读的符号序列转化为计算机可运算的数值序列的桥梁。这里不仅包含了简单的映射逻辑，还引入了深度学习中至关重要的序列边界标记 (Special Tokens)。在 ABC 乐谱生成的任务中，模型需要知道一段旋律从哪里开始，到哪里结束。因此，算法在调用 tokenize 函数获得原始片段后，会在序列的头部插入 $angle.l "bos" angle.r$ (Beginning of Sequence) 标识符，在尾部插入 $angle.l "eos" angle.r$ (End of Sequence) 标识符。这些特殊的 ID 就像是给乐谱加上了“书名号”，帮助模型在训练时识别旋律的边界。对于每一个分出的 Token，算法会查表获取其对应的唯一整数索引 $v$。如果某个 Token 意外地没出现在预设词表中，算法会强制将其编码为 $angle.l "unk" angle.r$ 的索引，确保输出的数值张量在维度上是完整的，方便后续进行向量嵌入 (Embedding) 计算。
 
 #figure(
-  table(
-    align: center + horizon,
-    columns: 1,
-    stroke: none,
-    table.hline(stroke: 1.5pt),
-    [算法3],
-    table.hline(stroke: 1pt),
-    ```textile
-    FUNCTION decode(ids):
-    Initialize an empty list called 'tokens'
-    
-    FOR each 'id' in 'ids':
-        IF 'id' exists in our ID-to-Token mapping:
-            Retrieve the 'token' string
-            
-            # Filter out non-musical/structural tokens
-            IF 'token' is NOT one of ['<pad>', '<unk>', '<bos>', '<eos>']:
-                Add 'token' to 'tokens'
-                
-    # Join all tokens together with no space
-    RETURN the concatenated string of all 'tokens'
-    ```,
-    table.hline(stroke: 1.5pt),
-  ),
-  caption: [解码算法的伪代码],
-)<three-line-table>
+  kind: "algorithm",
+  pseudocode-list(booktabs: true, numbered-title: [Numerical Encoding])[
+    + *function* $italic("encode")("text", italic("add_special"))$
+    + $T arrow.l italic("tokenize")("text")$, $I arrow.l [ ]$
+    + *if* $italic("add_special")$ *then* $I."append"(italic("ID")(angle.l "bos" angle.r))$
+    + *for* each $t in T$ *do*
+      + $v arrow.l italic("ID")(t)$ if $t in italic("Vocab")$ else $italic("ID")(angle.l "unk" angle.r)$
+      + $I."append"(v)$
+    + *end*
+    + *if* $italic("add_special")$ *then* $I."append"(italic("ID")(angle.l "eos" angle.r))$
+    + *return* $I$
+  ],
+  caption: [编码算法的伪代码]
+) <algo_encode>
+
+解码是编码的逆过程，但它并不是简单的查表拼接。它的核心任务是从冗余的、包含控制信息的数值序列中，提炼并还原出纯净的 ABC Notation 文本。当模型生成一串数字 ID 后，解码器会逐个将它们翻译回字符串形式。然而，在模型推理过程中，可能会产生大量的填充符 $angle.l "pad" angle.r$（用于对齐长度）或者之前提到的边界符 $angle.l "bos" angle.r$ 等。这些符号对于乐谱本身是没有音乐意义的。因此，在解码逻辑中加入了一个条件分支：只有当 Token 不属于这些“技术性标识符”集合时，才会被允许进入最终的字符串缓冲区 $S$。最后，通过一个高效的拼接操作 $italic("join")(S)$，将分散的音符、节拍记号、调式声明连接成一段完整的、符合标准 ABC 语法的乐谱文本，供后续的打谱软件或合成器使用
+
+#figure(
+  kind: "algorithm",
+  pseudocode-list(booktabs: true, numbered-title: [String Decoding])[
+    + *function* $italic("decode")("ids")$
+    + $S arrow.l [ ]$
+    + *for* each $i d in "ids"$ *do*
+      + $t arrow.l italic("Token")(i d)$
+      + *if* $t thin cancel(in) thin \{angle.l "pad" angle.r, angle.l "unk" angle.r, angle.l "bos" angle.r, angle.l "eos" angle.r\}$ *then*
+        + $S."append"(t)$
+      + *end*
+    + *end*
+    + *return* $italic("join")(S)$
+  ],
+  caption: [解码算法的伪代码]
+) <algo_decode>
+
 
 
 为使模型能够有效理解和生成ABC记谱文本，本文设计并实现了专门面向ABC音乐语料的ABCTokenizer分词器。该分词器的设计充分考虑了ABC记谱法的语法特点和音乐语义结构，与通用自然语言分词器存在本质差异。ABC记谱法作为一种半结构化的符号表示系统，其基本构成单元包括音高符号、时值标记、调性与节拍声明、装饰音记号、和弦标注以及小节线等结构标记。这些元素往往由单个字符或固定字符组合表示，且具有明确的语法规则和语义含义。例如，音高用字母C到B及其大小写变体表示，时值用分数形式如1/8或1/4标注，调性声明以"K:"为前缀后接调名，小节线用竖线"|"及其变体"|:"、":|"等表示重复结构。
@@ -745,7 +710,7 @@ GPT2ABC的训练目标是最大化训练集中ABC序列的对数似然。具体�
 
 == 本章小结
 
-= 基于预训练模型的音乐生成模型
+= 基于预训练模型的ABC音乐生成模型
 
 == 算法
 
