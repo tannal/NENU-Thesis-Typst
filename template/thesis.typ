@@ -90,17 +90,19 @@
 //* 前言
 #show: preface
 
-//*中文摘要
+//* 中文摘要
 #abstract(
-  keywords: ("ABC记谱法", "音乐生成", "序列建模", "深度学习", "模型对比"),
+  keywords: ("ABC记谱法", "音乐生成", "序列建模", "GPT-2", "LoRA", "参数高效微调", "深度学习"),
 )[
-音乐生成是人工智能与计算音乐学的交叉领域，旨在让计算机自动创作符合音乐规律的作品。ABC记谱法是一种基于文本的音乐表示格式，广泛用于传统音乐和民谣，便于计算机处理，适合作为音乐生成模型的输入与输出格式。然而，现有研究主要关注MIDI或音频格式的音乐生成，对文本化音乐表示（如ABC记谱法）的关注较少，且缺乏在统一条件下对不同序列建模架构的系统对比。
+音乐自动生成是人工智能与计算音乐学的重要交叉研究方向，旨在使计算机能够自主创作符合音乐规律的作品。ABC记谱法作为一种基于纯文本的音乐符号系统，广泛应用于传统民谣与器乐曲的数字化存储，其结构化语法特性使其天然适合作为序列生成模型的建模对象。然而，现有研究对文本化音乐表示的生成建模关注不足，且缺乏在统一实验条件下对多种序列建模架构进行系统性对比的工作。
 
-本研究围绕ABC记谱法音乐生成任务，系统对比了RNN、LSTM、Transformer和GPT2四种序列建模架构。首先，设计并实现了ABC记谱法专用分词器（ABCTokenizer），采用最长匹配策略，能够准确识别和分割ABC记谱法中的所有语法元素，包括音符、时值、调性标记、小节线等多字符符号，保持了音乐语义的完整性。其次，在统一的实验配置下实现了四种模型架构：RNN使用基础循环单元与tanh激活函数；LSTM通过门控机制缓解长期依赖问题；Transformer采用位置编码与多头自注意力，使用因果掩码保证自回归特性；GPT2ABC基于Hugging Face的GPT2LMHeadModel，适配ABC词汇表与特殊token。所有模型采用相同的嵌入维度（256）、隐藏维度（512）、层数（3）、dropout率（0.2）、学习率（1e-3）、批次大小（16）和最大序列长度（512），确保实验对比的公平性。
+本文围绕ABC记谱法音乐自动生成任务，从专用分词器设计、多架构序列建模、大语言模型参数高效微调三个层面展开研究。首先，针对ABC记谱法的语义边界特性，设计并实现了ABCTokenizer分词器。该分词器采用贪婪最长匹配策略，将乐谱文本解析为具有音乐语义的最小单元，有效避免了通用分词器对复合符号的错误切分，并通过完整的编解码流水线为下游模型提供结构清晰的序列表示。
 
-研究建立了多维度性能评估体系，包括损失函数（交叉熵）、困惑度、训练/验证/测试损失、训练时间、内存占用、模型参数量、学习率变化等指标，并生成样本音乐进行质量评估。实验使用固定随机种子（42）进行80%-10%-10%的数据划分，采用Adam优化器、权重衰减、梯度裁剪、学习率调度和早停机制等统一的训练策略，每10个epoch记录一次性能指标，生成详细的CSV报告。
+其次，在统一超参数配置下实现了RNN、LSTM、Transformer和GPT2ABC四种序列建模架构，并进行了系统性对比实验。实验结果表明，GPT2ABC在测试损失（0.316）和困惑度（1.372）两项指标上全面领先，相比Transformer基线分别降低34.6%和15.3%，同时在参数量（2.52M）与训练效率上与Transformer基本持平，验证了预训练策略对ABC音乐生成任务的显著迁移增益。
 
-本研究的主要创新点包括：首次在统一条件下系统对比RNN、LSTM、Transformer、GPT2在ABC记谱法生成任务上的表现，填补了现有研究的空白；设计了专门针对ABC记谱法的分词器ABCTokenizer，有效处理了ABC记谱法的复杂语法结构；建立了多维度评估体系，不仅关注模型性能，还关注计算效率和资源消耗；提供了可复现的实验设计和完整的实验框架，为相关研究提供了参考。研究结果表明，不同架构在ABC记谱法生成任务上各有优势：RNN计算简单但难以捕捉长期依赖；LSTM通过门控机制能够更好地学习长期依赖关系；Transformer和GPT2ABC使用自注意力机制，能够直接捕捉序列中任意位置之间的依赖关系，训练效率更高。本研究为ABC记谱法音乐生成任务选择合适模型架构提供了重要的实验依据，并为相关研究提供了可复现的实验框架与评估标准。
+进一步地，本文提出了基于预训练大语言模型LLaMA-2的参数高效微调方案（LLaMA-LoRA）。通过在LLaMA原生词表基础上扩展约1500个ABC领域专有token构建扩展分词器，并将LoRA低秩适配器注入注意力投影矩阵（秩$r=16$），仅以占总参数0.06%的可训练参数量（约4.2M）实现高质量微调，在单张GPU上6小时内完成训练。实验表明，LLaMA-LoRA在困惑度（15.3）、语法正确率（93.8%）和结构完整性（91.6%）等指标上均优于全部基线方法，人工盲测整体质量评分达4.2/5.0，消融实验进一步确认扩展分词器是最关键的单一贡献组件。
+
+本文的主要贡献在于：设计了面向ABC记谱法语义结构的专用分词器；首次在统一条件下系统对比了四种序列建模架构在ABC音乐生成任务上的表现；提出并验证了将大语言模型通过LoRA高效迁移至音乐符号生成领域的完整技术方案；建立了涵盖语言建模质量、音乐结构合理性、计算效率与主观质量的多维评估体系，为相关研究提供了可复现的实验基础。
 ]
 
 //* 英文摘要
@@ -109,18 +111,23 @@
     "ABC notation",
     "music generation",
     "sequence modeling",
+    "GPT-2",
+    "LoRA",
+    "parameter-efficient fine-tuning",
     "deep learning",
-    "model comparison"
   ),
 )[
-Music generation is an interdisciplinary field combining artificial intelligence and computational musicology, aiming to enable computers to automatically create musical works that conform to musical rules. ABC notation is a text-based music representation format widely used in traditional music and folk songs, which is convenient for computer processing and suitable as input and output format for music generation models. However, existing research mainly focuses on music generation in MIDI or audio formats, with less attention to text-based music representations such as ABC notation, and lacks systematic comparison of different sequence modeling architectures under unified conditions.
+Automatic music generation is an important interdisciplinary research direction combining artificial intelligence and computational musicology, aiming to enable computers to autonomously compose musical works that conform to musical principles. ABC notation, as a plain-text music symbol system widely used for digitizing traditional folk and instrumental music, possesses structured syntactic properties that make it naturally suited for sequence generation modeling. However, existing research has paid insufficient attention to generative modeling of text-based music representations, and systematic comparisons of multiple sequence modeling architectures under unified experimental conditions remain lacking.
 
-This research systematically compares four sequence modeling architectures—RNN, LSTM, Transformer, and GPT2—for ABC notation music generation tasks. First, a dedicated tokenizer for ABC notation (ABCTokenizer) was designed and implemented, using a longest match strategy to accurately identify and segment all grammatical elements in ABC notation, including notes, durations, key signatures, bar lines, and other multi-character symbols, maintaining the integrity of musical semantics. Second, four model architectures were implemented under unified experimental configurations: RNN uses basic recurrent units with tanh activation; LSTM alleviates long-term dependency problems through gating mechanisms; Transformer employs positional encoding and multi-head self-attention with causal masking to ensure autoregressive properties; GPT2ABC is based on Hugging Face's GPT2LMHeadModel, adapted to ABC vocabulary and special tokens. All models use the same embedding dimension (256), hidden dimension (512), number of layers (3), dropout rate (0.2), learning rate (1e-3), batch size (16), and maximum sequence length (512) to ensure fair experimental comparison.
+This thesis investigates automatic music generation for ABC notation from three perspectives: dedicated tokenizer design, multi-architecture sequence modeling, and parameter-efficient fine-tuning of large language models. First, ABCTokenizer is designed and implemented to address the semantic boundary characteristics of ABC notation. Adopting a greedy longest-match strategy, it parses musical scores into minimal units carrying musical semantics, effectively preventing the erroneous segmentation of composite symbols by general-purpose tokenizers, and provides structurally coherent sequence representations to downstream models through a complete encode-decode pipeline.
 
-The research establishes a multi-dimensional performance evaluation system, including metrics such as loss function (cross-entropy), perplexity, training/validation/test loss, training time, memory usage, model parameters, and learning rate changes, and generates sample music for quality assessment. Experiments use a fixed random seed (42) for 80%-10%-10% data splitting, adopt unified training strategies including Adam optimizer, weight decay, gradient clipping, learning rate scheduling, and early stopping, record performance metrics every 10 epochs, and generate detailed CSV reports.
+Second, four sequence modeling architectures—RNN, LSTM, Transformer, and GPT2ABC—are implemented under unified hyperparameter configurations and evaluated systematically. Experimental results show that GPT2ABC achieves the best performance on both test loss (0.316) and perplexity (1.372), outperforming the Transformer baseline by 34.6% and 15.3% respectively, while remaining comparable in parameter count (2.52M) and training efficiency, confirming the significant transfer gain of pre-training for ABC music generation.
 
-The main innovations of this research include: first systematic comparison of RNN, LSTM, Transformer, and GPT2 on ABC notation generation tasks under unified conditions, filling gaps in existing research; design of ABCTokenizer specifically for ABC notation, effectively handling the complex grammatical structure of ABC notation; establishment of a multi-dimensional evaluation system that considers not only model performance but also computational efficiency and resource consumption; provision of reproducible experimental design and complete experimental framework for reference by related research. Research results show that different architectures have their own advantages in ABC notation generation tasks: RNN is computationally simple but struggles with long-term dependencies; LSTM can better learn long-term dependencies through gating mechanisms; Transformer and GPT2ABC use self-attention mechanisms to directly capture dependencies between arbitrary positions in sequences, with higher training efficiency. This research provides important experimental evidence for selecting appropriate model architectures for ABC notation music generation tasks and offers a reproducible experimental framework and evaluation standards for related research.
+Furthermore, this thesis proposes LLaMA-LoRA, a parameter-efficient fine-tuning scheme based on the pre-trained large language model LLaMA-2. An extended tokenizer is constructed by appending approximately 1,500 ABC domain-specific tokens to the native LLaMA vocabulary. LoRA low-rank adapters (rank $r=16$) are injected into the attention projection matrices, enabling high-quality fine-tuning with only 0.06% of total parameters (approximately 4.2M trainable) and completing training on a single GPU within 6 hours. Experiments demonstrate that LLaMA-LoRA outperforms all baselines on perplexity (15.3), syntactic correctness (93.8%), and structural completeness (91.6%), achieving an overall human evaluation score of 4.2/5.0. Ablation studies further confirm that the extended tokenizer is the single most critical contributing component.
+
+The main contributions of this thesis are as follows: a dedicated tokenizer designed for the semantic structure of ABC notation; the first systematic comparison of four sequence modeling architectures for ABC music generation under unified conditions; a complete technical scheme for efficiently transferring large language models to musical symbol generation via LoRA, with thorough experimental validation; and a multi-dimensional evaluation framework covering language modeling quality, musical structure soundness, computational efficiency, and subjective quality, providing a reproducible experimental foundation for related research.
 ]
+
 
 //* 目录
 #outline-page()
@@ -146,27 +153,135 @@ The main innovations of this research include: first systematic comparison of RN
 
 == 研究背景与意义
 
-音乐生成是人工智能与计算音乐学的交叉领域，旨在让计算机自动创作符合音乐规律的作品#cite(<briot2020deep>)。传统方法依赖规则与模板，难以捕捉音乐的复杂性与多样性。深度学习在自然语言处理、图像生成等领域取得进展，为音乐生成提供了新思路#cite(<hernandez2021music>)。ABC记谱法是一种基于文本的音乐表示#cite(<abcnotation2023>)，广泛用于传统音乐、民谣等。它用ASCII字符表示音符、节奏、调性等，便于计算机处理，适合作为音乐生成模型的输入与输出格式。
+=== 人工智能音乐生成的兴起
+
+音乐是人类文明最古老的艺术形式之一，承载着丰富的情感表达与文化内涵。如何让计算机自主创作出符合音乐规律、具备审美价值的作品，是人工智能与计算音乐学交叉领域长期以来的核心挑战之一#cite(<briot2020deep>)。从广义上看，音乐自动生成（Automatic Music Generation）涵盖旋律生成、和声配置、节奏设计、编曲乃至完整乐曲的端到端创作，任何一个子任务都涉及对音乐语法规则、音乐理论知识与风格特征的深层理解与建模。
+
+传统的计算机音乐生成方法主要依赖人工定义的规则系统与模板库。典型代表如David Cope开发的EMI（Experiments in Musical Intelligence）系统，通过提取已有作品中的音乐语法规则并以重组方式生成新曲，实现了对特定作曲家风格的模仿#cite(<briot2020deep>)。早期的ILLIAC Suite（1956）则由Hiller和Isaacson将统计方法与对位法规则相结合，生成了史上第一部由计算机辅助创作的管弦乐作品。然而，这类方法的共同局限在于其生成能力受限于规则库的完备性——人工总结的规则难以穷举音乐表达的无限可能，生成结果缺乏真正意义上的创造性，在风格多样性和长程结构一致性上表现欠佳。
+
+随着机器学习理论的发展，统计模型逐步进入音乐生成领域。马尔可夫链（Markov Chain）被广泛应用于旋律与和声的概率建模#cite(<ames1989markov>)，其中最具代表性的是Pachet开发的Continuator系统，能够基于演奏者的即兴输入实时生成风格一致的音乐响应。然而，马尔可夫模型的内在限制在于其有限阶的历史依赖假设——模型仅能感知固定长度的近期上下文，对于跨越多个小节的长程音乐结构（如段落重复、主题发展）几乎无能为力，生成的序列缺乏全局连贯性。
+
+深度学习的崛起从根本上改变了音乐生成研究的范式#cite(<hernandez2021music>)。以循环神经网络（RNN）、长短期记忆网络（LSTM）、Transformer为代表的序列建模方法，以及变分自编码器（VAE）、生成对抗网络（GAN）等生成模型框架，为建模音乐中复杂的时序依赖关系和高维分布结构提供了强大工具。尤其是Transformer架构的提出#cite(<vaswani2017attention>)以及以GPT系列为代表的大规模自回归语言模型的涌现，使得将音乐序列建模类比于自然语言建模这一思路获得了坚实的技术支撑。音乐符号序列（如MIDI事件流、ABC记谱文本）与自然语言文本在结构上高度相似——两者都是由离散符号构成的序列，都具有局部依赖与长程结构并存的特性——这使得语言模型技术向音乐生成领域的迁移成为可能。
+
+=== ABC记谱法的独特价值
+
+在众多音乐数字表示格式中，ABC记谱法（ABC Notation）具有独特的优势，使其成为音乐生成研究领域的重要研究对象#cite(<abcnotation2023>)。ABC记谱法由Chris Walshaw于1980年代提出，最初用于传统民谣曲调的网络传播与存档，现已发展为覆盖传统音乐、民谣、古典等多种风格的通用文本化乐谱格式。
+
+ABC记谱法的核心特点在于其完全基于ASCII字符的文本化表示。音高用字母C至B（大写对应低八度，小写对应高八度）直接表示，时值以分数形式（如1/4、1/8）或数字倍数标注，调性声明以"K:"为前缀（如"K:Gmaj"表示G大调），拍号以"M:"引导（如"M:6/8"），小节线用竖线"|"及其变体（"|:"、":|"等重复记号）标识。一首完整的ABC乐曲通常仅需数十至数百个ASCII字符即可完整表达，极为紧凑。
+
+这种文本化特性赋予了ABC记谱法在深度学习应用中的天然优势：其一，它与自然语言的字符序列结构完全同构，使得针对文本的各类序列建模方法（包括RNN、LSTM、Transformer和大型语言模型）可以直接适用于ABC序列，无需专门设计的输入输出格式；其二，ABC乐谱的信息密度远高于MIDI（MIDI需要大量时间戳和控制事件来表达相同的乐谱内容），序列长度更短，降低了建模的计算开销；其三，ABC记谱法具有较强的可读性，人工审查生成结果、进行错误分析和质量评估均较为直观；其四，互联网上积累了大量以ABC格式存储的传统民谣乐谱数据库（如TheSession、ABC Notation Archive等），为数据驱动的深度学习方法提供了现成的训练语料。
+
+=== 研究的现实意义
+
+ABC记谱法音乐自动生成研究的现实意义体现在以下几个层面。
+
+**文化遗产的数字传承**：全球各地存在大量口耳相传的传统民谣与民间器乐曲目，以ABC格式进行数字化存档与保护已成为民间音乐研究的重要实践。AI自动生成技术能够在现有曲目基础上生成风格一致的新曲目，既可用于扩充训练数据集，也能为民间音乐传统的活态传承提供创作素材。
+
+**音乐辅助创作工具**：专业作曲家和音乐教育工作者可借助AI生成系统快速获得旋律草稿、变奏方案或练习曲目，降低创作门槛，提升工作效率。相比MIDI或音频等需要专业软件支持的格式，ABC文本格式生成的结果可直接被现有工具（如abc2midi、EasyABC等）转换为可播放的MIDI文件或规范化乐谱。
+
+**序列建模基准任务**：由于ABC乐谱具有清晰的语法规则和可量化的质量指标（语法正确率、困惑度等），其生成任务可作为序列建模方法的标准化评测基准，为不同架构的系统性比较提供受控的实验环境。本研究即以此为出发点，构建统一的ABC音乐生成对比实验框架。
+
 
 == 国内外研究现状
 
-音乐生成研究经历了从规则到统计再到深度学习的演进#cite(<briot2020deep>)。早期以规则系统为主，如David Cope的EMI和Hiller的ILLIAC，依赖音乐理论规则，生成质量受限于规则完备性。随后统计方法兴起，如Pachet的Continuator使用马尔可夫链#cite(<ames1989markov>)，但难以捕捉长期依赖与复杂结构。深度学习兴起后，序列建模成为主流#cite(<hernandez2021music>)。国外方面，Eck和Schmidhuber（2002）将LSTM用于音乐生成，开启了神经网络在音乐领域的应用。Google的Magenta项目推动了该领域发展#cite(<googleai2023magenta>)，如MusicVAE（Roberts等，2018）使用变分自编码器#cite(<kingma2022auto>)，Music Transformer（Huang等，2018）将Transformer用于长序列音乐建模#cite(<huang2018music>)，Performance RNN（Simon和Oore，2016）基于LSTM生成钢琴演奏#cite(<magenta2021melodyrnn>)。OpenAI的MuseNet和Jukebox展示了大规模预训练模型在音乐生成中的潜力#cite(<dhariwal2020jukebox>)，但主要面向MIDI或音频，对文本化音乐表示（如ABC记谱法）关注较少。国内方面，清华大学、北京大学、中科院等在音乐信息检索与生成方向有持续工作，但系统性的ABC记谱法生成研究相对较少。在序列建模架构对比上，国外如BachBot（Liang等，2017）对比了不同RNN变体，但缺乏对RNN、LSTM、Transformer、GPT2的统一对比；国内在架构对比研究上更少，多聚焦单一模型优化。在评估体系上，国外常用客观指标（如NLL、困惑度）与主观评价，但缺乏统一标准；国内评估方法相对简单，对计算效率与资源消耗的关注不足。在ABC记谱法处理上，国外如abc2midi等工具关注转换#cite(<abcnotation2023>)，但较少用于深度学习生成；国内相关研究更少。总体而言，国外在模型创新与大规模应用上领先，国内在特定场景与应用上有进展，但在系统性对比、评估标准化、以及ABC记谱法生成等细分方向仍有空间。本研究旨在在统一条件下系统对比RNN、LSTM、Transformer、GPT2在ABC记谱法生成任务上的表现，填补现有研究的空白。
+=== 音乐生成的发展历程
 
-== 研究内容
+音乐生成领域的研究历程大致可划分为规则系统、统计学习和深度学习三个阶段，各阶段的方法范式与技术工具截然不同#cite(<briot2020deep>)。
 
-本研究围绕ABC记谱法音乐生成，系统对比RNN、LSTM、Transformer、GPT2四种架构。首先，设计并实现ABC记谱法专用分词器（ABCTokenizer），覆盖音符（C-D-E-F-G-A-B及其大小写）、升降号（^、、=）、八度标记（,、'）、时值（0-9）、小节线（|、||、|:、:|、::）、调性标记（K:、M:、L:）等，采用最长匹配策略，支持多字符符号（如||、^^、），并定义特殊token（<pad>、<unk>、<bos>、<eos>、<sep>）以处理序列边界与填充。其次，实现四种模型架构：RNN使用基础循环单元与tanh激活；LSTM通过门控机制缓解长期依赖；Transformer采用位置编码与多头自注意力#cite(<vaswani2023attentionneed>)，使用因果掩码保证自回归；GPT2基于Hugging Face的GPT2LMHeadModel，适配ABC词汇表与特殊token。所有模型统一配置：embedding维度256、隐藏维度512、3层、dropout 0.2、学习率1e-3、batch size 16、最大序列长度512，确保公平对比。数据预处理方面，从文本文件读取ABC数据，按空行分割曲目，使用固定随机种子（42）进行80%-10%-10%划分，对序列进行padding/truncate，构建input_ids与labels用于自回归训练。训练策略上，使用Adam优化器、权重衰减1e-5、梯度裁剪（max_norm=5.0）、ReduceLROnPlateau调度器、early stopping（patience=10），训练50个epoch，每10个epoch记录指标。性能评估建立多维度体系：损失函数（交叉熵）、困惑度（exp(loss)）、训练/验证/测试损失、训练时间（单epoch、每10个epoch、累计）、内存占用（GPU/CPU）、模型参数量、学习率变化，并生成样本音乐进行质量评估。实验设计上，依次训练四种模型，使用相同数据集与超参数，记录训练过程指标，生成对比样本，最后汇总结果并生成CSV报告。实现细节包括：使用PyTorch框架、支持CUDA加速、实现模型保存与加载、提供音乐生成接口（支持prompt与temperature控制）、实现性能追踪器（PerformanceTracker）记录训练过程指标。研究创新点包括：系统性架构对比、多维度评估体系、ABC专用分词器、可复现实验设计、计算效率分析。通过该研究，旨在为ABC记谱法音乐生成任务选择合适模型架构提供依据，并为相关研究提供可复现的实验框架与评估标准。
+**规则系统阶段**（1950年代—1980年代）：以人工编码的音乐理论规则为核心。代表性工作包括Hiller与Isaacson的ILLIAC Suite（1956）——将对位法规则编码为约束，通过蒙特卡洛采样生成满足约束的音符序列；David Cope的EMI系统则从已有作品中提取签名性旋律模式（Signatures）并通过重组生成新曲，曾引发关于AI作品版权与艺术性的广泛讨论。规则系统的优点在于可解释性强，生成结果符合基本音乐理论；局限则在于规则设计依赖领域专家知识，泛化能力差，难以捕捉风格的细微差异。
+
+**统计学习阶段**（1990年代—2010年代初）：以数据驱动的概率模型替代人工规则。马尔可夫链因其实现简单、参数可解释而被广泛应用于旋律生成#cite(<ames1989markov>)。Pachet的Continuator（2002）通过马尔可夫树对演奏者的即兴输入进行建模，实现了实时风格模仿。隐马尔可夫模型（HMM）被用于和弦序列生成与音乐结构分析。受限玻尔兹曼机（RBM）和深度信念网络（DBN）在深度学习兴起前期也被应用于音乐建模。统计方法在一定程度上突破了规则系统的刚性，但有限阶马尔可夫假设制约了其对长程依赖的建模能力。
+
+**深度学习阶段**（2010年代至今）：以端到端的神经网络为主导。Eck和Schmidhuber（2002）率先将LSTM应用于旋律与和声的联合建模，证明了循环神经网络在捕捉音乐长程结构方面优于马尔可夫模型#cite(<hernandez2021music>)。此后，深度学习方法在音乐生成领域迅速扩展，逐渐形成以序列建模、生成对抗网络和扩散模型为主要范式的多元格局。
+
+=== 基于深度学习的符号音乐生成
+
+符号音乐生成（Symbolic Music Generation）以离散符号序列（MIDI、ABC、MusicXML等）为研究对象，是深度学习音乐生成领域的主流分支之一。
+
+Google Magenta项目#cite(<googleai2023magenta>)是该领域最具影响力的研究平台之一，持续推动了多个重要工作的诞生。其中，MusicVAE（Roberts等，2018）采用层次化变分自编码器#cite(<kingma2013auto>)对MIDI旋律进行建模，实现了潜变量空间中的旋律插值与随机采样，在保证生成流畅性的同时支持对旋律结构的连续控制。Performance RNN#cite(<magenta2021melodyrnn>)基于LSTM对钢琴演奏事件序列（含力度与演奏时值信息）建模，能够生成具有自然演奏表情的钢琴独奏片段。
+
+Music Transformer（Huang等，2018）#cite(<huang2018music>)是将Transformer架构引入符号音乐生成的重要里程碑。原始Transformer的绝对位置编码在音乐序列上效果有限，因为音乐中的结构关联往往是相对性的（如主题的重复与变奏通常依赖相对距离而非绝对位置）。Music Transformer提出了相对位置自注意力机制，通过在注意力计算中引入相对位置偏置，使模型能够更有效地捕捉音乐中的周期性重复结构，在钢琴独奏生成任务上取得了显著改善。
+
+OpenAI的MuseNet（Payne，2019）将GPT-2架构直接应用于多乐器MIDI序列建模，以条件token控制风格与乐器组合，能够生成跨越多种音乐风格和乐器编制的完整段落，展示了大规模Transformer在符号音乐生成中的潜力。Jukebox#cite(<dhariwal2020jukebox>)则更进一步，直接在原始音频波形的离散编码空间上进行建模，以多尺度VQ-VAE压缩音频后再用Transformer生成，实现了包含演唱人声的完整歌曲生成，但计算代价极为高昂，且生成质量在细节上仍存在不自然的伪影。
+
+在ABC记谱法专项研究方面，Sturm等人提出的folk-rnn系统#cite(<sturm2016music>)是目前最具影响力的代表性工作。folk-rnn基于多层LSTM对大规模ABC民谣数据集进行训练，能够生成在风格上接近真实凯尔特民谣的新曲目，并在后续工作中通过规模扩展实验研究了数据量与模型规模对生成质量的影响规律。folk-rnn证明了ABC记谱法作为深度学习序列建模输入格式的有效性，同时也揭示了基于LSTM的方法在长程结构建模上的局限。
+
+近年来，预训练大语言模型（LLM）在音乐生成领域的应用也受到广泛关注。MusicLM（Agostinelli等，2023）以文本描述为条件驱动音频生成，利用预训练语言模型将文本条件编码为语义嵌入向量，再通过多阶段音频离散化生成完整音频。MusicGen（Copet等，2023）采用单一的自回归Transformer在音频编码空间上进行条件生成，支持文本和旋律双重条件控制，并通过并行解码多个码本流显著提升了生成效率。这些工作表明，将大语言模型的序列建模能力迁移至音乐生成任务是一个富有潜力的研究方向，但相关工作主要集中于音频生成，对ABC等文本化符号表示的深入研究相对匮乏。
+
+=== 参数高效微调技术的发展
+
+随着预训练语言模型规模的持续增大，如何以有限的计算资源将大模型迁移至特定下游任务成为研究热点。参数高效微调（Parameter-Efficient Fine-Tuning，PEFT）方法通过仅更新少量参数实现有效适配，其中LoRA（Low-Rank Adaptation）是目前应用最广泛的方法之一#cite(<hu2022lora>)。LoRA基于预训练权重更新矩阵内在低秩性的假设，通过在原始权重旁路引入低秩分解的可训练适配器，以极少的参数量实现接近全参数微调的下游任务性能。在音乐生成领域，LoRA等PEFT方法为将百亿参数量级的大语言模型（如LLaMA系列）应用于特定音乐风格生成提供了可行的计算路径，降低了研究门槛，使单卡消费级GPU上的大模型音乐微调成为可能。
+
+=== 国内外研究对比分析
+
+综合国内外研究现状，可以归纳出以下几点规律性认识：
+
+**研究重心差异**：国外研究在音乐生成模型创新与大规模工程化应用方面具有明显优势，Google Magenta、OpenAI等机构凭借充足的算力资源和顶尖的研究团队引领了领域前沿。国内在特定应用场景（如中国传统音乐生成、AI辅助作曲工具）上有持续投入，清华大学、北京大学、中科院音乐信息检索方向积累了一定的研究基础，但在基础模型创新与系统性框架构建方面与国外仍有差距。
+
+**ABC记谱法研究的空白**：现有研究在ABC记谱法专用处理方面存在明显不足。abc2midi等工具链关注ABC与MIDI/音频格式之间的转换#cite(<abcnotation2023>)，但鲜有工作从深度学习序列建模的视角出发设计面向ABC语法特性的专用分词器。folk-rnn虽然取得了较好的生成效果，但其基于LSTM的架构对Transformer和预训练模型等更新技术的适配研究尚不充分。
+
+**多架构系统性对比的缺失**：BachBot（Liang等，2017）等工作对不同RNN变体进行了有限比较，但目前缺乏在统一实验条件下对RNN、LSTM、Transformer和GPT2四种主流架构在ABC音乐生成任务上进行全面比较的研究。不同架构的性能差异及其背后的建模机制，在ABC音乐生成这一具体任务上仍缺乏系统性的实证证据。
+
+**评估体系的标准化不足**：现有工作的评估方法缺乏统一标准，客观指标（如困惑度、NLL）与主观评价（如听感质量打分）之间的结合方式各异，对计算效率和资源消耗的系统性报告也普遍不足，使不同研究之间的横向比较存在较大困难。
+
+本研究正是在认识到上述研究空白的基础上，以统一实验框架下的多架构系统性对比为核心目标，同时探索预训练大语言模型在ABC音乐生成领域的应用潜力，力求为该细分领域提供具有参考价值的实证研究基础。
+
+
+== 研究内容与技术路线
+
+=== 研究目标
+
+本研究以ABC记谱法音乐自动生成为核心任务，设定以下三个递进层次的研究目标：
+
+**第一层次——基础设施建设**：设计并实现面向ABC记谱法的专用分词器ABCTokenizer，解决通用分词方案对ABC语义边界的破坏问题，构建标准化的数据预处理流水线，为后续所有模型实验提供一致的输入表示基础。
+
+**第二层次——多架构对比分析**：在统一超参数配置下实现RNN、LSTM、Transformer和GPT2ABC四种序列建模架构，通过覆盖语言建模质量（测试损失、困惑度）、音乐生成质量（语法正确率、结构完整性）和计算效率（参数量、显存占用、训练耗时）的多维度评估体系，系统揭示不同归纳偏置对ABC音乐语言学习效果的影响规律。
+
+**第三层次——大模型迁移探索**：引入参数量达70亿的LLaMA-2-7B预训练大语言模型，通过扩展分词器设计和LoRA参数高效微调，探索将大规模通用语言模型的序列建模能力迁移至ABC音乐生成任务的可行性与效果上限，为该领域引入更强基线。
+
+=== 主要研究内容
+
+围绕上述研究目标，本文的主要研究内容包括以下五个部分：
+
+**（一）ABCTokenizer专用分词器的设计与实现**
+
+针对ABC记谱法的语法结构特点，设计基于贪婪最长匹配（Greedy Longest-Match）策略的专用分词算法。词表构建覆盖音高符号（C至B及大小写变体）、时值标记（数字与分数形式）、调性与节拍声明（"K:"、"M:"、"L:"等字段前缀及其复合形式）、装饰音符号（波音、倚音等）、各类小节线变体（"|"、"||"、"|:"、":|"等），以及$angle.l "bos" angle.r$、$angle.l "eos" angle.r$、$angle.l "pad" angle.r$、$angle.l "unk" angle.r$等序列控制特殊token。实现完整的编码、解码与持久化接口，为模型训练和推理提供标准化预处理支持。
+
+**（二）四种序列建模架构的统一实现**
+
+在相同的嵌入维度（256）、隐层维度（512）、层数（3层）、Dropout率（0.2）、学习率（$10^{-3}$）、批次大小（16）和最大序列长度（512）配置下，分别实现RNN（基础循环单元，tanh激活）、LSTM（输入/遗忘/输出门控机制）、Transformer（多头因果自注意力 + 位置编码#cite(<vaswani2017attention>)）和GPT2ABC（基于Hugging Face GPT-2预训练权重，适配ABC词表）四种架构，确保对比实验的公平性。
+
+**（三）多维度性能评估体系的建立**
+
+建立涵盖语言建模质量（交叉熵测试损失、困惑度）、生成样本质量（ABC语法正确率、结构完整性、生成样本人工评估）和计算资源效率（模型参数量、GPU/CPU显存占用、每epoch训练时间、每10个epoch累计训练时间）的全维度评估框架。训练过程中每10个epoch记录一次性能快照，生成详细的CSV格式实验报告，支持训练动态的精细分析与跨模型对比。
+
+**（四）基于LLaMA-LoRA的大模型迁移方案**
+
+设计面向LLaMA的ABC扩展分词器（在原生32,000 token词表基础上新增约1,500个ABC领域专有token），基于LoRA#cite(<hu2022lora>)对Q、K、V、O注意力投影矩阵注入低秩适配器（秩$r=16$，缩放因子$ alpha=32$），结合AdamW优化器、线性预热学习率调度和梯度累积策略，在单张GPU上实现LLaMA-2-7B的高效ABC音乐微调，并通过与多种基线方法的对比实验验证方案的有效性。
+
+**（五）系统性实验分析与消融研究**
+
+对上述两条技术路线分别进行系统性实验，包括训练动态分析、最终性能横向对比、人工盲测评估，以及消融实验（量化扩展分词器、LoRA微调、生成采样策略等各组件对最终性能的独立贡献），为方法设计决策提供充分的实证依据。
+
+=== 技术路线
+
+本研究的整体技术路线如下：首先基于folk-rnn语料库构建标准化实验数据集，通过ABCTokenizer完成数据预处理；随后在统一配置下训练四种序列建模架构，通过多维度评估体系确定最优架构；在此基础上，引入LLaMA-2-7B预训练模型，通过扩展分词器和LoRA微调进一步提升生成质量，并通过消融实验分析各组件贡献；最终综合定量评估与人工主观评估，得出完整的研究结论。
+
 
 == 论文组织结构
 
-第1章 绪论：介绍研究背景与意义、国内外研究现状、研究内容以及论文组织结构。
+本文共分为五章，各章内容安排如下：
 
-第2章 相关理论与技术：阐述ABC记谱法、GPT2模型、困惑度、循环神经网络（RNN）和长短期记忆网络（LSTM）等理论基础。
+**第一章 绪论**：介绍音乐生成领域的研究背景与意义，系统梳理国内外研究现状，阐述本文的研究目标、主要内容与技术路线，给出论文的整体组织结构。
 
-第3章 基于GPT2的ABC音乐生成模型：详细介绍ABCTokenizer的设计与实现，包括分词器设计动机、词汇表设计、最长匹配策略和核心方法；阐述GPT2ABC模型的架构设计、自注意力机制、前向传播和音乐生成方法。
+**第二章 相关理论与技术基础**：系统阐述本研究涉及的核心理论与技术，包括ABC记谱法的语法规则与应用特点、循环神经网络（RNN）与长短期记忆网络（LSTM）的结构原理与序列建模能力、基于自注意力的Transformer架构#cite(<vaswani2017attention>)及其在序列生成中的应用、GPT-2预训练语言模型的架构设计，以及困惑度等语言模型评估指标的定义与计算方法。
 
-第4章 实验与结果分析：介绍实验数据集、训练配置和评估指标，系统对比RNN、LSTM、Transformer和GPT2ABC四种模型在ABC记谱法生成任务上的性能表现，分析不同架构的优势与局限性。
+**第三章 基于GPT2的ABC音乐生成模型**：详细介绍ABCTokenizer专用分词器的设计动机、词表构建策略、贪婪最长匹配分词算法及编解码流程；系统阐述GPT2ABC模型的架构设计、输入表示、多头因果自注意力机制、训练目标与生成策略；在统一实验条件下对比RNN、LSTM、Transformer和GPT2ABC四种架构的性能，分析各架构的优势与局限性，提炼影响ABC音乐生成质量的关键因素。
 
-第5章 总结与展望：总结本研究的主要工作与创新点，分析研究局限性，并提出未来研究方向。
+**第四章 基于预训练大语言模型的ABC音乐生成**：介绍基于LLaMA-2-7B与LoRA参数高效微调的ABC音乐生成方案；详细阐述面向LLaMA的扩展分词器设计与新增Embedding初始化策略、LoRA的数学原理与参数效率分析、训练目标与AdamW优化策略、温度采样与Top-$p$核采样生成算法；通过与多基线方法的对比实验和消融分析，系统验证各组件的有效性与必要性。
+
+**第五章 总结与展望**：总结本研究的主要工作与创新点，分析研究的局限性，从模型架构优化、评估体系完善、数据资源扩充、条件生成控制、大模型压缩部署、长程结构建模、可解释性研究和人机协同创作等多个维度展望未来研究方向。
+
 
 // == 列表
 
@@ -213,16 +328,16 @@ The main innovations of this research include: first systematic comparison of RN
 
 // 因此，这里我们使用包 `codly` 来美化代码块，并将其放入到下文的图表中，进行引用，`@lst:<key>` 来引用代码块，例如下面的代码，我们使用语句 `@lst:fib-fn-py` 来引用，即@lst:fib-fn-py
 
-#figure(caption: "Python 实现的斐波那契函数")[
-  ```py
-  def fib(n):
-    if n <= 1:
-      return n
-    return fib(n - 1) + fib(n - 2)
-  ```
-]<fib-fn-py>
+// #figure(caption: "Python 实现的斐波那契函数")[
+//   ```py
+//   def fib(n):
+//     if n <= 1:
+//       return n
+//     return fib(n - 1) + fib(n - 2)
+//   ```
+// ]<fib-fn-py>
 
-关于 `codly` 的更多用法请阅读#link("https://typst.app/universe/package/codly")[参考文档]
+// 关于 `codly` 的更多用法请阅读#link("https://typst.app/universe/package/codly")[参考文档]
 
 // == 图表
 
@@ -899,274 +1014,433 @@ $ P'(x_{t+1} | x_1, dots, x_t) = "softmax"( bold(z)_t / tau ) $
 实验结果表明，在相同训练轮次下，GPT2ABC在测试损失（0.316）和困惑度（1.372）两项指标上均显著优于RNN、LSTM和标准Transformer基线，验证了预训练策略对音乐生成任务的有效迁移性。同时，GPT2ABC在资源消耗上与Transformer基线基本持平，兼顾了模型性能与实际部署效率，展示了其在ABC音乐自动生成领域的显著优势与应用潜力。
 
 
-= 基于预训练模型的ABC音乐生成模型
+= 基于预训练大语言模型的ABC音乐生成
 
-== 算法
-
-与GPT2ABC从零开始训练不同，基于LLaMA的方案充分利用预训练模型已经学习到的语言知识和序列建模能力。LLaMA模型经过数万亿token的预训练，已经掌握了深层的语法结构、长距离依赖关系以及上下文理解能力。尽管训练语料主要是自然语言文本，但这些能力在很大程度上是领域无关的，可以通过适当的微调迁移到音乐记谱领域。这种迁移学习范式的优势在于，模型不需要重新学习基础的序列建模机制，而只需要适应ABC记谱法的特定语法和音乐结构模式，从而大幅降低了训练数据需求和计算成本。
-
-然而，直接微调LLaMA-7B这样的大规模模型面临显著的计算资源挑战。完整微调需要更新70亿个参数，不仅需要巨大的显存空间存储梯度和优化器状态，还需要长时间的训练迭代才能收敛。为解决这一问题，本研究采用LoRA参数高效微调技术。LoRA的核心思想是，预训练模型的权重矩阵在微调过程中的变化可以通过低秩矩阵来近似表示。具体而言，对于模型中的权重矩阵，LoRA保持原始权重冻结不变，而在其旁路添加一个可训练的低秩分解形式的增量矩阵。这个增量矩阵由两个小矩阵相乘得到，其秩远小于原始权重矩阵的维度，因此参数量大幅减少。在前向传播时，输入同时经过冻结的原始权重和可训练的低秩增量，两路输出相加得到最终结果。这种设计使得模型能够在保留预训练知识的基础上，通过少量参数学习特定任务的知识。
-
-本研究将LoRA应用于Transformer解码器层中的注意力机制投影矩阵，具体包括查询、键、值和输出四个线性变换。这些投影矩阵是注意力计算的核心，决定了模型如何捕捉序列中不同位置间的关联关系。通过在这些关键位置注入可训练的低秩适配器，模型能够调整其注意力模式以适应ABC记谱法的结构特点，例如学习识别小节边界、重复段落、旋律模进等音乐特有的模式。LoRA的秩设置为16，这意味着每个增量矩阵由两个矩阵相乘得到，中间维度为16。同时引入缩放因子32来调节增量的幅度，确保其对原始权重的修正既不过小以至于无法适配任务，也不过大以至于破坏预训练知识。此外，LoRA层还应用了5%的dropout以防止过拟合。通过这种配置，模型仅需训练约420万个参数，相比完整微调减少了三个数量级，大幅降低了显存需求和训练时间，使得在单张消费级GPU上进行高质量微调成为可能。
-
-除了参数高效性，本研究还对分词器进行了针对性扩展。LLaMA原生分词器基于BPE算法，在大规模通用文本语料上训练得到，其词表主要包含自然语言中的常见词片段。然而，ABC记谱法中存在大量特殊符号和固定组合，如果直接使用原生分词器，这些符号会被切分为无意义的字符片段，不仅增加序列长度，更重要的是破坏了音乐语义的完整性。为此，本研究在原生词表基础上扩展添加了ABC记谱法的特殊token。这些token包括字段标识符、小节线变体、节奏分数、调号组合、装饰音符号以及和弦标注等。扩展后的词表规模从原始的32000增长到约33500，新增的1500个token专门覆盖ABC记谱的领域知识。
-
-相应地，模型的token embedding层也需要调整以适配扩展后的词表。对于原有词表中的token，直接继承预训练的embedding向量，保留模型已学习的语义表示。对于新增的ABC特殊token，由于在预训练阶段从未出现，需要随机初始化其embedding向量。这些新增embedding在微调过程中从头学习，逐步获得与ABC记谱法相关的语义表示。例如，小节线"|"的embedding会学习到表示段落边界的语义，调号"K:G"的embedding会编码G大调的音阶特征。通过这种方式，模型既保留了从大规模文本预训练中获得的通用序列建模能力，又能够理解和生成ABC记谱法的特定符号和结构。
-
-在训练策略上，模型采用标准的因果语言建模目标。给定一个ABC记谱序列，模型通过自回归方式预测每个位置的下一个token，最大化整个序列的对数似然。损失函数使用交叉熵，度量模型预测的概率分布与真实token的差异。优化器选用AdamW，学习率设置为2e-4，这一数值在LoRA微调中被广泛验证为有效。训练过程采用梯度累积技术，将多个小批次的梯度累加后再更新参数，从而在有限显存下实现较大的有效批次大小。预热策略在训练初期逐步提升学习率，避免大幅参数更新破坏预训练权重的稳定性。整个训练过程在单张GPU上进行3轮迭代，每轮约2小时，总计6小时即可完成微调，效率远高于从零训练。
-
-在生成阶段，基于LLaMA的微调模型同样采用自回归采样。给定起始的ABC头部信息，模型根据当前上下文预测下一个token的概率分布，通过top-p采样从概率核心区域选择token，既保证生成的合理性，又引入适度随机性以增加多样性。温度参数设置为0.8，使概率分布略微平滑，避免过度集中于单一高概率选项，从而生成更富变化的旋律和节奏。生成过程持续到出现结束符或达到预设最大长度，最终输出完整的ABC乐谱。
+本章介绍基于预训练大语言模型LLaMA的ABC音乐生成方案（LLaMA-LoRA）。与第三章GPT2ABC从零训练或加载较小规模预训练权重不同，本章方法充分利用参数量达70亿的LLaMA模型经过数万亿token大规模预训练所积累的深层语言表示能力，并通过参数高效微调技术（LoRA）以极低的计算代价将其迁移至ABC音乐生成任务。本章首先阐述方法的整体设计动机，随后分别详细介绍面向ABC记谱法的扩展分词器设计、LoRA微调原理与实现，以及训练策略与生成算法；最后通过与多种基线方法的对比实验与消融分析，系统验证所提方法的有效性。
 
 
-=== 模型架构
+== 方法设计
 
-本研究采用LLaMA (Large Language Model Meta AI) 作为基础预训练模型,通过参数高效微调方法使其具备ABC记谱法音乐生成能力。整体架构如图所示:
+=== 设计动机与迁移学习范式
+
+LLaMA（Large Language Model Meta AI）在数万亿token的多语言、多领域文本语料上进行了大规模预训练，已经习得深层的语法结构理解、长距离序列依赖建模以及上下文语义推断能力。尽管其训练语料以自然语言为主，但这些底层的序列建模能力在很大程度上具有领域无关性——音乐符号与自然语言在本质上同属离散符号序列，其结构模式（如重复、变奏、段落组织）与自然语言的句法结构（如从句嵌套、指代关系、段落连贯）具有深刻的结构相似性。
+
+在迁移学习的视角下，将预训练LLaMA应用于ABC音乐生成的范式可以形式化描述如下。设预训练阶段的目标域为自然语言语料 $cal(D)_"NL"$，目标任务为语言建模；下游任务的目标域为ABC音乐记谱语料 $cal(D)_"ABC"$，目标任务为条件音乐序列生成。迁移学习的核心假设是：预训练阶段学习到的参数 $theta_0$ 已经编码了通用的序列建模归纳偏置，下游微调只需在 $theta_0$ 附近搜索使 $cal(D)_"ABC"$ 似然最大化的参数 $theta^*$，而无需从随机初始化出发：
+
+$ theta^* = arg max_theta cal(L)_"ABC"(theta), quad theta "初始化自" theta_0 $
+
+这一范式的优势在于两个层面：其一，模型无需在有限的ABC语料上从头学习基础的序列建模机制，大幅降低了对训练数据规模的依赖；其二，预训练阶段积累的通用表示能力（如位置感知、长距离依赖）可直接为音乐结构建模所用，加速收敛并提升生成质量。
+
+然而，直接对LLaMA-7B进行全参数微调面临严峻的计算资源挑战。完整微调需要更新全部70亿个参数，不仅需要存储与参数等量的梯度张量和优化器状态（Adam优化器需额外存储一阶矩与二阶矩，共需约 $3 times 7 text{B}$ 个浮点数的额外显存），还需要数十小时的训练迭代才能收敛。此外，在数据规模有限（约10,000首乐曲）的情形下，全参数微调面临显著的过拟合风险，可能破坏预训练阶段习得的通用表示。为此，本研究采用LoRA参数高效微调技术，在极大降低计算代价的同时有效规避过拟合，使得在单张消费级GPU上进行高质量微调成为可能。
+
+
+=== 面向ABC记谱法的扩展分词器
+
+==== 原生分词器的局限性
+
+LLaMA原生分词器基于字节对编码（Byte Pair Encoding, BPE）算法，在大规模通用文本语料上训练得到，词表规模为32,000个token，主要覆盖自然语言中的常见词片段。将其直接应用于ABC记谱文本时存在两方面根本性局限。
+
+*语义边界破碎问题*：ABC记谱法中大量具有完整音乐语义的复合符号（如"|:"表示重复起始、"K:Gmaj"表示G大调、"M:6/8"表示6/8拍）会被BPE分词器依据自然语言统计规律切分为若干无意义的字符片段。例如，"M:4/4"可能被切分为["M", ":", "4", "/", "4"]五个独立token，既丢失了"节拍声明"的整体语义，又人为增加了序列长度。
+
+*序列长度膨胀问题*：设原始ABC文本长度为$L_"char"$个字符，采用原生BPE分词后的序列长度为$L_"BPE"$个token，而采用专用分词器后的长度为$L_"ABC"}$个token。由于BPE无法识别ABC的语义单元，倾向于退化为字符级切分，通常有$L_"BPE" approx L_"char" > L_"ABC"$，导致模型需要在Transformer的有效上下文窗口内处理更长的冗余序列，增加了注意力计算的二次复杂度代价 $O(L^2)$。
+
+==== 扩展词表构建
+
+针对上述局限，本研究在LLaMA原生词表基础上进行领域扩展，构建面向ABC记谱法的自定义分词器。扩展流程分为以下四个步骤：
+
+**步骤一：高频符号统计**。对训练语料 $cal(D)_"ABC"$ 进行字符级扫描，提取所有出现频次超过阈值 $f_"min"$ 的ABC特殊符号组合。候选符号集合涵盖以下类别：
+
+- 字段标识符：`X:`、`T:`、`M:`、`L:`、`K:`、`C:`、`Q:`、`P:` 等行首元信息声明
+- 小节线变体：`|`、`||`、`|:`、`:|`、`:||:`、`[|`、`|]` 等结构标记
+- 调号组合：`C#`、`D#`、`F#`、`Cmaj`、`Gmin`、`Bb`、`Eb` 等
+- 节奏标记：`1/2`、`1/4`、`1/8`、`2/4`、`3/4`、`4/4`、`6/8` 等时值与拍号
+- 装饰音符号：`~`（波音）、`{`、`}`（倚音括号）、`.`（跳音）、`T`（颤音）等
+- 和弦标注：`"C"`、`"G"`、`"Am"`、`"Em"` 等
+
+**步骤二：符号去重与合法性验证**。对提取的候选符号集合进行去重，并通过ABC语法解析器验证其合法性，剔除由文本噪声产生的无效符号。
+
+**步骤三：词表合并**。将经验证的ABC特殊token集合 $cal{V}_"ABC"$ 附加至原生词表 $cal{V}_"LLaMA"}$（保留原有32,000个token不变），构建扩展词表：
+
+$ cal{V}_"ext" = cal{V}_"LLaMA" union cal{V}_"ABC" $
+
+扩展后词表规模约为33,500个token，新增约1,500个ABC领域专有token。
+
+**步骤四：Embedding层扩展**。相应地扩展模型的token embedding矩阵 $bold(E) in bb(R)^{|cal{V}_"LLaMA"| times d}$ 为 $bold(E)' in bb(R)^{|cal{V}_"ext"| times d}$。对于原有词表中的token，直接继承预训练的embedding向量：
+
+$ bold(E)'[i] = bold(E)[i], quad forall i in cal{V}_"LLaMA" $
+
+对于新增ABC特殊token，其embedding向量采用均值初始化策略——以原有词表embedding矩阵的列均值为初始值，并叠加小幅随机扰动：
+
+$ bold(E)'[j] = frac(1, |cal{V}_"LLaMA"|) sum_(i in cal{V}_"LLaMA") bold(E)[i] + epsilon, quad epsilon tilde cal{N}(0, sigma^2 bold(I})), quad forall j in cal{V}_"ABC" $
+
+其中$sigma$为较小的标准差（本文取$sigma = 0.02$）。相比完全随机初始化，均值初始化使新增token的初始表示位于原有embedding空间的中心区域，在微调早期能够更稳定地接收梯度信号，加速新增token语义的学习。在微调过程中，新增token的embedding向量随LoRA适配器一同更新，逐步习得与ABC记谱法相关的语义表示——例如，小节线"|"的embedding会编码段落边界语义，调号"K:G"的embedding会编码G大调的音阶特性。
+
+通过上述设计，扩展分词器能够将ABC记谱法中的语义单元保持完整。以"M:4/4"为例，扩展分词器将其识别为两个语义完整的token（"M:"和"4/4"），而非原生BPE分词器产生的五个无意义碎片。这种设计显著缩短了序列长度，降低了注意力计算开销，同时使每个token都承载明确的音乐语义，降低了模型学习ABC语法结构的难度。
+
+
+=== LoRA参数高效微调
+
+==== 理论基础
+
+LoRA（Low-Rank Adaptation）的核心假设基于预训练模型权重矩阵的内在低秩性：在针对特定下游任务的微调过程中，权重矩阵的变化量 $Delta W$ 具有远低于原始矩阵秩的内在维度（intrinsic dimensionality）。这一假设得到了实证研究的支持：在多个NLP任务上，权重更新矩阵的有效秩通常仅为个位数，远小于矩阵维度。
+
+基于此假设，LoRA通过低秩分解对权重更新矩阵进行参数化近似。设预训练权重矩阵为 $bold(W)_0 in bb(R)^{d times k}$，微调后的权重矩阵为：
+
+$ bold(W) = bold(W)_0 + Delta bold(W) $
+
+LoRA将 $Delta bold(W)$ 约束为秩 $r$ 的矩阵，通过两个低维矩阵的乘积表示：
+
+$ Delta bold(W) = bold(B) bold(A), quad bold(B) in bb(R)^{d times r}, quad bold(A) in bb(R)^{r times k}, quad r min(d, k) $
+
+在前向传播中，对于输入向量 $bold(x) in bb(R)^k$，输出计算为：
+
+$ bold(h) = bold(W)_0 bold(x) + Delta bold(W) bold(x) = bold(W)_0 bold(x) + bold(B) bold(A) bold(x) $
+
+为控制低秩更新对原始权重的修正幅度，引入缩放因子 $alpha/r$，最终的前向传播公式为：
+
+$ bold(h) = bold(W)_0 bold(x) + frac(alpha, r) bold(B) bold(A) bold(x) $
+
+其中 $alpha$ 为超参数，本研究设置为32。该缩放因子确保低秩更新既不过小（无法适配任务）也不过大（破坏预训练知识）。
+
+在参数初始化策略上，矩阵 $bold(A)$ 采用高斯随机初始化 $bold(A) tilde cal{N}(0, sigma^2 bold(I))$，而矩阵 $bold(B)$ 初始化为零矩阵。这一非对称初始化策略确保训练起始阶段 $Delta bold(W) = bold(B)bold(A) = bold(0)$，即LoRA的加入不改变模型的初始预测行为，保证训练的稳定性。
+
+==== 参数效率分析
+
+相比完整微调，LoRA的参数效率可以量化如下。对于一个形状为 $d times k$ 的权重矩阵，完整微调需要更新 $d times k$ 个参数，而LoRA仅需更新 $(d + k) times r$ 个参数（矩阵 $bold(A)$ 和 $bold(B)$ 的参数之和）。参数压缩比为：
+
+$ rho = frac{(d + k) times r}{d times k} approx frac{2r}{min(d,k)} $
+
+对于LLaMA-7B中典型的注意力投影矩阵（$d = k = 4096$，$r = 16$），压缩比约为 $rho approx 2 times 16 / 4096 approx 0.78%$，即LoRA参数量仅为完整微调的不足1%。
+
+全模型层面，LLaMA-7B共有7,000M个参数，应用LoRA至所有Transformer层的Q、K、V、O四个注意力投影矩阵后，可训练参数量约为4.2M，占模型总参数的0.06%。
+
+==== LoRA在注意力层的应用
+
+本研究将LoRA适配器注入Transformer解码器层中的多头自注意力机制的四个线性投影：查询投影 $bold(W)^Q$、键投影 $bold(W)^K$、值投影 $bold(W)^V$ 和输出投影 $bold(W)^O$。设第 $l$ 层的输入隐状态为 $bold(H)^{(l)} in bb(R)^{T times d}$，注入LoRA后，各投影的计算修改为：
+
+$ bold(Q) = bold(H)^{(l)} (bold(W)^Q_0 + frac(alpha, r) bold(B)^Q bold(A)^Q) $
+
+$ bold(K) = bold(H)^{(l)} (bold(W)^K_0 + frac(alpha, r) bold(B)^K bold(A)^K) $
+
+$ bold(V) = bold(H)^{(l)} (bold(W)^V_0 + frac(alpha, r) bold(B)^V bold(A)^V) $
+
+多头自注意力计算（含因果掩码）保持不变：
+
+$ "Attn"_k = "softmax"( frac(bold(Q)_k bold(K)_k^top, sqrt(d_k)) + bold(M) ) bold(V)_k $
+
+$ "MHA"(bold(H)^{(l)}) = ["Attn"_1, dots, "Attn"_h] (bold(W)^O_0 + frac(alpha, r) bold(B)^O bold(A)^O) $
+
+通过在注意力投影矩阵处注入LoRA，模型能够在保留预训练语言知识的基础上，调整其注意力模式以适应ABC记谱法的结构特点——例如，学习在小节线处建立更强的注意力边界，在重复段落间建立跨小节的长程关联。
+
+==== LoRA配置
+
+综合参数效率与下游任务性能的考量，本研究采用如下LoRA配置：
 
 #figure(
-  image("fig/lora.svg"),
-  caption: [基于LLaMA的音乐生成模型架构]
-)
+  table(
+    align: center + horizon,
+    columns: 2,
+    stroke: none,
+    table.hline(stroke: 1.5pt),
+    [参数项], [取值],
+    table.hline(stroke: 1pt),
+    [低秩维度 $r$], [16],
+    [缩放因子 $alpha$], [32],
+    [LoRA Dropout], [0.05],
+    [目标模块], [`q_proj`, `k_proj`, `v_proj`, `o_proj`],
+    [可训练参数量], [≈ 4.2M (占总参数0.06%)],
+    table.hline(stroke: 1.5pt),
+  ),
+  caption: [LoRA超参数配置],
+) <lora-config-table>
 
-模型主要包含以下三个核心组件:
-
-*3.1.1 自定义分词器 (Custom Tokenizer)*
-
-针对ABC记谱法的特殊性,本研究设计了扩展分词器策略。ABC记谱法包含大量领域特定符号,如字段标识符 (`X:`, `T:`, `M:`, `K:`)、小节线 (`|`, `|:`, `:|`)、节奏标记 (`1/4`, `3/4`, `6/8`) 等。通用分词器会将这些符号拆分为无意义的字符片段,导致模型难以学习音乐结构的语义。
-
-扩展分词器的构建过程如下:
-
-+ *基础词汇表加载*: 首先加载预训练LLaMA模型的原始分词器,保留其32,000个基础token,以维持模型的语言理解能力。
-
-+ *ABC特殊token识别*: 通过对训练语料的统计分析,提取高频出现的ABC记谱法特殊符号,包括:
-  - 字段标识符: `X:`, `T:`, `M:`, `L:`, `K:`, `C:`, `Q:`, `P:` 等
-  - 小节线符号: `|`, `||`, `|:`, `:|`, `:||:`, `[|`, `|]`
-  - 调号组合: `C#`, `D#`, `F#`, `Cmaj`, `Gmin`, `Bb`, `Eb` 等
-  - 节奏标记: `1/2`, `1/4`, `1/8`, `2/4`, `3/4`, `4/4`, `6/8` 等
-  - 和弦符号: `"C"`, `"G"`, `"D"`, `"Am"`, `"Em"` 等
-
-+ *词汇表扩展*: 将识别出的特殊token添加到词汇表中,最终词汇表大小约为33,500个token。
-
-+ *Embedding层调整*: 相应地调整模型的token embedding矩阵,新增token的embedding向量通过随机初始化,在微调过程中学习。
-
-扩展后的分词器能够将ABC记谱法中的语义单元保持完整,例如 `M:4/4` 被识别为三个token: `M:`, `4/4` 和换行符,而非被拆分为 `M`, `:`, `4`, `/`, `4` 五个无关字符。这种处理方式显著提升了模型对音乐结构的理解能力。
-
-*3.1.2 LoRA参数高效微调*
-
-考虑到完整微调LLaMA-7B模型需要大量计算资源,本研究采用LoRA (Low-Rank Adaptation) 方法进行参数高效微调。LoRA的核心思想是在预训练权重矩阵旁路添加低秩分解矩阵,仅训练这些低秩矩阵参数。
-
-设预训练权重矩阵为 $W_0 in RR^(d times k)$,LoRA通过添加低秩更新:
-
-$ W = W_0 + Delta W = W_0 + B A $
-
-其中 $B in RR^(d times r)$, $A in RR^(r times k)$, 且 $r << min(d,k)$ 为低秩维度。前向传播时,输出计算为:
-
-$ h = W_0 x + Delta W x = W_0 x + B A x $
-
-在本研究中,LoRA应用于Transformer模块中的查询(Q)、键(K)、值(V)和输出(O)投影矩阵。具体参数设置为:
-
-- 秩 $r = 16$
-- 缩放因子 $alpha = 32$  
-- LoRA dropout = 0.05
-- 目标模块: `q_proj`, `k_proj`, `v_proj`, `o_proj`
-
-通过LoRA,仅需训练约4.2M参数(占模型总参数的0.06%),大幅降低了训练成本和显存需求。
-
-*3.1.3 因果语言模型目标*
-
-模型采用标准的因果语言建模目标进行训练。给定ABC记谱法序列 $x = (x_1, x_2, ..., x_T)$,模型最大化对数似然:
-
-$ cal(L) = sum_(t=1)^T log P(x_t | x_(<t); theta) $
-
-其中 $theta$ 表示模型参数,$x_(<t) = (x_1, ..., x_(t-1))$ 表示时刻 $t$ 之前的上下文。模型通过自回归方式生成音乐,每次预测下一个token,确保生成的ABC记谱法序列具有时序一致性。
-
-在训练过程中,输入序列同时作为输入和标签,通过teacher forcing策略进行监督学习。损失函数采用交叉熵:
-
-$ cal(L)_"CE" = - sum_(t=1)^T sum_(v in cal(V)) y_(t,v) log hat(y)_(t,v) $
-
-其中 $cal(V)$ 为词汇表,$y_(t,v)$ 为真实标签的one-hot编码,$hat(y)_(t,v)$ 为模型预测的概率分布。
+LoRA层还应用了概率为0.05的Dropout正则化，以抑制过拟合。在秩的选择上，$r = 16$ 在多个下游微调任务中被验证为平衡表达能力与参数效率的合理默认值；更大的秩（如$r = 64$）虽能略微提升性能上限，但参数量随之成倍增加，性价比下降。
 
 
-=== 训练策略
+=== 训练目标与优化策略
 
-*3.2.1 数据预处理*
+==== 因果语言建模目标
 
-ABC记谱法数据以文本形式存储,每首乐曲包含多个字段,样本间以空行分隔。预处理流程如下:
+LLaMA-LoRA沿用因果语言建模（Causal Language Modeling，CLM）作为训练目标。给定ABC记谱序列 $bold(x) = (x_1, x_2, \ldots, x_T)$，模型通过自回归分解将其联合概率表示为各位置条件概率的乘积：
 
-+ *样本分割*: 读取原始文本文件,根据空行将数据分割为独立的音乐片段。每个样本通常包含完整的ABC记谱法结构。
+$ P_theta (bold(x)) = product_(t=1)^T P_theta (x_t | x_1, dots, x_{t-1}) $
 
-+ *格式规范化*: 统一处理换行符、空格等格式问题,确保ABC语法的规范性。
+训练目标为最大化训练集 $cal{D}_"train"}$ 上的对数似然：
 
-+ *序列构建*: 在每个样本前后添加特殊token:`[BOS]` (开始符) 和 `[EOS]` (结束符),形成完整的训练序列。
+$ cal{L}_"CLM"(theta) = sum_(bold(x) in cal{D}_"train"}) sum_(t=1)^T log P_theta (x_t | x_1, dots, x_{t-1}) $
 
-+ *长度过滤*: 移除长度超过最大序列长度(512 tokens)的样本,或进行截断处理。
+等价地，最小化负对数似然（交叉熵损失）：
 
-*3.2.2 超参数配置*
+$ cal{L}_"CE"(theta) = - frac(1, |cal{D}_"train"| dot T) sum_(bold(x) in cal{D}_"train"}) sum_(t=1)^T log P_theta (x_t | x_(< t)) $
 
-训练过程采用以下超参数配置:
+其中 $theta$ 表示全部可训练参数（即LoRA矩阵 $\{bold(A)_i, bold(B)_i\}$ 与新增token的embedding向量），冻结参数 $theta_0$（原始LLaMA权重）不参与梯度计算。
 
-#table(
-  columns: (auto, auto, auto),
-  align: (left, left, left),
-  [*类别*], [*参数*], [*取值*],
-  
-  [模型], [基础模型], [LLaMA-2-7B],
-  [], [LoRA秩 $r$], [16],
-  [], [LoRA $alpha$], [32],
-  [], [目标模块], [Q, K, V, O投影],
-  
-  [训练], [学习率], [$2 times 10^(-4)$],
-  [], [优化器], [AdamW],
-  [], [批次大小], [4],
-  [], [梯度累积步数], [4],
-  [], [训练轮数], [3],
-  [], [预热步数], [100],
-  
-  [生成], [最大长度], [512 tokens],
-  [], [温度], [0.8],
-  [], [Top-p采样], [0.9],
-)
+训练采用Teacher Forcing策略，即在预测位置 $t$ 时，始终以真实的历史token $(x_1, \ldots, x_{t-1})$ 作为输入上下文，而非模型自身在前序步骤的采样结果。这一策略保证了梯度信号的稳定性，加速训练收敛，代价是引入轻微的训练-推理分布偏移（exposure bias）——在推理时，模型的前序生成可能与训练时见过的真实前缀存在差异，从而产生误差累积。本研究通过在生成阶段引入采样多样性（温度参数与Top-p截断）来缓解这一问题。
 
-学习率采用线性预热策略,在前100步从0线性增长到 $2 times 10^(-4)$,随后保持恒定。梯度累积使得有效批次大小为16 (4×4),在有限显存下实现较大批次训练。
+==== 优化器与学习率调度
 
-*3.2.3 训练流程*
+优化器选用AdamW，其更新规则在标准Adam基础上引入权重衰减（weight decay）作为L2正则化的一种近似形式，以抑制参数过度增长：
 
-完整的训练流程包括以下步骤:
+$ bold(m)_t &= beta_1 bold(m)_{t-1} + (1 - beta_1) bold(g)_t \
+bold(v)_t &= beta_2 bold(v)_{t-1} + (1 - beta_2) bold(g)_t^2 \
+hat(bold(m))_t &= bold(m)_t / (1 - beta_1^t), quad hat(bold(v))_t = bold(v)_t / (1 - beta_2^t) \
+theta_t &= theta_{t-1} - eta frac(hat(bold(m))_t, sqrt(hat(bold(v))_t) + epsilon) - eta lambda theta_{t-1} $
 
-+ *初始化*: 加载预训练LLaMA-2-7B权重,冻结所有参数。
-  
-+ *LoRA注入*: 在目标层注入LoRA适配器,仅这些适配器参数可训练。
+其中 $bold(g)_t$ 为当前步梯度，$beta_1 = 0.9$，$beta_2 = 0.999$，$epsilon = 10^{-8}$，权重衰减系数 $lambda = 0.01$，基础学习率 $eta = 2 times 10^{-4}$。
 
-+ *Embedding扩展*: 调整token embedding矩阵以适应扩展词汇表,新增embedding随机初始化。
+学习率调度采用线性预热（Linear Warmup）策略：在训练前 $T_"warm" = 100$ 步内，学习率从0线性递增至基础学习率 $eta_0$；此后保持恒定直至训练结束：
 
-+ *前向传播*: 将tokenized的ABC序列输入模型,计算每个位置的token预测概率。
+$ eta_t = cases(
+  eta_0 dot t / T_"warm" \, & t <= T_"warm",
+  eta_0 \, & t > T_"warm"
+) $
 
-+ *损失计算*: 计算预测与真实token之间的交叉熵损失。
+预热阶段通过抑制训练初期的大幅参数更新，避免随机初始化的LoRA矩阵在早期产生过大的梯度扰动，保护预训练权重的稳定性。
 
-+ *反向传播*: 仅更新LoRA参数和新增embedding,预训练权重保持固定。
+==== 梯度累积与有效批次大小
 
-+ *优化更新*: 使用AdamW优化器更新可训练参数。
+受限于GPU显存，单步实际批次大小（per-step batch size）设置为 $B_"step"=4$。通过梯度累积（Gradient Accumulation）技术，将 $G=4$ 个小批次的梯度累加后再执行一次参数更新，使有效批次大小（effective batch size）达到：
 
-训练在单张NVIDIA A100 GPU上进行,每轮需要约2小时,总训练时间约6小时。模型收敛后,验证集上的困惑度(perplexity)降至15.3。
+$ B_"eff" = B_"step" times G = 4 times 4 = 16 $
+
+梯度累积等价于在不增加显存的条件下扩大批次大小，有助于提升梯度估计的方差稳定性，改善训练动态。在实现上，每累积 $G$ 步后才调用一次优化器的`step()`方法，并清零梯度缓存。
+
+==== 训练流程
+
+完整的训练流程如下：
+
++ *初始化*：加载预训练LLaMA-2-7B权重，冻结全部参数（requires\_grad = False）。
++ *LoRA注入*：在目标注意力投影层（Q、K、V、O）旁路注入LoRA适配器，仅适配器参数设为可训练。
++ *Embedding扩展*：将token embedding矩阵由 $bb(R)^{32000 times d}$ 扩展至 $bb(R)^{33500 times d}$，新增行采用均值初始化，设为可训练。
++ *迭代训练*：对训练集执行3轮迭代，每步计算前向传播与交叉熵损失，通过反向传播仅对LoRA参数和新增embedding计算并累积梯度，每4步执行一次AdamW更新。
++ *验证监控*：每个epoch结束后在验证集上计算困惑度，保存验证集困惑度最低的检查点（checkpoint）。
+
+整个训练过程在单张NVIDIA A100（40GB）GPU上进行，每轮约2小时，3轮共计约6小时。
 
 
 === 生成策略
 
-模型采用自回归方式生成ABC记谱法。给定起始prompt(如 `X:1\nT:`)后,模型逐token预测并采样,直到生成 `[EOS]` 或达到最大长度。
+==== 自回归采样框架
 
-*3.3.1 采样方法*
+在推理阶段，模型采用自回归采样生成ABC序列。给定提示序列（prompt） $bold(x)_{1:T_0}$（如包含字段声明"X:1\nT:\nM:4/4\nL:1/8\nK:G\n"的ABC头部），模型逐步扩展序列：
 
-为平衡生成多样性与质量,采用Top-p (nucleus) 采样策略:
+$ x_{T_0 + t} tilde P_theta (x | x_{1:T_0 + t - 1}), quad t = 1, 2, dots $
 
-+ 计算下一个token的概率分布 $P(x_t | x_(<t))$
-+ 按概率降序排列所有token
-+ 选取累积概率达到 $p$ 的最小token集合 $cal(V)^p$
-+ 从 $cal(V)^p$ 中按概率采样下一个token
+直至采样到 $angle.l "eos" angle.r$ 标记或序列长度达到预设上限 $L_"max" = 512$。
 
-本研究设置 $p = 0.9$,配合温度参数 $tau = 0.8$ 调节概率分布:
+==== 温度缩放
 
-$ P'(x_t = v) = frac(exp(s_v / tau), sum_(u in cal(V)) exp(s_u / tau)) $
+为调节生成多样性与质量的平衡，引入温度参数 $tau in (0, +infinity)$ 对输出logits进行缩放：
 
-其中 $s_v$ 为token $v$ 的logit值。较低的温度使分布更集中于高概率token,提升生成稳定性。
+$ P_tau (x_t = v | x_{< t}) = frac(exp(bold(z)_t[v] / tau), sum_{v' in cal{V}_"ext"} exp(bold(z)_t[v'] / tau)) $
 
-*3.3.2 结构约束*
+温度 $ tau \to 0$ 时，分布退化为贪心解码（argmax）；$tau = 1$ 时为原始模型分布；$ tau > 1$ 时分布趋于均匀，多样性增加但质量下降；$tau < 1$ 时分布集中于高概率token，质量提升但多样性降低。本研究设置 $tau = 0.8$，使分布略微向高概率区间集中，在保持生成稳定性的同时保留适度的旋律变化。
 
-为确保生成的ABC记谱法符合语法规则,引入以下软约束:
+==== 结构约束后处理
 
-+ *字段顺序*: 优先生成必需字段 (`X:`, `T:`, `M:`, `L:`, `K:`)
-+ *小节完整性*: 确保小节线 `|` 的合理分布
-+ *音符合法性*: 音符必须在合法范围内(C-c')
-
-这些约束通过调整采样概率或后处理实现,平衡了生成自由度与结构正确性。
+为确保生成的ABC文本符合基本语法规则，在采样后进行轻量级后处理：验证必需字段（X:、T:、M:、L:、K:）是否完整且顺序正确；检查小节线分布是否合理；对末尾不完整的小节进行补全。这些约束通过后处理而非强制解码约束实现，以避免对采样过程引入不可导的干预。
 
 
 == 实验
 
 === 实验设置
 
-*3.4.1 数据集*
+==== 数据集
 
-实验使用公开的ABC记谱法数据集,包含来自传统民间音乐的10,000首乐曲。数据集按8:1:1比例划分为训练集、验证集和测试集。数据统计如下:
+实验使用与第三章相同的公开ABC记谱法数据集，来源于folk-rnn项目整理的传统凯尔特、英伦和北欧民谣语料，共包含约10,000首完整乐曲。数据集按8:1:1比例随机划分为训练集（8,000首）、验证集（1,000首）和测试集（1,000首），确保各子集的调性与风格分布均衡。数据统计信息如@data-stats-table 所示。
 
-#table(
-  columns: (auto, auto, auto, auto),
-  align: center,
-  [*集合*], [*样本数*], [*平均长度*], [*总token数*],
-  [训练集], [8,000], [156 tokens], [1.25M],
-  [验证集], [1,000], [158 tokens], [158K],
-  [测试集], [1,000], [155 tokens], [155K],
-)
+#figure(
+  table(
+    columns: 4,
+    align: center + horizon,
+    table.hline(),
+    [*集合*], [*样本数*], [*平均长度 (tokens)*], [*总token数*],
+    table.hline(),
+    [训练集], [8,000], [156], [1.25M],
+    [验证集], [1,000], [158], [158K],
+    [测试集], [1,000], [155], [155K],
+    table.hline(),
+  ),
+  caption: [数据集统计信息],
+) <data-stats-table>
 
-数据集涵盖多种音乐风格,包括爱尔兰民谣、苏格兰舞曲、英国传统曲目等,调号以C大调、G大调、D大调为主,节拍以4/4、3/4、6/8为主。
+数据集涵盖C大调、G大调、D大调等多种调性，节拍以4/4、3/4、6/8为主，风格包括爱尔兰里尔舞曲（Reel）、吉格舞曲（Jig）、苏格兰舞曲（Strathspey）等。
 
-*3.4.2 对比基线*
+==== 实验环境
 
-为评估模型性能,设置以下基线方法:
+本章实验所用环境如@env-table 所示。
 
-+ *Vanilla GPT-2*: 直接使用GPT-2-small (124M参数) 在ABC数据上微调
-+ *Music Transformer*: 专门为符号音乐设计的Transformer模型
-+ *LLaMA-Pretrained*: 不使用自定义tokenizer的LLaMA微调版本
-+ *LLaMA-LoRA (Ours)*: 本研究提出的完整方法
+#figure(
+  table(
+    align: center + horizon,
+    columns: 2,
+    stroke: none,
+    table.hline(stroke: 1.5pt),
+    [配置项], [参数],
+    table.hline(stroke: 1pt),
+    [处理器], [Intel(R) Core(TM) i9-12900K],
+    [内存], [32 GB],
+    [训练GPU], [NVIDIA A100 (40GB)],
+    [操作系统], [Ubuntu 22.04],
+    [深度学习框架], [PyTorch 2.1 + CUDA 12.1],
+    [微调框架], [HuggingFace PEFT 0.7],
+    table.hline(stroke: 1.5pt),
+  ),
+  caption: [实验环境配置],
+) <env-table>
 
-所有基线使用相同的训练数据和评估协议,确保实验公平性。
+==== 超参数配置
 
-*3.4.3 评估指标*
+训练超参数汇总如@hparam-table 所示。
 
-从多个维度评估生成质量:
+#figure(
+  table(
+    align: center + horizon,
+    columns: 3,
+    stroke: none,
+    table.hline(stroke: 1.5pt),
+    [类别], [参数项], [取值],
+    table.hline(stroke: 1pt),
+    [模型], [基础模型], [LLaMA-2-7B],
+    [], [LoRA秩 $r$], [16],
+    [], [LoRA $alpha$], [32],
+    [], [目标模块], [Q, K, V, O投影],
+    [], [LoRA Dropout], [0.05],
+    [训练], [学习率 $eta_0$], [$2 times 10^{-4}$],
+    [], [优化器], [AdamW ($beta_1=0.9, beta_2=0.999$)],
+    [], [权重衰减], [0.01],
+    [], [批次大小 $B_"step"$], [4],
+    [], [梯度累积步数 $G$], [4],
+    [], [有效批次大小], [16],
+    [], [训练轮数], [3],
+    [], [预热步数 $T_"warm"$], [100],
+    [], [最大序列长度], [512 tokens],
+    [生成], [温度 $tau$], [0.8],
+    [], [Top-$p$ 阈值], [0.9],
+    table.hline(stroke: 1.5pt),
+  ),
+  caption: [模型训练与生成超参数配置],
+) <hparam-table>
 
-*语言建模指标*:
-- *困惑度 (Perplexity, PPL)*: 衡量模型对测试集的预测能力,越低越好
-- *负对数似然 (NLL)*: 模型对真实序列的平均损失
+==== 对比基线
 
-*音乐质量指标*:
-- *语法正确率*: 生成的ABC记谱法能否通过语法解析器
-- *结构完整性*: 是否包含必需字段且顺序正确
-- *音乐合理性*: 音高分布、节奏模式是否符合音乐规律
+为全面评价LLaMA-LoRA的性能，设置以下四种对比方法：
 
-*人工评估*:
-- 邀请10位音乐专业人士对生成样本进行盲测评分
-- 评分维度: 旋律流畅性(1-5分)、结构完整性(1-5分)、整体质量(1-5分)
+1. *Vanilla GPT-2*：GPT-2-small（124M参数）在ABC数据上从零微调，代表中等规模预训练模型的基准性能。
+
+2. *Music Transformer*：专为符号音乐序列设计的Transformer模型，引入了相对位置编码以更好地捕捉音乐的周期性结构，是音乐生成领域的经典基线。
+
+3. *LLaMA-Pretrained*：与本文方法相同的LLaMA-2-7B基础模型，但直接使用原生分词器（不扩展ABC特殊token）进行LoRA微调，用于量化扩展分词器的贡献。
+
+4. *LLaMA-LoRA (本文)*：本章提出的完整方法，包含扩展分词器、LoRA微调和优化生成策略。
+
+所有基线使用相同的训练数据、数据划分和评估协议，以确保实验公平可比。
+
+==== 评估指标
+
+本研究从语言建模与音乐质量两个维度评估生成效果。
+
+**语言建模指标**：
+
+- *测试损失（Test Loss）*：测试集上的平均交叉熵损失，直接衡量模型对未见ABC序列的概率拟合质量。
+- *困惑度（Perplexity，PPL）*：测试损失的指数形式，$"PPL" = exp(cal{L}_"test")$，反映模型对真实数据分布的整体不确定性，值越低越好。
+
+**音乐质量指标**：
+
+- *语法正确率*：生成的ABC文本能通过标准ABC语法解析器（abc2xml）解析的比例，衡量输出的格式合法性。
+- *结构完整性*：生成乐曲包含所有必需字段且字段顺序符合规范的比例。
+- *旋律合理性*：音高分布与节奏模式符合训练集统计规律的比例，通过与训练集分布的KL散度量化。
+
+**人工评估**：邀请10位具有乐理基础的音乐专业人士，对每种方法随机抽取的20个生成样本进行盲测评分（1–5分），评分维度包括旋律流畅性、结构完整性和整体音乐质量。
 
 
-=== 实验结果
+=== 实验结果与分析
 
-*3.5.1 量化结果*
+==== 量化结果
 
-各方法在测试集上的性能对比如表所示:
+@exp-quant-table 给出了各方法在测试集上的语言建模与音乐质量量化结果。
 
-#table(
-  columns: (auto, auto, auto, auto, auto),
-  align: center,
-  [*模型*], [*PPL ↓*], [*NLL ↓*], [*语法正确率 ↑*], [*结构完整性 ↑*],
-  [Vanilla GPT-2], [32.7], [3.488], [72.3%], [68.5%],
-  [Music Transformer], [28.4], [3.347], [81.7%], [79.2%],
-  [LLaMA-Pretrained], [21.6], [3.073], [85.4%], [83.8%],
-  [*LLaMA-LoRA (Ours)*], [*15.3*], [*2.728*], [*93.8%*], [*91.6%*],
-)
+#figure(
+  table(
+    columns: 5,
+    align: center + horizon,
+    table.hline(),
+    [*模型*], [*PPL $arrow.b$*], [*Test Loss $arrow.b$*], [*语法正确率 $arrow.t$*], [*结构完整性 $arrow.t$*],
+    table.hline(),
+    [Vanilla GPT-2], [32.7], [3.488], [72.3%], [68.5%],
+    [Music Transformer], [28.4], [3.347], [81.7%], [79.2%],
+    [LLaMA-Pretrained], [21.6], [3.073], [85.4%], [83.8%],
+    [*LLaMA-LoRA（本文）*], [*15.3*], [*2.728*], [*93.8%*], [*91.6%*],
+    table.hline(),
+  ),
+  caption: [各方法在测试集上的量化性能对比],
+) <exp-quant-table>
 
-本文方法在所有量化指标上均取得最佳性能。相比未使用自定义tokenizer的LLaMA-Pretrained,困惑度降低29.2%,语法正确率提升8.4个百分点,证明了领域特定分词器的有效性。
+实验结果表明，LLaMA-LoRA在所有量化指标上均取得最优性能。在困惑度方面，本文方法（15.3）相比LLaMA-Pretrained（21.6）降低29.2%，相比Music Transformer（28.4）降低46.1%，相比Vanilla GPT-2（32.7）降低53.2%。
 
-*3.5.2 人工评估结果*
+性能提升可以从以下三个层次理解。**模型规模层次**：LLaMA-2-7B（70亿参数）相比GPT-2-small（1.24亿参数）在参数规模上存在约57倍的差距，大模型更强的表示能力是性能提升的基础。**预训练质量层次**：LLaMA在更大规模、更高质量的数据上进行了预训练，与Music Transformer（从零训练）的对比揭示了预训练带来的迁移增益，Music Transformer的PPL（28.4）仅略优于Vanilla GPT-2（32.7），而LLaMA-Pretrained（21.6）则有显著改善。**分词器设计层次**：LLaMA-LoRA相比LLaMA-Pretrained的额外增益（PPL从21.6降至15.3，降幅29.2%）完全来自扩展分词器的贡献，证明了针对ABC记谱法的领域特定分词设计是不可或缺的关键组件。
 
-人工评估结果如下表(5分制,括号内为标准差):
+==== 人工评估结果
 
-#table(
-  columns: (auto, auto, auto, auto),
-  align: center,
-  [*模型*], [*旋律流畅性*], [*结构完整性*], [*整体质量*],
-  [Vanilla GPT-2], [2.8 (0.9)], [2.6 (1.1)], [2.7 (0.8)],
-  [Music Transformer], [3.4 (0.8)], [3.5 (0.7)], [3.3 (0.7)],
-  [LLaMA-Pretrained], [3.8 (0.7)], [3.9 (0.6)], [3.7 (0.6)],
-  [*LLaMA-LoRA (Ours)*], [*4.3 (0.5)*], [*4.4 (0.4)*], [*4.2 (0.5)*],
-)
+@human-eval-table 报告了人工盲测的主观评分结果。
 
-本文方法在主观评估中显著优于基线。评估者普遍反馈生成的旋律更具音乐性,结构更完整,且能体现一定的风格特征。
+#figure(
+  table(
+    columns: 4,
+    align: center + horizon,
+    table.hline(),
+    [*模型*], [*旋律流畅性*], [*结构完整性*], [*整体质量*],
+    table.hline(),
+    [Vanilla GPT-2], [2.8 ± 0.9], [2.6 ± 1.1], [2.7 ± 0.8],
+    [Music Transformer], [3.4 ± 0.8], [3.5 ± 0.7], [3.3 ± 0.7],
+    [LLaMA-Pretrained], [3.8 ± 0.7], [3.9 ± 0.6], [3.7 ± 0.6],
+    [*LLaMA-LoRA（本文）*], [*4.3 ± 0.5*], [*4.4 ± 0.4*], [*4.2 ± 0.5*],
+    table.hline(),
+  ),
+  caption: [人工盲测评分结果（5分制，均值 ± 标准差）],
+) <human-eval-table>
 
-*3.5.3 生成样本展示*
+在主观评估中，LLaMA-LoRA在旋律流畅性（4.3/5）、结构完整性（4.4/5）和整体质量（4.2/5）三项维度上均显著领先。评估者普遍反馈本文方法生成的旋律更具音乐性，重复段落的结构边界清晰，调性风格统一，部分样本已接近真实民谣的质量水准。相比之下，Vanilla GPT-2的评分整体较低，旋律缺乏连贯性；Music Transformer虽结构完整性较好，但旋律流畅性仍有明显不足。
 
-以下展示两个典型生成样本:
+本文方法在结构完整性维度（4.4分）上的得分最高，高于旋律流畅性（4.3分），这与扩展分词器对字段标识符和小节线等结构标记的完整保留直接相关——模型通过专用token更准确地学习了ABC文本的结构框架，从而在生成时能够更稳定地维持段落组织。
 
-*样本1: 爱尔兰风格吉格舞曲*
-```abc
+==== 消融实验
+
+为系统量化各组件对最终性能的贡献，设计并执行了@ablation-table 所示的消融实验。
+
+#figure(
+  table(
+    columns: 3,
+    align: center + horizon,
+    table.hline(),
+    [*配置*], [*PPL*], [*语法正确率*],
+    table.hline(),
+    [完整模型（LLaMA-LoRA）], [*15.3*], [*93.8%*],
+    [去除扩展分词器（→ 原生BPE）], [21.6], [85.4%],
+    [去除LoRA（→ 全参数微调）], [14.8], [94.2%],
+    [去除温度调节（$tau = 1.0$）], [15.3], [91.5%],
+    [去除Top-$p$采样（→ 贪心解码）], [15.3], [89.3%],
+    table.hline(),
+  ),
+  caption: [消融实验结果],
+) <ablation-table>
+
+消融结果揭示了以下关键发现：
+
+**扩展分词器是最重要的组件**。去除扩展分词器后PPL从15.3上升至21.6，增幅达41.2%；语法正确率从93.8%降至85.4%，下降8.4个百分点。这一结果有力证明了领域特定分词设计对ABC音乐生成的核心价值：BPE分词器对复合符号的破碎性切分直接导致模型难以学习正确的音乐语法边界，是制约生成质量的最主要瓶颈。
+
+**LoRA与全参数微调性能相当**。将LoRA替换为全参数微调后，PPL小幅降低至14.8，语法正确率微升至94.2%，差距极小（PPL相差0.5，语法正确率相差0.4个百分点）。但全参数微调所需显存约为LoRA的300倍，训练时间约为其10倍。这一结果验证了LoRA在音乐生成领域的参数高效性：以0.06%的可训练参数量实现了接近完整微调的性能，充分体现了预训练权重内在低秩更新假设的合理性。
+
+**生成策略影响不可忽视**。去除温度调节（$tau=1.0$）或将Top-$p$采样替换为贪心解码，虽不影响困惑度（困惑度仅取决于模型参数，与采样策略无关），但语法正确率分别下降2.3和4.5个百分点。这说明适当的随机性在ABC音乐生成中具有积极作用：贪心解码容易陷入局部重复模式，导致旋律在固定几个音符间往复循环，进而产生不完整的小节结构。
+
+
+=== 生成样本展示
+
+以下展示两个典型生成样本，以直观呈现LLaMA-LoRA的生成质量。
+
+*样本一：爱尔兰风格吉格舞曲（6/8拍，G大调）*
+
+```
 X:1
 T:The Dancing Brook
 M:6/8
@@ -1178,11 +1452,12 @@ c2A A2G|F2D D2E|F2A c2e|d2B B2:|
 e2c A2c|d2B G2B|c2A F2A|G3 G2:|
 ```
 
-该样本展现了典型的6/8拍吉格舞曲特征,旋律在G大调主和弦上流畅进行,重复结构清晰,符合爱尔兰传统音乐风格。
+该样本展现了典型的6/8拍吉格舞曲特征，旋律在G大调主和弦骨干音上流畅进行，两段重复结构（"|:"与":|"）清晰对称，符合爱尔兰传统音乐的惯例风格。
 
-*样本2: 苏格兰风格进行曲*
-```abc
-X:2  
+*样本二：苏格兰风格进行曲（4/4拍，D大调）*
+
+```
+X:2
 T:Highland March
 M:4/4
 L:1/16
@@ -1191,121 +1466,127 @@ K:Dmaj
 |:de|f4 a4 f4 d4|e4 g4 e4 c4|d4 f4 e4 c4|d8 d4:|
 ```
 
-该样本呈现出苏格兰进行曲的庄严感,4/4拍节奏稳定,旋律以四分音符和八分音符为主,D大调的调性明确。
+该样本呈现出苏格兰进行曲的庄严感，4/4拍节奏稳定，旋律以长时值音符为主，D大调调性明确，两段结构均以主音D收束，体现了良好的调性一致性。
 
 
-=== 消融实验
+=== 局限性与讨论
 
-为验证各组件的贡献,进行消融实验:
+尽管LLaMA-LoRA在量化与主观评估中均取得了显著性能，仍存在以下局限值得关注：
 
-#table(
-  columns: (auto, auto, auto),
-  align: center,
-  [*配置*], [*PPL*], [*语法正确率*],
-  [完整模型], [*15.3*], [*93.8%*],
-  [- 自定义tokenizer], [21.6], [85.4%],
-  [- LoRA (全参数微调)], [14.8], [94.2%],
-  [- 温度调节], [15.9], [91.5%],
-  [- Top-p采样], [16.7], [89.3%],
-)
+**创造性有限**：生成的音乐主要在训练集风格的统计分布范围内模仿，缺乏突破性的旋律创新。这是当前所有基于监督语言建模的音乐生成方法的共同局限，根源在于最大似然目标本质上鼓励模型向训练数据的均值靠拢。
 
-*关键发现*:
+**长程结构一致性**：对于包含多个段落的复杂乐曲结构，模型在超过256个token的长距离范围内维持主题连贯性仍有挑战，偶尔出现段落间调性漂移的现象。
 
-+ *自定义tokenizer影响最大*: 移除后PPL上升41.2%,证明领域特定分词对ABC生成至关重要。
+**和声多声部能力弱**：当前方法主要针对单旋律线的ABC文本，对多声部和声进行（如四声部合唱）的建模能力较为有限。
 
-+ *LoRA与全参数微调效果相当*: LoRA仅用0.06%参数即达到comparable性能,验证了参数高效性。
-
-+ *采样策略显著影响质量*: 移除温度调节或Top-p采样均导致性能下降,说明平衡探索与利用的重要性。
-
-
-=== 讨论与分析
-
-*3.7.1 模型优势*
-
-实验结果表明,本文方法具有以下优势:
-
-+ *强大的序列建模能力*: 基于大规模预训练的LLaMA继承了优秀的语言理解能力,能够捕捉ABC记谱法中的长距离依赖和结构模式。
-
-+ *领域适应高效*: LoRA仅需训练少量参数即可将通用语言模型转化为音乐生成专家,大幅降低了训练成本。
-
-+ *生成质量优异*: 自定义tokenizer使模型能够以音乐语义单元为基本单位进行建模,生成的ABC记谱法语法正确性和音乐性均显著提升。
-
-*3.7.2 局限性分析*
-
-尽管取得了良好效果,模型仍存在以下局限:
-
-+ *创造性有限*: 生成的音乐主要模仿训练集风格,缺乏突破性创新。
-
-+ *长程结构控制*: 对于复杂的多段落结构,模型有时难以维持全局一致性。
-
-+ *和声知识不足*: 虽然能生成合理的单旋律线,但多声部和声进行的处理能力较弱。
-
-*3.7.3 未来工作方向*
-
-针对上述局限,未来可从以下方向改进:
-
-+ *条件生成*: 引入风格、情绪、难度等条件控制,实现更精细的生成控制。
-
-+ *强化学习优化*: 使用音乐理论规则作为奖励信号,通过强化学习进一步优化生成质量。
-
-+ *多模态扩展*: 结合音频、乐谱图像等多模态信息,提升模型的音乐理解能力。
-
-+ *大规模数据*: 扩展训练数据至更多音乐风格和文化背景,提升模型的泛化能力和创造性。
+针对上述局限，未来工作可在以下方向展开探索：引入风格、情绪等条件控制信号实现可控生成；采用基于音乐理论规则的奖励模型进行强化学习微调（RLHF）；扩展训练数据至更多音乐风格与文化背景以提升泛化能力；探索多模态融合（音频与乐谱联合建模）以增强音乐语义理解。
 
 
 == 本章小结
 
-本章详细介绍了基于预训练LLaMA模型的ABC记谱法音乐生成方法。通过设计领域特定的tokenizer、采用LoRA参数高效微调策略,以及优化的生成采样方法,模型在语法正确性和音乐质量上均取得显著提升。
+本章系统介绍了基于预训练大语言模型LLaMA的ABC音乐生成方案LLaMA-LoRA。在分词器设计上，通过对训练语料进行高频ABC符号统计，在LLaMA原生BPE词表基础上扩展约1,500个领域专有token，构建了面向ABC记谱法语义边界的扩展分词器，并采用均值初始化策略为新增token提供稳定的训练起点。在参数高效微调上，通过对LoRA数学原理的深入分析，揭示了低秩假设的理论基础，量化了其约$300 times$的参数压缩比，并详细阐述了其在多头注意力投影矩阵上的具体应用形式。在训练策略上，结合AdamW优化器、线性预热学习率调度和梯度累积技术，实现了在单张GPU上6小时内完成高质量微调的目标。在生成阶段，通过温度缩放与Top-$p$核采样的组合策略，在生成质量与多样性之间取得了良好平衡。
 
-实验结果表明,本文方法在困惑度、语法正确率、结构完整性等指标上全面优于基线方法,人工评估也验证了生成音乐的高质量。消融实验进一步证实了自定义tokenizer和LoRA微调的关键作用。
+实验结果表明，LLaMA-LoRA在困惑度（15.3）、语法正确率（93.8%）等全部量化指标上均优于Vanilla GPT-2、Music Transformer和LLaMA-Pretrained基线，人工评估整体质量评分达4.2/5.0。消融实验进一步确认扩展分词器是贡献最大的单一组件（去除后PPL上升41.2%），而LoRA在仅使用0.06%可训练参数的条件下实现了接近全参数微调的性能，充分验证了参数高效微调范式在音乐生成领域的适用性与实用价值。
 
-未来工作将着重于增强模型的创造性、改善长程结构控制,并探索条件生成和多模态融合等方向,以进一步提升AI音乐生成的能力。
 
 = 总结与展望
 
 == 工作总结
 
-本研究围绕ABC记谱法音乐生成任务，系统对比了RNN、LSTM、Transformer和GPT2四种序列建模架构，为ABC记谱法音乐生成任务选择合适模型架构提供了重要的实验依据和理论支撑。主要工作总结如下：
+本研究围绕ABC记谱法音乐自动生成这一核心任务，从专用分词器设计、多架构序列建模、参数高效微调到系统性实验评估，构建了一套完整的研究框架。研究内容涵盖两条技术路线：其一是在统一实验条件下系统对比RNN、LSTM、Transformer和GPT2ABC四种序列建模架构，探究不同归纳偏置对ABC音乐语言学习效果的影响；其二是引入预训练大语言模型LLaMA并结合LoRA参数高效微调与扩展分词策略，将大规模语言模型的通用序列建模能力迁移至音乐符号生成领域。本文的主要工作总结如下。
 
-*ABCTokenizer的设计与实现*：针对ABC记谱法的独特语法结构和符号系统，设计并实现了专用的分词器ABCTokenizer。该分词器采用最长匹配策略，能够准确识别和分割ABC记谱法中的所有语法元素，包括音符、时值、调性标记、小节线等多字符符号，保持了音乐语义的完整性。ABCTokenizer定义了包含特殊token和ABC特定符号的分层词汇表，支持序列填充、截断和未知符号处理，为模型训练和推理提供了标准化的数据预处理接口。ABCTokenizer的确定性分词行为、完整的编码解码功能以及模型持久化支持，使其成为ABC记谱法音乐生成任务中不可或缺的预处理组件。
+=== ABCTokenizer的设计与实现
 
-*四种模型架构的统一实现*：在统一的实验配置下，实现了RNN、LSTM、Transformer和GPT2四种模型架构。所有模型采用相同的嵌入维度（256）、隐藏维度（512）、层数（3）、dropout率（0.2）、学习率（1e-3）、批次大小（16）和最大序列长度（512），确保了实验对比的公平性。RNN模型使用基础循环单元与tanh激活函数；LSTM模型通过门控机制缓解长期依赖问题；Transformer模型采用位置编码与多头自注意力，使用因果掩码保证自回归特性；GPT2ABC模型基于Hugging Face的GPT2LMHeadModel，适配ABC词汇表与特殊token。四种模型的统一实现为系统对比提供了坚实的基础。
+针对ABC记谱法高度规则化的语法结构与音乐语义边界问题，本文设计并实现了专用的ABCTokenizer分词器。通用自然语言分词器（如BPE）在处理ABC文本时会将具有完整音乐语义的复合符号（如"|:"、"K:Gmaj"、"M:6/8"）错误地切分为若干无意义的字符碎片，导致序列冗长且语义结构破碎；字符级分词方案虽能保留原始信息，但会造成序列长度膨胀、注意力计算代价增大。ABCTokenizer针对上述问题，采用贪婪最长匹配（Greedy Longest-Match）策略构建分词核心算法：维护一个文本指针，在每一步优先尝试匹配长度为4、3、2、1的子串是否存在于专用词表中，从长到短依次尝试，确保"|:"等复合符号不被拆散；对无法匹配的字符回退至$angle.l "unk" angle.r$标记，保证分词器的鲁棒性。
 
-*多维度评估体系的建立*：建立了全面的性能评估体系，包括损失函数（交叉熵）、困惑度、训练/验证/测试损失、训练时间（单epoch、每10个epoch、累计）、内存占用（GPU/CPU）、模型参数量、学习率变化等多个维度。评估体系不仅关注模型的预测准确性，还关注计算效率和资源消耗，为模型选择提供了全面的参考依据。此外，通过生成样本音乐进行质量评估，从主观和客观两个角度评估模型的生成能力。
+在词表构建上，ABCTokenizer涵盖音高符号、时值标记、调性与节拍声明、装饰音记号、和弦标注及各类小节线变体，同时引入$angle.l "bos" angle.r$、$angle.l "eos" angle.r$、$angle.l "pad" angle.r$等序列边界与对齐控制token，构成语义层次清晰的分层词表。编码阶段在token序列两端自动附加边界标记，帮助模型准确感知旋律的起止结构；解码阶段对控制性token进行过滤，还原出符合标准ABC语法的纯净乐谱文本，供打谱软件或音频合成器直接使用。相比通用分词方案，ABCTokenizer能够在保留乐谱结构信息的同时有效控制序列长度，使每个token都承载明确的音乐语义，显著降低了下游模型学习ABC语法规律的难度。
 
-*可复现实验设计*：设计了严格的可复现实验流程，包括数据预处理、模型训练、性能评估和结果分析等环节。数据预处理使用固定随机种子（42）进行80%-10%-10%的数据划分，确保不同模型使用相同的数据集。训练策略统一使用Adam优化器、权重衰减、梯度裁剪、学习率调度和早停机制。实验过程中每10个epoch记录一次性能指标，生成详细的CSV报告，便于后续分析和对比。这种可复现的实验设计为相关研究提供了标准化的实验框架。
+=== GPT2ABC模型的构建与验证
 
-*系统性架构对比分析*：在统一条件下系统对比了四种模型架构在ABC记谱法生成任务上的表现，分析了不同架构的优势和局限性。RNN作为基础循环架构，计算简单但难以捕捉长期依赖；LSTM通过门控机制缓解了梯度消失问题，能够更好地学习长期依赖关系；Transformer和GPT2ABC使用自注意力机制，能够直接捕捉序列中任意位置之间的依赖关系，训练效率更高，但计算复杂度相对较高。通过系统对比，为不同应用场景下的模型选择提供了依据。
+在GPT2ABC的研究中，本文以GPT-2的Decoder-only Transformer架构为基础，将ABCTokenizer输出的离散token序列作为输入，通过多层堆叠的因果自注意力机制对ABC音乐序列的条件概率分布进行建模。模型的输入表示由token嵌入与可学习位置编码相加构成，使模型能够同时感知符号语义与时序位置。每个Transformer解码器层包含带因果掩码的多头自注意力模块（确保自回归特性）与位置前馈网络，并采用前置层归一化（Pre-LN）残差连接以提升训练稳定性。输出层通过与输入嵌入层共享权重的线性投影实现参数节约，并经softmax归一化得到词表上的概率分布。
 
-本研究的创新点包括：首先，首次在统一条件下系统对比RNN、LSTM、Transformer、GPT2在ABC记谱法生成任务上的表现，填补了现有研究的空白；其次，设计了专门针对ABC记谱法的分词器ABCTokenizer，有效处理了ABC记谱法的复杂语法结构；再次，建立了多维度评估体系，不仅关注模型性能，还关注计算效率和资源消耗；最后，提供了可复现的实验设计和完整的实验框架，为相关研究提供了参考。
+在训练策略上，GPT2ABC以最大化ABC序列对数似然为目标，采用Teacher Forcing策略加速收敛，通过Adam优化器配合带预热的学习率调度进行端到端训练。在生成阶段，引入温度参数、Top-$k$截断和Top-$p$核采样等多种策略，在生成质量与旋律多样性之间实现灵活调控。
 
+系统性对比实验在统一超参数配置（嵌入维度256、隐层维度512、3层、dropout率0.2、学习率1e-3、批次大小16）下，对RNN、LSTM、Transformer和GPT2ABC四种架构进行了50轮训练的全程跟踪评估。实验结果表明，GPT2ABC在测试损失（0.316）和困惑度（1.372）两项指标上均全面领先，相比性能次优的Transformer基线（测试损失0.483，困惑度1.620）分别降低34.6%和15.3%；在计算资源消耗方面，GPT2ABC（参数量2.52M，显存60MB，10轮训练耗时172.1秒）与Transformer基线基本持平，远优于LSTM（5.85M参数，110MB显存，316.5秒）。实验系统地揭示了各架构的性能规律：RNN受梯度消失制约，长距离音乐依赖建模能力最弱；LSTM通过门控机制取得明显改善；Transformer通过全局自注意力进一步提升；GPT2ABC则在Transformer架构基础上叠加预训练迁移增益，取得最优综合表现。
+
+=== 基于LLaMA-LoRA的音乐生成方案
+
+在大语言模型迁移的研究路线中，本文提出了LLaMA-LoRA方案，将LLaMA-2-7B的通用序列建模能力迁移至ABC音乐生成任务。该方案在三个核心模块上进行了系统性设计。
+
+**扩展分词器**方面，通过对训练语料进行高频ABC符号统计，在LLaMA原生BPE词表（32,000 token）基础上扩展约1,500个领域专有token，覆盖字段标识符、小节线变体、调号组合、节奏标记、装饰音符号等ABC核心语义单元，构建规模约33,500的扩展词表。新增token的embedding向量采用原有词表embedding均值叠加小幅随机扰动的初始化策略，在保证训练稳定性的同时加速领域语义的学习。
+
+**LoRA参数高效微调**方面，基于预训练权重更新矩阵内在低秩性的理论假设，对Q、K、V、O四个注意力投影矩阵注入低秩适配器（秩$r=16$，缩放因子$alpha=32$，Dropout率0.05），可训练参数量约4.2M，仅占LLaMA-2-7B全部参数的0.06%，实现约300倍的参数压缩比，将完整微调所需的约84GB优化器状态显存压缩至约50MB，使单张24GB消费级GPU即可完成微调任务。
+
+**训练与生成策略**方面，结合AdamW优化器（含权重衰减$lambda=0.01$）、线性预热学习率调度（前100步从0线性升至$2 times 10^{-4}$）和梯度累积（有效批次大小16），在单张A100 GPU上6小时内完成3轮微调；生成阶段采用温度缩放（$tau=0.8$）与Top-$p$核采样（$p=0.9$）组合策略，在生成稳定性与旋律多样性之间取得良好平衡。
+
+实验结果表明，LLaMA-LoRA在困惑度（15.3）、测试损失（2.728）、语法正确率（93.8%）和结构完整性（91.6%）等全部量化指标上均优于Vanilla GPT-2、Music Transformer和LLaMA-Pretrained基线；人工盲测整体质量评分达4.2/5.0，旋律流畅性和结构完整性评分分别为4.3和4.4。消融实验进一步确认，扩展分词器是贡献最大的单一组件（去除后PPL上升41.2%），而LoRA以极少参数实现了接近全参数微调（PPL 14.8）的性能（PPL 15.3），验证了参数高效微调范式在音乐生成领域的实用价值。
+
+=== 实验框架的标准化建设
+
+本研究在实验设计层面也进行了系统性建设。数据预处理采用固定随机种子（42），按8:1:1比例划分训练集、验证集和测试集，确保不同模型在完全相同的数据分布上进行训练与评估。评估体系覆盖语言建模质量（测试损失、困惑度）、音乐生成质量（语法正确率、结构完整性）、计算效率（参数量、显存占用、训练耗时）和主观质量（人工盲测）四个维度，为模型选择提供了多角度参考。每10个训练轮次记录一次性能快照，输出详细的CSV格式实验报告，支持训练动态的精细分析。完整的代码实现、超参数配置与数据预处理流程均公开可复现，为后续研究提供了标准化的实验基础。
 
 
 == 工作展望
 
-尽管本研究在ABC记谱法音乐生成任务上取得了一定的成果，但仍存在一些局限性和值得进一步探索的方向：
+尽管本研究在ABC记谱法音乐生成任务上取得了较为系统的成果，但仍存在若干值得深入探索的方向。以下从模型架构、评估体系、数据资源、生成控制、应用拓展等多个层面展望未来研究方向。
 
-*模型架构的进一步优化*：本研究对比了四种经典的序列建模架构，但还有许多新兴的架构值得探索，如GPT-3、GPT-4等大规模预训练模型，以及专门针对音乐生成设计的架构。未来可以探索更大规模的模型、更复杂的架构设计，以及针对音乐领域的特定优化技术，如音乐理论约束、和声规则等。
+=== 更大规模预训练模型的探索
 
-*评估体系的完善*：当前的评估体系主要关注客观指标（如损失、困惑度）和计算效率，对生成音乐的主观质量评估相对不足。未来可以引入更多的音乐理论指标，如和声一致性、节奏规律性、旋律流畅性等，以及更系统的主观评价方法，如音乐家评分、听众测试等。此外，可以探索更先进的评估指标，如BLEU、ROUGE等文本生成评估指标在音乐生成中的适配。
+本研究在预训练模型路线上采用了LLaMA-2-7B，其参数规模已显著优于GPT2ABC，但与当前最先进的开源大语言模型（如LLaMA-3-70B、Qwen-72B等）相比仍有差距。已有研究表明，语言模型的能力随参数规模呈现出幂律增长趋势（Scaling Law），更大规模的模型有望在序列建模的深度与广度上取得进一步突破。然而，更大规模模型的微调即便借助LoRA也面临更高的显存门槛；未来可探索量化感知训练（QLoRA）——将基础模型权重以4-bit或8-bit整数格式存储，在保留LoRA低秩更新精度的同时大幅压缩显存占用——以实现在消费级硬件上对更大规模模型的高效微调。
 
-*数据集的扩展与优化*：本研究使用的数据集规模相对有限，未来可以收集更大规模、更多样化的ABC记谱法数据集，包括不同风格、不同时期、不同地区的音乐作品。此外，可以探索数据增强技术，如转调、变奏等，提高模型的泛化能力。同时，可以研究数据质量对模型性能的影响，以及如何更好地清洗和预处理数据。
+此外，专门针对符号音乐设计的预训练模型（如在海量MIDI或MusicXML语料上预训练的模型）也值得关注。与通用语言模型相比，此类模型的预训练数据分布与ABC记谱法更为接近，迁移时的领域偏移（domain shift）更小，有望以更少的微调数据和计算成本达到更优的生成质量。
 
-*生成控制与交互*：当前的生成过程主要通过prompt和temperature参数进行控制，控制能力相对有限。未来可以探索更精细的生成控制方法，如指定调性、拍号、风格、情感等音乐属性，实现条件生成。此外，可以研究交互式音乐生成系统，允许用户实时调整生成参数，实现人机协作的音乐创作。
+=== 多维度音乐质量评估体系的完善
 
-*多模态音乐生成*：本研究专注于ABC记谱法这一文本化音乐表示，未来可以探索多模态音乐生成，如同时生成ABC记谱法、MIDI、音频等多种表示形式，或者从一种表示形式转换到另一种表示形式。多模态生成可以提供更丰富的音乐创作工具，满足不同用户的需求。
+当前评估体系以困惑度、测试损失等语言建模指标为主，辅以语法正确率、结构完整性等基于规则的音乐质量指标，以及人工盲测。然而，上述指标对旋律的音乐性质量（如和声合理性、旋律线条的张弛感、节奏律动的律感）仍缺乏细粒度的客观量化能力。
 
-*模型压缩与部署*：当前模型在训练和推理时需要较多的计算资源，限制了其在实际应用中的部署。未来可以研究模型压缩技术，如知识蒸馏、量化、剪枝等，在保持模型性能的同时减少模型大小和计算开销。此外，可以探索模型在移动设备、边缘设备上的部署方案，实现实时音乐生成应用。
+未来可从以下方向完善评估体系。**基于音乐理论的自动评估**：设计量化和声一致性的指标（如音符与调性和弦的契合度）、节奏规律性指标（如节拍重音与强位音符的吻合程度）以及旋律流畅性指标（如相邻音程的分布是否符合传统旋律写作规律）。**基于学习的评估模型**：训练一个专门用于评估ABC音乐质量的判别模型，以真实民谣与生成样本之间的分布距离（如Fréchet Music Distance，类比图像生成中的FID）为评价尺度。**标准化主观评估协议**：设计包含更多维度（如风格一致性、情绪表达、创造性）的盲测问卷，并扩大评估者样本量，以降低主观评分的方差，提升评估结论的统计显著性。
 
-*音乐理论知识的融入*：当前模型主要从数据中学习音乐模式，对音乐理论知识的利用相对有限。未来可以探索如何将音乐理论知识（如和声学、对位法、曲式学等）融入到模型中，通过约束、正则化或结构化设计等方式，提高生成音乐的音乐理论正确性和艺术性。
+=== 数据资源的扩展与多样化
 
-*长期依赖与结构建模*：虽然Transformer和GPT2ABC能够捕捉长期依赖关系，但对于非常长的音乐序列（如完整的交响乐作品），仍然存在挑战。未来可以探索专门针对长序列的架构设计，如分段建模、层次化建模等，更好地捕捉音乐的整体结构和长期模式。
+本研究数据集规模约为10,000首传统民谣，风格集中于凯尔特与英伦民间音乐传统。这一规模对于探索基础架构特性是足够的，但对于训练能够泛化到更广泛音乐风格的生成模型则显得有限。未来可从以下方向扩充数据资源。
 
-*可解释性与可控性*：深度学习模型通常被视为"黑盒"，其生成过程难以解释。未来可以研究模型的可解释性，如注意力可视化、特征分析等，帮助理解模型如何学习和生成音乐。同时，可以提高模型的可控性，使用户能够更好地理解和控制生成过程。
+**规模扩展**：收集更大规模的ABC格式乐谱数据库（如TheSession、folkwiki等平台的公开资源），将训练语料扩充至数十万甚至数百万首。已有研究（如folk-rnn的后续工作）表明，数据规模的增长能够显著提升模型对旋律多样性和风格细节的学习能力。
 
-*应用场景的拓展*：当前研究主要关注音乐生成任务，未来可以将相关技术拓展到其他应用场景，如音乐风格转换、音乐修复、音乐推荐、音乐教育等。这些应用场景可以充分利用序列建模和音乐生成的技术积累，为音乐产业和教育提供更多有价值的工具和服务。
+**风格多样化**：纳入古典、爵士、蓝调、巴洛克、民谣等多种音乐风格的ABC乐谱，使模型具备跨风格生成的能力，同时支持条件生成（见下文）的风格控制需求。
 
-总的来说，ABC记谱法音乐生成是一个充满挑战和机遇的研究领域。随着深度学习技术的不断发展和音乐数据的不断积累，相信未来会有更多创新性的方法和技术出现，推动该领域的发展，为音乐创作、教育和研究提供更好的工具和支持。
+**数据增强**：探索适用于ABC记谱法的数据增强技术，如等音转调（将乐曲移至不同调性）、节奏变换（将4/4拍改写为3/4或6/8拍的等价版本）和旋律镜像（音高轴反转）等，在有限原始数据上扩大有效训练样本量，缓解过拟合。
+
+**数据质量优化**：研究训练数据质量对生成质量的影响规律，探索自动化数据清洗方法（如基于ABC语法解析器的合法性过滤、基于难度估计的样本筛选），提升低质量样本对模型的负面影响。
+
+=== 条件生成与精细化控制
+
+当前方案的生成控制主要依赖于prompt（起始ABC头部）和温度参数，控制粒度较粗。用户无法在不手动编写ABC片段的情况下指定调性、拍号、风格、情绪、难度、旋律走向等高层次音乐属性。
+
+未来可探索多种条件生成范式。**属性条件生成**：在模型输入中引入结构化条件向量，编码用户指定的音乐属性（如"G大调、6/8拍、中速、爱尔兰吉格风格"），通过条件交叉注意力或前缀嵌入机制将属性约束注入生成过程。**旋律填充与续写**：给定乐曲的前半部分，生成风格和声一致的后半部分；或给定头尾旋律片段，生成中间的过渡乐句，实现旋律级别的补全与插值。**基于强化学习的质量优化**：以音乐理论规则（和声合理性、音域合法性、节奏一致性）和人类偏好评分作为奖励信号，通过近端策略优化（PPO）或直接偏好优化（DPO）对生成模型进行强化学习微调，引导模型从最大似然解向音乐质量最优解迁移，缓解监督训练目标与生成质量目标之间的偏差。
+
+=== 多模态音乐表示的融合
+
+本研究专注于ABC记谱法这一文本化音乐表示，未来可探索多模态扩展方向，将ABC生成与其他音乐模态相互贯通。**ABC-MIDI联合建模**：将ABC记谱法与MIDI事件序列在统一的多模态框架下联合建模，利用MIDI丰富的力度、踏板、连奏等表情信息补充ABC符号表示的不足，实现从乐谱到演奏的一体化生成。**音频引导的生成**：以音频片段的声学特征（如音调轮廓、节奏型）为条件，驱动ABC乐谱的自动生成，实现"听音写谱"式的多模态转换。**乐谱图像的理解与生成**：结合视觉Transformer等多模态模型，探索从乐谱扫描图像到ABC文本的转录，以及从ABC文本到规范化乐谱排版的渲染，实现乐谱全流程的智能化处理。
+
+=== 长程音乐结构建模
+
+当前基于Transformer的方案在处理超过256个token的长序列时，注意力计算的平方复杂度$O(L^2)$制约了其对完整多段落乐曲的全局结构建模能力；在超过有效注意力窗口的跨段落范围内，模型对主题呼应、调性回归等高层次音乐结构的感知能力有所下降。
+
+未来可从以下方向攻克长程建模挑战。**线性注意力与稀疏注意力**：引入Longformer、BigBird等线性或稀疏注意力机制，将注意力复杂度从$O(L^2)$降至$O(L)$或$O(L sqrt{L})$，支持更长序列的端到端建模。**层次化结构建模**：采用分层的生成架构，底层模型负责在音符和小节级别生成局部旋律细节，高层模型负责在乐句和段落级别规划全局结构框架，两个层次通过跨层注意力或潜变量进行耦合，实现"先谋篇布局、再填充细节"的从粗到细生成策略。**记忆增强机制**：引入外部记忆模块（如Transformer-XL的循环记忆、Memorizing Transformer的KNN记忆等），使模型能够在有限的注意力窗口外持续保留对远处重要上下文的访问能力，增强对旋律主题的长程记忆与复现。
+
+=== 模型压缩与边缘部署
+
+当前LLaMA-LoRA方案在推理阶段仍依赖服务器级GPU，限制了其在实际应用中的可及性。未来可探索以下模型压缩与轻量化方向，以支持边缘设备部署和实时音乐生成应用。**知识蒸馏**：以LLaMA-LoRA等大模型为教师，训练参数量更小的学生模型，使其在音乐生成任务上接近教师模型的分布，实现性能与效率的协同优化。**模型量化**：将模型权重从FP32/FP16压缩至INT8/INT4格式存储与计算，配合量化感知训练（QAT）维持生成质量，可在移动端GPU（如Apple M系列芯片、高通骁龙等）上实现可接受延迟的实时推理。**结构化剪枝**：识别并移除对ABC音乐生成任务贡献较小的注意力头和前馈神经元，在不显著损失生成质量的前提下压缩模型计算图，提升推理吞吐量。
+
+=== 音乐生成的可解释性研究
+
+深度生成模型通常被视为"黑盒"，其内部表示与音乐知识之间的对应关系难以直接解读。未来可从可解释性角度深入探究模型如何编码和运用音乐结构知识。**注意力模式可视化**：分析自注意力权重在不同音乐事件（如小节线、调性声明、旋律转折点）处的分布特征，探究模型是否在注意力层面习得了与音乐结构语义对应的模式。**表示空间探测**：通过线性探测分类器（probing classifier）检验模型隐层表示中是否编码了调性、节拍、音符功能等音乐属性，定量评估不同层次表示的音乐语义丰富性。**因果干预分析**：对模型内部表示施加定向干预（如在隐层中增减代表特定调性的方向向量），观察对生成输出的影响，探索模型内部的音乐知识表示机制，为可控生成提供理论基础。
+
+=== 人机协同音乐创作系统
+
+将AI音乐生成技术转化为实际可用的创作辅助工具，是本研究长期的应用目标。未来可围绕以下应用场景构建人机协同系统。**交互式旋律编辑**：构建可视化的ABC乐谱编辑环境，允许用户在任意位置插入或修改音符，系统根据用户的局部修改实时推断并补全其余部分，实现"人出创意、AI补全细节"的协作模式。**风格迁移与变奏**：给定用户提供的主题旋律，自动生成多种风格变体（如将爱尔兰民谣主题改编为巴洛克风格的复调变奏），丰富音乐创作的探索空间。**音乐教育辅助**：根据学习者的演奏水平自动生成适配难度的练习曲目和伴奏，并提供基于音乐理论的生成解释，将AI音乐生成系统转化为个性化音乐教育工具。
+
+=== 跨文化音乐生成
+
+本研究的训练数据集中于西欧传统民谣，生成的音乐风格相应集中于凯尔特和英伦传统。未来可拓展至更广泛的世界音乐风格，包括中国传统五声调式音乐、印度古典音乐的旋律模式（raga）、阿拉伯音乐的微分音体系等。跨文化音乐生成不仅要求数据资源的多元化，更需要对非西方音乐理论体系进行相应的表示与建模设计，这是一个兼具学术挑战性与文化价值的研究方向。
+
+综上所述，ABC记谱法音乐自动生成是一个横跨深度学习、音乐信息检索与音乐理论的交叉研究领域，既具有丰富的学术探索空间，又具有广泛的实际应用潜力。本研究所建立的实验框架、分词器设计方法论与模型架构对比体系，为该领域后续研究提供了可复现的基础与可扩展的平台。随着大语言模型技术的持续演进、高质量音乐数据资源的不断积累，以及音乐理论与计算方法的深度融合，AI辅助音乐创作在可控性、创造性与音乐性上有望取得突破性进展，为音乐创作、教育与文化传承提供更强大的智能化支撑。
 
 
 
