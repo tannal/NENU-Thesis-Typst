@@ -1,0 +1,248 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="960" viewBox="0 0 820 960" font-family="'Georgia', 'Times New Roman', serif">
+
+  <!-- Background -->
+  <rect width="820" height="960" fill="white"/>
+
+  <!-- Section Title -->
+  <text x="410" y="48" text-anchor="middle" font-size="20" font-weight="bold" fill="#000" letter-spacing="1">Low-Rank Adaptation (LoRA)</text>
+  <line x1="80" y1="58" x2="740" y2="58" stroke="#000" stroke-width="1.2"/>
+
+  <!-- ══════════════════════════════════════════════
+       PART 1: Core Idea — Full vs LoRA update
+  ═══════════════════════════════════════════════ -->
+
+  <text x="80" y="92" font-size="13" font-style="italic" fill="#333">§ Core Concept: Decomposing Weight Updates</text>
+
+  <!-- Full fine-tuning box -->
+  <rect x="80" y="108" width="148" height="148" fill="none" stroke="#000" stroke-width="1.5"/>
+  <!-- Grid shading for ΔW (dense) -->
+  <g stroke="#bbb" stroke-width="0.5">
+    <line x1="80" y1="127" x2="228" y2="127"/>
+    <line x1="80" y1="146" x2="228" y2="146"/>
+    <line x1="80" y1="165" x2="228" y2="165"/>
+    <line x1="80" y1="184" x2="228" y2="184"/>
+    <line x1="80" y1="203" x2="228" y2="203"/>
+    <line x1="80" y1="222" x2="228" y2="222"/>
+    <line x1="80" y1="241" x2="228" y2="241"/>
+    <line x1="99"  y1="108" x2="99"  y2="256"/>
+    <line x1="118" y1="108" x2="118" y2="256"/>
+    <line x1="137" y1="108" x2="137" y2="256"/>
+    <line x1="156" y1="108" x2="156" y2="256"/>
+    <line x1="175" y1="108" x2="175" y2="256"/>
+    <line x1="194" y1="108" x2="194" y2="256"/>
+    <line x1="213" y1="108" x2="213" y2="256"/>
+  </g>
+  <!-- fill dots to indicate dense -->
+  <rect x="81" y="109" width="146" height="146" fill="url(#denseFill)" opacity="0.18"/>
+  <defs>
+    <pattern id="denseFill" patternUnits="userSpaceOnUse" width="6" height="6">
+      <circle cx="3" cy="3" r="1.2" fill="#000"/>
+    </pattern>
+  </defs>
+  <text x="154" y="278" text-anchor="middle" font-size="12" fill="#000">ΔW ∈ ℝ<tspan font-size="9" dy="-4">d×d</tspan></text>
+  <text x="154" y="294" text-anchor="middle" font-size="11" fill="#555">(Full fine-tuning)</text>
+
+  <!-- Equals sign -->
+  <text x="256" y="192" text-anchor="middle" font-size="22" fill="#000">=</text>
+
+  <!-- B matrix -->
+  <rect x="280" y="148" width="44" height="108" fill="none" stroke="#000" stroke-width="1.5"/>
+  <!-- sparse vertical lines -->
+  <g stroke="#aaa" stroke-width="0.5">
+    <line x1="294" y1="148" x2="294" y2="256"/>
+    <line x1="308" y1="148" x2="308" y2="256"/>
+    <line x1="322" y1="148" x2="322" y2="256"/>
+  </g>
+  <text x="302" y="272" text-anchor="middle" font-size="12" fill="#000">B</text>
+  <text x="302" y="286" text-anchor="middle" font-size="10" fill="#555">d×r</text>
+
+  <!-- × sign -->
+  <text x="342" y="210" text-anchor="middle" font-size="16" fill="#000">×</text>
+
+  <!-- A matrix -->
+  <rect x="358" y="188" width="108" height="44" fill="none" stroke="#000" stroke-width="1.5"/>
+  <g stroke="#aaa" stroke-width="0.5">
+    <line x1="358" y1="202" x2="466" y2="202"/>
+    <line x1="358" y1="216" x2="466" y2="216"/>
+    <line x1="358" y1="230" x2="466" y2="230"/>
+  </g>
+  <text x="412" y="272" text-anchor="middle" font-size="12" fill="#000">A</text>
+  <text x="412" y="286" text-anchor="middle" font-size="10" fill="#555">r×d</text>
+
+  <!-- rank label with brace -->
+  <line x1="488" y1="148" x2="488" y2="256" stroke="#000" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="510" y="192" font-size="11" fill="#333">rank</text>
+  <text x="510" y="207" font-size="13" font-style="italic" fill="#000">r ≪ d</text>
+
+  <!-- Annotation: param count -->
+  <rect x="540" y="140" width="200" height="86" fill="none" stroke="#888" stroke-width="1" stroke-dasharray="5,3" rx="4"/>
+  <text x="550" y="160" font-size="11" fill="#333">Parameter comparison:</text>
+  <text x="550" y="178" font-size="11" fill="#000">Full:    d × d</text>
+  <text x="550" y="194" font-size="11" fill="#000">LoRA: d×r + r×d = 2dr</text>
+  <text x="550" y="212" font-size="11.5" fill="#000" font-weight="bold">Reduction: d / (2r) ×</text>
+
+  <!-- ══════════════════════════════════════════════
+       PART 2: Forward Pass Diagram
+  ═══════════════════════════════════════════════ -->
+
+  <line x1="80" y1="318" x2="740" y2="318" stroke="#ccc" stroke-width="0.8"/>
+  <text x="80" y="342" font-size="13" font-style="italic" fill="#333">§ Modified Forward Pass</text>
+
+  <!-- Input x -->
+  <rect x="80" y="360" width="60" height="34" fill="none" stroke="#000" stroke-width="1.5" rx="3"/>
+  <text x="110" y="382" text-anchor="middle" font-size="13" fill="#000" font-style="italic">x</text>
+
+  <!-- Arrow from x -->
+  <line x1="140" y1="377" x2="200" y2="377" stroke="#000" stroke-width="1.3" marker-end="url(#arr)"/>
+
+  <!-- W_0 block (frozen) -->
+  <rect x="200" y="354" width="90" height="46" fill="#f0f0f0" stroke="#000" stroke-width="1.5" rx="3"/>
+  <text x="245" y="376" text-anchor="middle" font-size="13" fill="#000" font-weight="bold">W₀</text>
+  <text x="245" y="392" text-anchor="middle" font-size="10" fill="#555">(frozen)</text>
+
+  <!-- Arrow from W_0 to plus -->
+  <line x1="290" y1="377" x2="360" y2="377" stroke="#000" stroke-width="1.3" marker-end="url(#arr)"/>
+
+  <!-- Plus circle -->
+  <circle cx="378" cy="377" r="16" fill="none" stroke="#000" stroke-width="1.5"/>
+  <text x="378" y="382" text-anchor="middle" font-size="18" fill="#000">+</text>
+
+  <!-- Arrow to output -->
+  <line x1="394" y1="377" x2="460" y2="377" stroke="#000" stroke-width="1.3" marker-end="url(#arr)"/>
+
+  <!-- Output h -->
+  <rect x="460" y="360" width="60" height="34" fill="none" stroke="#000" stroke-width="1.5" rx="3"/>
+  <text x="490" y="382" text-anchor="middle" font-size="13" fill="#000" font-style="italic">h</text>
+
+  <!-- LoRA branch: x -> A -> B -> plus -->
+  <!-- Down from x -->
+  <line x1="110" y1="394" x2="110" y2="450" stroke="#000" stroke-width="1" stroke-dasharray="5,3"/>
+  <line x1="110" y1="450" x2="230" y2="450" stroke="#000" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+
+  <!-- A block -->
+  <rect x="230" y="432" width="56" height="34" fill="none" stroke="#000" stroke-width="1.5" rx="3"/>
+  <text x="258" y="452" text-anchor="middle" font-size="13" fill="#000" font-weight="bold">A</text>
+  <text x="258" y="465" text-anchor="middle" font-size="9" fill="#555">d→r</text>
+
+  <!-- Arrow A to B -->
+  <line x1="286" y1="449" x2="320" y2="449" stroke="#000" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+
+  <!-- B block -->
+  <rect x="320" y="432" width="56" height="34" fill="none" stroke="#000" stroke-width="1.5" rx="3"/>
+  <text x="348" y="452" text-anchor="middle" font-size="13" fill="#000" font-weight="bold">B</text>
+  <text x="348" y="465" text-anchor="middle" font-size="9" fill="#555">r→d</text>
+
+  <!-- scale α/r label -->
+  <text x="390" y="446" font-size="11" fill="#333">× α/r</text>
+
+  <!-- Arrow to plus circle -->
+  <line x1="376" y1="449" x2="378" y2="449" stroke="#000" stroke-width="0"/>
+  <line x1="420" y1="449" x2="420" y2="393" stroke="#000" stroke-width="1" stroke-dasharray="5,3"/>
+  <line x1="420" y1="393" x2="394" y2="393" stroke="#000" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arr2)"/>
+  <!-- connect B to scale -->
+  <line x1="376" y1="449" x2="418" y2="449" stroke="#000" stroke-width="1" stroke-dasharray="5,3"/>
+
+  <!-- formula -->
+  <text x="530" y="380" font-size="13" fill="#000" font-style="italic">h = W₀x + ΔWx</text>
+  <text x="530" y="400" font-size="13" fill="#000" font-style="italic">  = W₀x + BAx · (α/r)</text>
+
+  <!-- LoRA label -->
+  <rect x="220" y="486" width="168" height="22" fill="none" stroke="#888" stroke-width="0.8" rx="3" stroke-dasharray="4,2"/>
+  <text x="304" y="501" text-anchor="middle" font-size="11" fill="#555">LoRA trainable branch</text>
+
+  <!-- ══════════════════════════════════════════════
+       PART 3: Initialization
+  ═══════════════════════════════════════════════ -->
+
+  <line x1="80" y1="528" x2="740" y2="528" stroke="#ccc" stroke-width="0.8"/>
+  <text x="80" y="552" font-size="13" font-style="italic" fill="#333">§ Initialization Strategy</text>
+
+  <!-- Two boxes side by side -->
+  <rect x="80" y="568" width="250" height="76" fill="none" stroke="#000" stroke-width="1.2" rx="4"/>
+  <text x="205" y="589" text-anchor="middle" font-size="12" font-weight="bold" fill="#000">Matrix A</text>
+  <text x="205" y="608" text-anchor="middle" font-size="11.5" fill="#333">Gaussian random init:</text>
+  <text x="205" y="626" text-anchor="middle" font-size="12" fill="#000" font-style="italic">A ~ 𝒩(0, σ²)</text>
+
+  <rect x="360" y="568" width="250" height="76" fill="none" stroke="#000" stroke-width="1.2" rx="4"/>
+  <text x="485" y="589" text-anchor="middle" font-size="12" font-weight="bold" fill="#000">Matrix B</text>
+  <text x="485" y="608" text-anchor="middle" font-size="11.5" fill="#333">Zero initialization:</text>
+  <text x="485" y="626" text-anchor="middle" font-size="12" fill="#000" font-style="italic">B = 0</text>
+
+  <!-- Effect label -->
+  <text x="650" y="598" font-size="11.5" fill="#333">⟹ ΔW = BA = 0</text>
+  <text x="650" y="616" font-size="11" fill="#555">at start of training</text>
+
+  <!-- ══════════════════════════════════════════════
+       PART 4: Rank selection visual
+  ═══════════════════════════════════════════════ -->
+
+  <line x1="80" y1="670" x2="740" y2="670" stroke="#ccc" stroke-width="0.8"/>
+  <text x="80" y="694" font-size="13" font-style="italic" fill="#333">§ Effect of Rank r on Expressiveness</text>
+
+  <!-- rank bars -->
+  <g transform="translate(80, 710)">
+    <!-- r=1 -->
+    <rect x="0" y="0" width="12" height="80" fill="#ddd" stroke="#000" stroke-width="1"/>
+    <rect x="26" y="40" width="80" height="12" fill="#ddd" stroke="#000" stroke-width="1"/>
+    <text x="49" y="108" text-anchor="middle" font-size="11" fill="#000">r = 1</text>
+    <text x="49" y="122" text-anchor="middle" font-size="10" fill="#555">minimal</text>
+
+    <!-- r=4 -->
+    <g transform="translate(130,0)">
+      <rect x="0" y="0" width="12" height="80" fill="#ddd" stroke="#000" stroke-width="1"/>
+      <rect x="16" y="0" width="12" height="80" fill="#ddd" stroke="#000" stroke-width="1"/>
+      <rect x="32" y="0" width="12" height="80" fill="#ddd" stroke="#000" stroke-width="1"/>
+      <rect x="48" y="0" width="12" height="80" fill="#ddd" stroke="#000" stroke-width="1"/>
+      <rect x="8" y="52" width="80" height="12" fill="#ddd" stroke="#000" stroke-width="1"/>
+      <rect x="8" y="36" width="80" height="12" fill="#ddd" stroke="#000" stroke-width="1"/>
+      <rect x="8" y="20" width="80" height="12" fill="#ddd" stroke="#000" stroke-width="1"/>
+      <rect x="8" y="4"  width="80" height="12" fill="#ddd" stroke="#000" stroke-width="1"/>
+      <text x="49" y="108" text-anchor="middle" font-size="11" fill="#000">r = 4</text>
+      <text x="49" y="122" text-anchor="middle" font-size="10" fill="#555">typical</text>
+    </g>
+
+    <!-- r=d (full) -->
+    <g transform="translate(280,0)">
+      <rect x="0" y="0" width="80" height="80" fill="url(#denseFill2)" stroke="#000" stroke-width="1"/>
+      <defs>
+        <pattern id="denseFill2" patternUnits="userSpaceOnUse" width="5" height="5">
+          <rect width="5" height="5" fill="#ddd"/>
+          <circle cx="2.5" cy="2.5" r="1" fill="#aaa"/>
+        </pattern>
+      </defs>
+      <text x="40" y="108" text-anchor="middle" font-size="11" fill="#000">r = d</text>
+      <text x="40" y="122" text-anchor="middle" font-size="10" fill="#555">≈ full fine-tune</text>
+    </g>
+
+    <!-- Arrow -->
+    <line x1="380" y1="40" x2="500" y2="40" stroke="#000" stroke-width="1.2" marker-end="url(#arr)"/>
+    <text x="440" y="32" text-anchor="middle" font-size="11" fill="#333">increasing r</text>
+    <text x="440" y="58" text-anchor="middle" font-size="10.5" fill="#555">more params, higher capacity</text>
+  </g>
+
+  <!-- ══════════════════════════════════════════════
+       PART 5: Mathematical Summary Box
+  ═══════════════════════════════════════════════ -->
+
+  <line x1="80" y1="858" x2="740" y2="858" stroke="#ccc" stroke-width="0.8"/>
+
+  <rect x="80" y="872" width="660" height="72" fill="#f9f9f9" stroke="#000" stroke-width="1.2" rx="4"/>
+  <text x="410" y="893" text-anchor="middle" font-size="12" font-weight="bold" fill="#000">Summary: LoRA Objective</text>
+  <text x="410" y="913" text-anchor="middle" font-size="12.5" fill="#000" font-style="italic">
+    min  ℒ(W₀ + BA),   s.t.  rank(BA) ≤ r,  |params(B,A)| = 2dr ≪ d²
+  </text>
+  <text x="410" y="933" text-anchor="middle" font-size="11" fill="#555">
+    W₀ frozen throughout training · only A and B are updated via gradient descent
+  </text>
+
+  <!-- Arrowhead markers -->
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#000"/>
+    </marker>
+    <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#000"/>
+    </marker>
+  </defs>
+
+</svg>
