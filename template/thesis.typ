@@ -36,7 +36,7 @@
   print: false,
   info: (
     title: ("基于大语言模型的ABC音乐生成"),
-    title-en: "GPT2ABC: GPT2-Based ABC Music Generation",
+    title-en: "LLM-Based ABC Music Generation",
     grade: "2024",
     student-id: "2024103289",
     author: "谭盟",
@@ -140,8 +140,92 @@ The main contributions of this thesis are as follows: a dedicated tokenizer desi
 
 //* 符号表
 #notation[
-  / RNN: 循环神经网络
-  / LSTM: 长短期记忆网络
+  // ── 模型与架构缩写 ───────────────────────────────────────────────────────
+  / RNN: 循环神经网络（Recurrent Neural Network）
+  / LSTM: 长短期记忆网络（Long Short-Term Memory）
+  / GPT-2: 生成式预训练Transformer第二版（Generative Pre-trained Transformer 2）
+  / LLaMA: 大语言模型元AI（Large Language Model Meta AI）
+  / LoRA: 大语言模型低秩适配（Low-Rank Adaptation of Large Language Models）
+  / BPE: 字节对编码分词算法（Byte Pair Encoding）
+  / CLM: 因果语言建模（Causal Language Modeling）
+  / MHA: 多头自注意力机制（Multi-Head Attention）
+  / FFN: 位置前馈网络（Feed-Forward Network）
+  / Pre-LN: 前置层归一化残差连接（Pre-Layer Normalization）
+
+  // ── 序列与词表 ───────────────────────────────────────────────────────────
+  / $bold(x)$: ABC记谱序列，$bold(x) = (x_1, x_2, dots, x_T)$
+  / $x_t$: 序列第 $t$ 个位置的token
+  / $T$: 序列长度
+  / $cal(V)$: 词表（token集合）
+  / $cal(V)_"LLaMA"$: LLaMA原生BPE词表，规模32,000
+  / $cal(V)_"ABC"$: 新增的ABC领域专有token集合，规模约1,500
+  / $cal(V)_"ext"$: 扩展后词表，$cal(V)_"ext" = cal(V)_"LLaMA" union cal(V)_"ABC"$，规模约33,500
+  / $angle.l "bos" angle.r$: 序列起始特殊标记（Beginning of Sequence）
+  / $angle.l "eos" angle.r$: 序列终止特殊标记（End of Sequence）
+  / $angle.l "pad" angle.r$: 序列填充特殊标记（Padding Token）
+  / $angle.l "unk" angle.r$: 未知符号特殊标记（Unknown Token）
+
+  // ── 模型表示与维度 ───────────────────────────────────────────────────────
+  / $d_"model"$: 模型隐层维度（嵌入维度）
+  / $d_k$: 单注意力头的键/查询向量维度，$d_k = d_"model" \/ h$
+  / $h$: 注意力头数
+  / $N$: Transformer解码器层数
+  / $bold(E)$: Token嵌入矩阵，$bold(E) in bb(R)^{T times d_"model"}$
+  / $bold(P)$: 可学习位置编码矩阵，$bold(P) in bb(R)^{T times d_"model"}$
+  / $bold(H)^{(l)}$: 第 $l$ 层Transformer的输出隐状态，$bold(H)^{(l)} in bb(R)^{T times d_"model"}$
+  / $bold(W)^E$: 与输入Embedding共享权重的输出投影矩阵，$bold(W)^E in bb(R)^{d_"model" times |cal(V)|}$
+  / $bold(z)_t$: 输出层第 $t$ 步的logits向量
+
+  // ── 注意力机制 ───────────────────────────────────────────────────────────
+  / $bold(Q)_k$: 第 $k$ 个注意力头的查询矩阵（Query）
+  / $bold(K)_k$: 第 $k$ 个注意力头的键矩阵（Key）
+  / $bold(V)_k$: 第 $k$ 个注意力头的值矩阵（Value）
+  / $bold(W)_k^Q, bold(W)_k^K, bold(W)_k^V$: 第 $k$ 头查询、键、值投影权重矩阵
+  / $bold(W)^O$: 多头注意力输出投影权重矩阵
+  / $bold(M)$: 因果掩码矩阵，$bold(M)_{i j} = -infinity$（当 $j > i$ 时），确保自回归特性
+
+  // ── LoRA参数 ─────────────────────────────────────────────────────────────
+  / $bold(W)_0$: 预训练基础权重矩阵（训练中冻结），$bold(W)_0 in bb(R)^{d times k}$
+  / $Delta bold(W)$: 微调阶段的权重更新矩阵，$Delta bold(W) = bold(B) bold(A)$
+  / $bold(A)$: LoRA低秩分解矩阵A，$bold(A) in bb(R)^{r times k}$，高斯随机初始化
+  / $bold(B)$: LoRA低秩分解矩阵B，$bold(B) in bb(R)^{d times r}$，零初始化
+  / $r$: LoRA低秩维度，本文取 $r = 16$
+  / $alpha$: LoRA缩放超参数，本文取 $alpha = 32$；实际缩放比为 $alpha \/ r = 2$
+  / $rho$: LoRA参数压缩比，$rho approx 2r \/ min(d, k)$
+
+  // ── 训练目标与损失 ───────────────────────────────────────────────────────
+  / $theta$: 全部可训练参数（LoRA矩阵与新增token嵌入向量）
+  / $theta_0$: 冻结的预训练权重（原始LLaMA权重）
+  / $cal(D)_"train"$: 训练集
+  / $cal(L)_"CLM"$: 因果语言建模对数似然目标（最大化）
+  / $cal(L)_"CE"$: 交叉熵损失（最小化），$cal(L)_"CE" = -frac(1, |cal(D)|T) sum log P_theta (x_t | x_{<t})$
+
+  // ── 优化器（AdamW） ──────────────────────────────────────────────────────
+  / $bold(g)_t$: 第 $t$ 步梯度
+  / $bold(m)_t$: Adam一阶矩估计（梯度指数移动平均）
+  / $bold(v)_t$: Adam二阶矩估计（梯度平方指数移动平均）
+  / $beta_1$: 一阶矩衰减系数，本文取 $beta_1 = 0.9$
+  / $beta_2$: 二阶矩衰减系数，本文取 $beta_2 = 0.999$
+  / $epsilon$: 数值稳定项，本文取 $epsilon = 10^{-8}$
+  / $eta$: 学习率；基础学习率 $eta_0 = 2 times 10^{-4}$
+  / $lambda$: 权重衰减系数，本文取 $lambda = 0.01$
+  / $T_"warm"$: 学习率线性预热步数，本文取 $T_"warm" = 100$
+
+  // ── 梯度累积与批次 ───────────────────────────────────────────────────────
+  / $B_"step"$: 单步实际批次大小，本文取 $B_"step" = 4$
+  / $G$: 梯度累积步数，本文取 $G = 4$
+  / $B_"eff"$: 有效批次大小，$B_"eff" = B_"step" times G = 16$
+
+  // ── 生成策略 ─────────────────────────────────────────────────────────────
+  / $tau$: 温度参数；$tau < 1$ 分布集中，$tau > 1$ 分布均匀，本文取 $tau = 0.8$
+  / $p$: Top-$p$ 核采样概率质量阈值，本文取 $p = 0.9$
+  / $k$: Top-$k$ 截断采样保留的候选token数
+  / $cal(V)_t^{(p)}$: 第 $t$ 步Top-$p$采样的动态候选集合
+  / $L_"max"$: 自回归生成的最大序列长度，本文取 $L_"max" = 512$
+
+  // ── 评估指标 ─────────────────────────────────────────────────────────────
+  / PPL: 困惑度（Perplexity），$"PPL" = exp(cal(L)_"test")$，越低越好
+  / NLL: 负对数似然（Negative Log-Likelihood），即测试集交叉熵损失
 ]
 
 //* 正文
@@ -1027,7 +1111,7 @@ LLaMA（Large Language Model Meta AI）在数万亿token的多语言、多领域
 
 在迁移学习的视角下，将预训练LLaMA应用于ABC音乐生成的范式可以形式化描述如下。设预训练阶段的目标域为自然语言语料 $cal(D)_"NL"$，目标任务为语言建模；下游任务的目标域为ABC音乐记谱语料 $cal(D)_"ABC"$，目标任务为条件音乐序列生成。迁移学习的核心假设是：预训练阶段学习到的参数 $theta_0$ 已经编码了通用的序列建模归纳偏置，下游微调只需在 $theta_0$ 附近搜索使 $cal(D)_"ABC"$ 似然最大化的参数 $theta^*$，而无需从随机初始化出发：
 
-$ theta^* = arg max_theta cal(L)_"ABC"(theta), quad theta "初始化自" theta_0 $
+$ theta^* = arg max_theta cal(L)_"ABC"(theta), quad theta "initialized from" theta_0 $
 
 这一范式的优势在于两个层面：其一，模型无需在有限的ABC语料上从头学习基础的序列建模机制，大幅降低了对训练数据规模的依赖；其二，预训练阶段积累的通用表示能力（如位置感知、长距离依赖）可直接为音乐结构建模所用，加速收敛并提升生成质量。
 
