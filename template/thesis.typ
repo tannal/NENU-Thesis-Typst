@@ -1100,6 +1100,10 @@ $ P'(x_{t+1} | x_1, dots, x_t) = "softmax"( bold(z)_t / tau ) $
 
 #figure(image("fig/model_test_loss_comparison.png"), caption: [各模型在测试集上的损失曲线]) <fig-loss-curve>
 
+#figure(image("fig/models_perplexity_comparison.png"), caption: [各模型在测试集上的损失曲线]) <fig-perplexity-curve>
+
+
+
 从实验结果可以得出以下结论：
 
 *GPT2ABC全面优于所有基准模型。*在测试损失上，GPT2ABC（0.316）相比性能最接近的Transformer基线（0.483）降低了34.6%，相比LSTM（0.535）降低了40.9%，相比RNN（0.702）降低了54.9%。困惑度指标上，GPT2ABC（1.372）同样显著低于其他模型，说明其对ABC音乐语言的概率分布建模最为精准。
