@@ -35,7 +35,7 @@
   twoside: false,
   print: false,
   info: (
-    title: ("基于大语言模型的ABC音乐生成"),
+    title: "基于大语言模型的ABC音乐生成",
     title-en: "LLM-Based ABC Music Generation",
     grade: "2024",
     student-id: "2024103289",
@@ -94,15 +94,15 @@
 #abstract(
   keywords: ("ABC记谱法", "音乐生成", "序列建模", "GPT-2", "LoRA", "参数高效微调", "深度学习"),
 )[
-音乐自动生成是人工智能与计算音乐学的重要交叉研究方向，旨在使计算机能够自主创作符合音乐规律的作品。ABC记谱法作为一种基于纯文本的音乐符号系统，广泛应用于传统民谣与器乐曲的数字化存储，其结构化语法特性使其天然适合作为序列生成模型的建模对象。然而，现有研究对文本化音乐表示的生成建模关注不足，且缺乏在统一实验条件下对多种序列建模架构进行系统性对比的工作。
+  音乐自动生成是人工智能与计算音乐学的重要交叉研究方向，旨在使计算机能够自主创作符合音乐规律的作品。ABC记谱法作为一种基于纯文本的音乐符号系统，广泛应用于传统民谣与器乐曲的数字化存储，其结构化语法特性使其天然适合作为序列生成模型的建模对象。然而，现有研究对文本化音乐表示的生成建模关注不足，且缺乏在统一实验条件下对多种序列建模架构进行系统性对比的工作。
 
-本文围绕ABC记谱法音乐自动生成任务，从专用分词器设计、多架构序列建模、大语言模型参数高效微调三个层面展开研究。首先，针对ABC记谱法的语义边界特性，设计并实现了ABCTokenizer分词器。该分词器采用贪婪最长匹配策略，将乐谱文本解析为具有音乐语义的最小单元，有效避免了通用分词器对复合符号的错误切分，并通过完整的编解码流水线为下游模型提供结构清晰的序列表示。
+  本文围绕ABC记谱法音乐自动生成任务，从专用分词器设计、多架构序列建模、大语言模型参数高效微调三个层面展开研究。首先，针对ABC记谱法的语义边界特性，设计并实现了ABCTokenizer分词器。该分词器采用贪婪最长匹配策略，将乐谱文本解析为具有音乐语义的最小单元，有效避免了通用分词器对复合符号的错误切分，并通过完整的编解码流水线为下游模型提供结构清晰的序列表示。
 
-其次，在统一超参数配置下实现了RNN、LSTM、Transformer和GPT2ABC四种序列建模架构，并进行了系统性对比实验。实验结果表明，GPT2ABC在测试损失（0.316）和困惑度（1.372）两项指标上全面领先，相比Transformer基线分别降低34.6%和15.3%，同时在参数量（2.52M）与训练效率上与Transformer基本持平，验证了预训练策略对ABC音乐生成任务的显著迁移增益。
+  其次，在统一超参数配置下实现了RNN、LSTM、Transformer和GPT2ABC四种序列建模架构，并进行了系统性对比实验。实验结果表明，GPT2ABC在测试损失（0.316）和困惑度（1.372）两项指标上全面领先，相比Transformer基线分别降低34.6%和15.3%，同时在参数量（2.52M）与训练效率上与Transformer基本持平，验证了预训练策略对ABC音乐生成任务的显著迁移增益。
 
-进一步地，本文提出了基于预训练大语言模型LLaMA-2的参数高效微调方案（LLaMA-LoRA）。通过在LLaMA原生词表基础上扩展约1500个ABC领域专有token构建扩展分词器，并将LoRA低秩适配器注入注意力投影矩阵（秩$r=16$），仅以占总参数0.06%的可训练参数量（约4.2M）实现高质量微调，在单张GPU上6小时内完成训练。实验表明，LLaMA-LoRA在困惑度（15.3）、语法正确率（93.8%）和结构完整性（91.6%）等指标上均优于全部基线方法，人工盲测整体质量评分达4.2/5.0，消融实验进一步确认扩展分词器是最关键的单一贡献组件。
+  进一步地，本文提出了基于预训练大语言模型LLaMA-2的参数高效微调方案（LLaMA-LoRA）。通过在LLaMA原生词表基础上扩展约1500个ABC领域专有token构建扩展分词器，并将LoRA低秩适配器注入注意力投影矩阵（秩$r=16$），仅以占总参数0.06%的可训练参数量（约4.2M）实现高质量微调，在单张GPU上6小时内完成训练。实验表明，LLaMA-LoRA在困惑度（15.3）、语法正确率（93.8%）和结构完整性（91.6%）等指标上均优于全部基线方法，人工盲测整体质量评分达4.2/5.0，消融实验进一步确认扩展分词器是最关键的单一贡献组件。
 
-本文的主要贡献在于：设计了面向ABC记谱法语义结构的专用分词器；首次在统一条件下系统对比了四种序列建模架构在ABC音乐生成任务上的表现；提出并验证了将大语言模型通过LoRA高效迁移至音乐符号生成领域的完整技术方案；建立了涵盖语言建模质量、音乐结构合理性、计算效率与主观质量的多维评估体系，为相关研究提供了可复现的实验基础。
+  本文的主要贡献在于：设计了面向ABC记谱法语义结构的专用分词器；首次在统一条件下系统对比了四种序列建模架构在ABC音乐生成任务上的表现；提出并验证了将大语言模型通过LoRA高效迁移至音乐符号生成领域的完整技术方案；建立了涵盖语言建模质量、音乐结构合理性、计算效率与主观质量的多维评估体系，为相关研究提供了可复现的实验基础。
 ]
 
 //* 英文摘要
@@ -117,15 +117,15 @@
     "deep learning",
   ),
 )[
-Automatic music generation is an important interdisciplinary research direction combining artificial intelligence and computational musicology, aiming to enable computers to autonomously compose musical works that conform to musical principles. ABC notation, as a plain-text music symbol system widely used for digitizing traditional folk and instrumental music, possesses structured syntactic properties that make it naturally suited for sequence generation modeling. However, existing research has paid insufficient attention to generative modeling of text-based music representations, and systematic comparisons of multiple sequence modeling architectures under unified experimental conditions remain lacking.
+  Automatic music generation is an important interdisciplinary research direction combining artificial intelligence and computational musicology, aiming to enable computers to autonomously compose musical works that conform to musical principles. ABC notation, as a plain-text music symbol system widely used for digitizing traditional folk and instrumental music, possesses structured syntactic properties that make it naturally suited for sequence generation modeling. However, existing research has paid insufficient attention to generative modeling of text-based music representations, and systematic comparisons of multiple sequence modeling architectures under unified experimental conditions remain lacking.
 
-This thesis investigates automatic music generation for ABC notation from three perspectives: dedicated tokenizer design, multi-architecture sequence modeling, and parameter-efficient fine-tuning of large language models. First, ABCTokenizer is designed and implemented to address the semantic boundary characteristics of ABC notation. Adopting a greedy longest-match strategy, it parses musical scores into minimal units carrying musical semantics, effectively preventing the erroneous segmentation of composite symbols by general-purpose tokenizers, and provides structurally coherent sequence representations to downstream models through a complete encode-decode pipeline.
+  This thesis investigates automatic music generation for ABC notation from three perspectives: dedicated tokenizer design, multi-architecture sequence modeling, and parameter-efficient fine-tuning of large language models. First, ABCTokenizer is designed and implemented to address the semantic boundary characteristics of ABC notation. Adopting a greedy longest-match strategy, it parses musical scores into minimal units carrying musical semantics, effectively preventing the erroneous segmentation of composite symbols by general-purpose tokenizers, and provides structurally coherent sequence representations to downstream models through a complete encode-decode pipeline.
 
-Second, four sequence modeling architectures—RNN, LSTM, Transformer, and GPT2ABC—are implemented under unified hyperparameter configurations and evaluated systematically. Experimental results show that GPT2ABC achieves the best performance on both test loss (0.316) and perplexity (1.372), outperforming the Transformer baseline by 34.6% and 15.3% respectively, while remaining comparable in parameter count (2.52M) and training efficiency, confirming the significant transfer gain of pre-training for ABC music generation.
+  Second, four sequence modeling architectures—RNN, LSTM, Transformer, and GPT2ABC—are implemented under unified hyperparameter configurations and evaluated systematically. Experimental results show that GPT2ABC achieves the best performance on both test loss (0.316) and perplexity (1.372), outperforming the Transformer baseline by 34.6% and 15.3% respectively, while remaining comparable in parameter count (2.52M) and training efficiency, confirming the significant transfer gain of pre-training for ABC music generation.
 
-Furthermore, this thesis proposes LLaMA-LoRA, a parameter-efficient fine-tuning scheme based on the pre-trained large language model LLaMA-2. An extended tokenizer is constructed by appending approximately 1,500 ABC domain-specific tokens to the native LLaMA vocabulary. LoRA low-rank adapters (rank $r=16$) are injected into the attention projection matrices, enabling high-quality fine-tuning with only 0.06% of total parameters (approximately 4.2M trainable) and completing training on a single GPU within 6 hours. Experiments demonstrate that LLaMA-LoRA outperforms all baselines on perplexity (15.3), syntactic correctness (93.8%), and structural completeness (91.6%), achieving an overall human evaluation score of 4.2/5.0. Ablation studies further confirm that the extended tokenizer is the single most critical contributing component.
+  Furthermore, this thesis proposes LLaMA-LoRA, a parameter-efficient fine-tuning scheme based on the pre-trained large language model LLaMA-2. An extended tokenizer is constructed by appending approximately 1,500 ABC domain-specific tokens to the native LLaMA vocabulary. LoRA low-rank adapters (rank $r=16$) are injected into the attention projection matrices, enabling high-quality fine-tuning with only 0.06% of total parameters (approximately 4.2M trainable) and completing training on a single GPU within 6 hours. Experiments demonstrate that LLaMA-LoRA outperforms all baselines on perplexity (15.3), syntactic correctness (93.8%), and structural completeness (91.6%), achieving an overall human evaluation score of 4.2/5.0. Ablation studies further confirm that the extended tokenizer is the single most critical contributing component.
 
-The main contributions of this thesis are as follows: a dedicated tokenizer designed for the semantic structure of ABC notation; the first systematic comparison of four sequence modeling architectures for ABC music generation under unified conditions; a complete technical scheme for efficiently transferring large language models to musical symbol generation via LoRA, with thorough experimental validation; and a multi-dimensional evaluation framework covering language modeling quality, musical structure soundness, computational efficiency, and subjective quality, providing a reproducible experimental foundation for related research.
+  The main contributions of this thesis are as follows: a dedicated tokenizer designed for the semantic structure of ABC notation; the first systematic comparison of four sequence modeling architectures for ABC music generation under unified conditions; a complete technical scheme for efficiently transferring large language models to musical symbol generation via LoRA, with thorough experimental validation; and a multi-dimensional evaluation framework covering language modeling quality, musical structure soundness, computational efficiency, and subjective quality, providing a reproducible experimental foundation for related research.
 ]
 
 
@@ -160,10 +160,10 @@ The main contributions of this thesis are as follows: a dedicated tokenizer desi
   / $cal(V)_"LLaMA"$: LLaMA原生BPE词表，规模32,000
   / $cal(V)_"ABC"$: 新增的ABC领域专有token集合，规模约1,500
   / $cal(V)_"ext"$: 扩展后词表，$cal(V)_"ext" = cal(V)_"LLaMA" union cal(V)_"ABC"$，规模约33,500
-  / $angle.l "bos" angle.r$: 序列起始特殊标记（Beginning of Sequence）
-  / $angle.l "eos" angle.r$: 序列终止特殊标记（End of Sequence）
-  / $angle.l "pad" angle.r$: 序列填充特殊标记（Padding Token）
-  / $angle.l "unk" angle.r$: 未知符号特殊标记（Unknown Token）
+  / $⟨"bos"⟩$: 序列起始特殊标记（Beginning of Sequence）
+  / $⟨"eos"⟩$: 序列终止特殊标记（End of Sequence）
+  / $⟨"pad"⟩$: 序列填充特殊标记（Padding Token）
+  / $⟨"unk"⟩$: 未知符号特殊标记（Unknown Token）
 
   // ── 模型表示与维度 ───────────────────────────────────────────────────────
   / $d_"model"$: 模型隐层维度（嵌入维度）
@@ -329,7 +329,7 @@ OpenAI的MuseNet（Payne，2019）将GPT-2架构直接应用于多乐器MIDI序�
 
 **（一）ABCTokenizer专用分词器的设计与实现**
 
-针对ABC记谱法的语法结构特点，设计基于贪婪最长匹配（Greedy Longest-Match）策略的专用分词算法。词表构建覆盖音高符号（C至B及大小写变体）、时值标记（数字与分数形式）、调性与节拍声明（"K:"、"M:"、"L:"等字段前缀及其复合形式）、装饰音符号（波音、倚音等）、各类小节线变体（"|"、"||"、"|:"、":|"等），以及$angle.l "bos" angle.r$、$angle.l "eos" angle.r$、$angle.l "pad" angle.r$、$angle.l "unk" angle.r$等序列控制特殊token。实现完整的编码、解码与持久化接口，为模型训练和推理提供标准化预处理支持。
+针对ABC记谱法的语法结构特点，设计基于贪婪最长匹配（Greedy Longest-Match）策略的专用分词算法。词表构建覆盖音高符号（C至B及大小写变体）、时值标记（数字与分数形式）、调性与节拍声明（"K:"、"M:"、"L:"等字段前缀及其复合形式）、装饰音符号（波音、倚音等）、各类小节线变体（"|"、"||"、"|:"、":|"等），以及$⟨ "bos" ⟩$、$⟨ "eos" ⟩$、$⟨ "pad" ⟩$、$⟨ "unk" ⟩$等序列控制特殊token。实现完整的编码、解码与持久化接口，为模型训练和推理提供标准化预处理支持。
 
 **（二）四种序列建模架构的统一实现**
 
@@ -341,7 +341,7 @@ OpenAI的MuseNet（Payne，2019）将GPT-2架构直接应用于多乐器MIDI序�
 
 **（四）基于LLaMA-LoRA的大模型迁移方案**
 
-设计面向LLaMA的ABC扩展分词器（在原生32,000 token词表基础上新增约1,500个ABC领域专有token），基于LoRA#cite(<hu2022lora>)对Q、K、V、O注意力投影矩阵注入低秩适配器（秩$r=16$，缩放因子$ alpha=32$），结合AdamW优化器、线性预热学习率调度和梯度累积策略，在单张GPU上实现LLaMA-2-7B的高效ABC音乐微调，并通过与多种基线方法的对比实验验证方案的有效性。
+设计面向LLaMA的ABC扩展分词器（在原生32,000 token词表基础上新增约1,500个ABC领域专有token），基于LoRA#cite(<hu2022lora>)对Q、K、V、O注意力投影矩阵注入低秩适配器（秩$r=16$，缩放因子$alpha=32$），结合AdamW优化器、线性预热学习率调度和梯度累积策略，在单张GPU上实现LLaMA-2-7B的高效ABC音乐微调，并通过与多种基线方法的对比实验验证方案的有效性。
 
 **（五）系统性实验分析与消融研究**
 
@@ -442,15 +442,15 @@ OpenAI的MuseNet（Payne，2019）将GPT-2架构直接应用于多乐器MIDI序�
 //     [配置项], [参数],
 //     table.hline(stroke: 1pt),
 //     [处理器型号], [Intel(R) Core(TM) i9-12900K],
-//     [内存容量], [32GB], 
-//     [硬盘容量], [1TB], 
-//     [显卡型号], [GEFORCE RTX 4090], 
+//     [内存容量], [32GB],
+//     [硬盘容量], [1TB],
+//     [显卡型号], [GEFORCE RTX 4090],
 //     table.hline(stroke: 1.5pt),
 //   ),
 //   caption: [三线表示例],
 // )<three-line-table>
 
-#import "../utils/grid-table.typ": three-line-table, highlight-table
+#import "../utils/grid-table.typ": highlight-table, three-line-table
 也可使用 `three-line-table`函数创建三线表。
 
 #figure(
@@ -459,38 +459,48 @@ OpenAI的MuseNet（Payne，2019）将GPT-2架构直接应用于多乐器MIDI序�
     columns: 4,
     inset: 0.5em,
     stroke: none,
-    [x], [y], [z], [t],
-    [11], [5 ms], [3], [0.7],
-    [3000], [80 ms], [1111], [0.9],
+    [x],
+    [y],
+    [z],
+    [t],
+    [11],
+    [5 ms],
+    [3],
+    [0.7],
+    [3000],
+    [80 ms],
+    [1111],
+    [0.9],
   ),
   caption: [三线表示例2],
 )<three-line-table2>
 
 可使用 `highlight-table` 高亮某些列的最值，示例如下：
 #figure(
-caption: [自动加粗最值示例],
-highlight-table(
-  columns: 4,
-  // 仅配置规则即可：1列取最小值，2列取最大值
-  rules: ("1": "min", "2": "max"),
-  inset: 5pt,
-  [Model],
-  [Vina Score],
-  [QED],
-  [LogP],
-  "DEPACT",
-  (-6.632, 0.18),
-  0.45,
-  2.1,
-  "PocketGen",
-  (-7.135, 0.08),
-  0.78,
-  3.1,
-  "DiffPocket",
-  (-7.599, 0.15),
-  0.60,
-  2.5,
-))
+  caption: [自动加粗最值示例],
+  highlight-table(
+    columns: 4,
+    // 仅配置规则即可：1列取最小值，2列取最大值
+    rules: ("1": "min", "2": "max"),
+    inset: 5pt,
+    [Model],
+    [Vina Score],
+    [QED],
+    [LogP],
+    "DEPACT",
+    (-6.632, 0.18),
+    0.45,
+    2.1,
+    "PocketGen",
+    (-7.135, 0.08),
+    0.78,
+    3.1,
+    "DiffPocket",
+    (-7.599, 0.15),
+    0.60,
+    2.5,
+  ),
+)
 
 // === 图片
 
@@ -605,7 +615,7 @@ $ "Attention"(Q, K, V) = "softmax"((Q K^T) / sqrt(d_k)) V $
 
 其中：
 - $Q = X W_Q$：查询矩阵 (Query)
-- $K = X W_K$：键矩阵 (Key)  
+- $K = X W_K$：键矩阵 (Key)
 - $V = X W_V$：值矩阵 (Value)
 - $d_k$：键向量的维度
 - $X$：输入表示
@@ -754,26 +764,26 @@ LSTM相比传统RNN的主要优势在于其能够维持长期记忆。在传统R
 #定义(编号: "1", 名称: "低秩分解")[
   设 $W_0 in RR^(d_"out" times d_"in")$ 为预训练权重矩阵，$r in NN^+$ 为秩超参数，满足 $r min(d_"out", d_"in")$。LoRA 将权重更新量参数化为两个低秩矩阵之积：
   $
-  Delta W = B A, quad B in RR^(d_"out" times r),quad A in RR^(r times d_"in").
+    Delta W = B A, quad B in RR^(d_"out" times r),quad A in RR^(r times d_"in").
   $
 ]
 
 在此参数化下，含适配器的前向传播为
 
 $
-h = W_0 x + Delta W x = W_0 x + B A x, quad x in RR^(d_"in"),
+  h = W_0 x + Delta W x = W_0 x + B A x, quad x in RR^(d_"in"),
 $ <eq:forward>
 
 其中 $W_0$ 在整个训练过程中保持冻结，仅 $A$ 与 $B$ 参与梯度更新。为保证适配开始时模型行为与预训练基线完全一致，两矩阵按如下方式初始化：
 
 $
-A tilde cal(N)(0, sigma^2), quad B = bold(0),
+  A tilde cal(N)(0, sigma^2), quad B = bold(0),
 $ <eq:init>
 
 从而在训练第 $0$ 步时有 $Delta W = B A = bold(0)$。实际前向传播中，乘积 $B A x$ 还需乘以缩放因子 $alpha \/ r$，得到完整形式：
 
 $
-h = W_0 x + frac(alpha, r) dot B A x,
+  h = W_0 x + frac(alpha, r) dot B A x,
 $ <eq:scaled>
 
 其中 $alpha$ 为固定超参数。引入 $alpha \/ r$ 的目的在于将适配器的有效学习率与秩 $r$ 的选取解耦——改变 $r$ 时无需重新调整 $alpha$，提升了超参搜索的便利性。
@@ -783,7 +793,7 @@ $ <eq:scaled>
 以方阵情形 $d_"out" = d_"in" = d$ 为例，全量微调对应 $d^2$ 个可训练参数，而 LoRA 仅需：
 
 $
-|theta_"LoRA"| = d r + r d = 2 d r.
+  |theta_"LoRA"| = d r + r d = 2 d r.
 $
 
 参数压缩比为
@@ -791,7 +801,7 @@ $
 #set math.equation(numbering: "1.")
 
 $
-rho = frac(d^2, 2 d r) = frac(d, 2r).
+  rho = frac(d^2, 2 d r) = frac(d, 2r).
 $ <eq:ratio>
 
 由式 @eq:ratio 可知，当 $d = 4096$、$r = 4$ 时，$rho = 512$，即可训练参数量仅为全量微调的 $1 \/ 512 approx 0.20\%$。表 @tbl:params 给出了若干主流模型在典型秩配置下的具体数据。
@@ -802,13 +812,11 @@ $ <eq:ratio>
     align: (left, center, center, center),
     stroke: 0.5pt,
     inset: 6.5pt,
-    table.header(
-      [*模型*], [*$d$*], [*秩 $r$*], [*可训练参数占比*],
-    ),
-    [GPT-2 Medium],   [1 024],  [4],  [0.38%],
-    [LLaMA-2 7B],     [4 096],  [8],  [0.10%],
-    [LLaMA-2 13B],    [5 120],  [16], [0.16%],
-    [GPT-3 175B],     [12 288], [64], [0.05%],
+    table.header([*模型*], [*$d$*], [*秩 $r$*], [*可训练参数占比*]),
+    [GPT-2 Medium], [1 024], [4], [0.38%],
+    [LLaMA-2 7B], [4 096], [8], [0.10%],
+    [LLaMA-2 13B], [5 120], [16], [0.16%],
+    [GPT-3 175B], [12 288], [64], [0.05%],
   ),
   caption: [主流模型在典型 LoRA 配置下的可训练参数占比（相对于完整模型参数量）。],
 ) <tbl:params>
@@ -858,7 +866,7 @@ ABC记谱法是一种面向文本的音乐符号系统，广泛用于传统民�
 
 ABCTokenizer的核心分词逻辑采用**贪婪最长匹配（Greedy Longest-Match）**策略。其基本思想是：在处理ABC乐谱文本时，字符的含义往往取决于其组合方式。例如，\^表示升号，但\^\^表示重升号；单独的|是普通小节线，而|:则是重复起始记号。若简单地逐字符拆分，就会丢失这种组合语义。贪婪最长匹配策略通过优先尝试最长可能的子串是否在词表中，从而确保复合符号不被错误拆分。
 
-算法的执行流程如下：维护一个指针$i$，初始指向文本首部。在每一步，算法并不立刻断定当前字符构成一个Token，而是向后预看最多$italic("max\_len")$个字符（本文设定为4），依次检查长度为4、3、2、1的子串是否在词表$italic("Vocab")$中。一旦找到匹配，则将该子串记录为一个Token，并将指针$i$向后移动相应步长。若所有长度均无法匹配，则将当前字符标记为$angle.l "unk" angle.r$（未知符号），指针后移一位，保证算法的鲁棒性。
+算法的执行流程如下：维护一个指针$i$，初始指向文本首部。在每一步，算法并不立刻断定当前字符构成一个Token，而是向后预看最多$italic("max\_len")$个字符（本文设定为4），依次检查长度为4、3、2、1的子串是否在词表$italic("Vocab")$中。一旦找到匹配，则将该子串记录为一个Token，并将指针$i$向后移动相应步长。若所有长度均无法匹配，则将当前字符标记为$⟨ "unk" ⟩$（未知符号），指针后移一位，保证算法的鲁棒性。
 
 #figure(
   kind: "algorithm",
@@ -875,39 +883,39 @@ ABCTokenizer的核心分词逻辑采用**贪婪最长匹配（Greedy Longest-Mat
         + *end*
       + *end*
       + *if* not $italic("found")$ *then*
-        + $T."append"(angle.l "unk" angle.r)$, $i arrow.l i + 1$
+        + $T."append"(⟨ "unk" ⟩)$, $i arrow.l i + 1$
       + *end*
     + *end*
     + *return* $T$
   ],
-  caption: [分词算法（贪婪最长匹配）的伪代码]
+  caption: [分词算法（贪婪最长匹配）的伪代码],
 ) <algo_tokenize>
 
-这种"从长到短"的优先策略确保了"|:"（重复起始小节线）不会被错误地拆分为"|"和":"，"\^\^"（重升号）也不会被分解为两个独立的"\^"。相比之下，若采用短匹配优先策略，则复合符号的语义将无法得到正确保留。对未知字符的容错处理（回退到$angle.l "unk" angle.r$）进一步保证了分词器在面对非标准输入时的稳健性，不会因遭遇非法字符而崩溃。
+这种"从长到短"的优先策略确保了"|:"（重复起始小节线）不会被错误地拆分为"|"和":"，"\^\^"（重升号）也不会被分解为两个独立的"\^"。相比之下，若采用短匹配优先策略，则复合符号的语义将无法得到正确保留。对未知字符的容错处理（回退到$⟨ "unk" ⟩$）进一步保证了分词器在面对非标准输入时的稳健性，不会因遭遇非法字符而崩溃。
 
 
 === 数值编码
 
 编码阶段是将人类可读的符号序列转化为计算机可运算的数值序列的桥梁。除了基本的符号到整数索引的映射，编码算法还引入了深度学习中至关重要的序列边界标记（Special Tokens）。
 
-在ABC乐谱生成任务中，模型需要明确感知一段旋律的起止边界。因此，算法在调用$italic("tokenize")$函数获得原始token序列后，会在序列头部插入$angle.l "bos" angle.r$（Beginning of Sequence）标识符，在尾部插入$angle.l "eos" angle.r$（End of Sequence）标识符。这些特殊ID帮助模型在训练时识别旋律的完整结构边界，类似于给乐谱加上明确的"开始"与"结束"信号，使模型能够在生成阶段判断何时终止序列延伸。
+在ABC乐谱生成任务中，模型需要明确感知一段旋律的起止边界。因此，算法在调用$italic("tokenize")$函数获得原始token序列后，会在序列头部插入$⟨ "bos" ⟩$（Beginning of Sequence）标识符，在尾部插入$⟨ "eos" ⟩$（End of Sequence）标识符。这些特殊ID帮助模型在训练时识别旋律的完整结构边界，类似于给乐谱加上明确的"开始"与"结束"信号，使模型能够在生成阶段判断何时终止序列延伸。
 
-对于每一个分出的Token，算法查表获取其对应的唯一整数索引$v$。若某个Token意外地未出现在预设词表中，则强制将其编码为$angle.l "unk" angle.r$的索引，确保输出的数值张量维度完整，便于后续的嵌入（Embedding）计算。
+对于每一个分出的Token，算法查表获取其对应的唯一整数索引$v$。若某个Token意外地未出现在预设词表中，则强制将其编码为$⟨ "unk" ⟩$的索引，确保输出的数值张量维度完整，便于后续的嵌入（Embedding）计算。
 
 #figure(
   kind: "algorithm",
   pseudocode-list(booktabs: true, numbered-title: [Numerical Encoding])[
     + *function* $italic("encode")("text", italic("add_special"))$
     + $T arrow.l italic("tokenize")("text")$, $I arrow.l [ ]$
-    + *if* $italic("add_special")$ *then* $I."append"(italic("ID")(angle.l "bos" angle.r))$
+    + *if* $italic("add_special")$ *then* $I."append"(italic("ID")(⟨ "bos" ⟩))$
     + *for* each $t in T$ *do*
-      + $v arrow.l italic("ID")(t)$ if $t in italic("Vocab")$ else $italic("ID")(angle.l "unk" angle.r)$
+      + $v arrow.l italic("ID")(t)$ if $t in italic("Vocab")$ else $italic("ID")(⟨ "unk" ⟩)$
       + $I."append"(v)$
     + *end*
-    + *if* $italic("add_special")$ *then* $I."append"(italic("ID")(angle.l "eos" angle.r))$
+    + *if* $italic("add_special")$ *then* $I."append"(italic("ID")(⟨ "eos" ⟩))$
     + *return* $I$
   ],
-  caption: [数值编码算法的伪代码]
+  caption: [数值编码算法的伪代码],
 ) <algo_encode>
 
 
@@ -915,7 +923,7 @@ ABCTokenizer的核心分词逻辑采用**贪婪最长匹配（Greedy Longest-Mat
 
 解码是编码的逆过程，但并非简单的查表拼接。其核心任务是从包含控制符号的数值序列中提炼并还原出纯净的ABC Notation文本。当模型生成一串数字ID后，解码器逐一将其翻译回字符串形式。
 
-然而，模型推理过程中会产生大量对于乐谱本身没有音乐意义的控制性符号，包括填充符$angle.l "pad" angle.r$（用于对齐序列长度）、边界符$angle.l "bos" angle.r$与$angle.l "eos" angle.r$，以及可能出现的$angle.l "unk" angle.r$。解码逻辑中加入了过滤分支：只有当Token不属于这些技术性标识符集合时，才被允许进入最终的字符串缓冲区$S$。最后通过$italic("join")(S)$操作将离散的音符、节拍记号、调式声明拼接为完整的、符合标准ABC语法的乐谱文本，供后续的打谱软件或音频合成器使用。
+然而，模型推理过程中会产生大量对于乐谱本身没有音乐意义的控制性符号，包括填充符$⟨ "pad" ⟩$（用于对齐序列长度）、边界符$⟨ "bos" ⟩$与$⟨ "eos" ⟩$，以及可能出现的$⟨ "unk" ⟩$。解码逻辑中加入了过滤分支：只有当Token不属于这些技术性标识符集合时，才被允许进入最终的字符串缓冲区$S$。最后通过$italic("join")(S)$操作将离散的音符、节拍记号、调式声明拼接为完整的、符合标准ABC语法的乐谱文本，供后续的打谱软件或音频合成器使用。
 
 #figure(
   kind: "algorithm",
@@ -924,13 +932,13 @@ ABCTokenizer的核心分词逻辑采用**贪婪最长匹配（Greedy Longest-Mat
     + $S arrow.l [ ]$
     + *for* each $i d in "ids"$ *do*
       + $t arrow.l italic("Token")(i d)$
-      + *if* $t thin cancel(in) thin \{angle.l "pad" angle.r, angle.l "unk" angle.r, angle.l "bos" angle.r, angle.l "eos" angle.r\}$ *then*
+      + *if* $t thin cancel(in) thin \{⟨ "pad" ⟩, ⟨ "unk" ⟩, ⟨ "bos" ⟩, ⟨ "eos" ⟩\}$ *then*
         + $S."append"(t)$
       + *end*
     + *end*
     + *return* $italic("join")(S)$
   ],
-  caption: [字符串解码算法的伪代码]
+  caption: [字符串解码算法的伪代码],
 ) <algo_decode>
 
 综合上述三个模块，ABCTokenizer形成了一套完整的音乐文本处理流水线：输入原始ABC字符串，经贪婪最长匹配分词后得到语义明确的token序列，再附加边界标记并映射为数值索引作为模型输入；模型输出的索引序列则经解码器还原为可读的乐谱文本。相比字符级或通用BPE分词方案，ABCTokenizer能够更好地保留乐谱的结构信息，减少稀有符号和过长序列带来的建模负担，为后续的GPT2ABC模型提供语义清晰、结构合理的输入表示。
@@ -961,7 +969,9 @@ $ bold(H)^{(0)} = bold(E) + bold(P) $
 
 **多头自注意力机制**通过在$h$个注意力头上并行计算键值查询关联，使模型能够同时关注序列中不同位置的多种依赖关系。对于第$l$层输入$bold(H)^{(l-1)}$，第$k$个注意力头的计算过程为：
 
-$ bold(Q)_k = bold(H)^{(l-1)} bold(W)_k^Q, quad bold(K)_k = bold(H)^{(l-1)} bold(W)_k^K, quad bold(V)_k = bold(H)^{(l-1)} bold(W)_k^V $
+$
+  bold(Q)_k = bold(H)^{(l-1)} bold(W)_k^Q, quad bold(K)_k = bold(H)^{(l-1)} bold(W)_k^K, quad bold(V)_k = bold(H)^{(l-1)} bold(W)_k^V
+$
 
 $ "Attn"_k = "softmax"( (bold(Q)_k bold(K)_k^top) / sqrt(d_k) + bold(M) ) bold(V)_k $
 
@@ -1005,7 +1015,7 @@ $ cal(L) = - 1/T sum_(t=1)^T log P(x_t | x_1, dots, x_{t-1}) $
 
 === 生成策略
 
-在生成阶段，GPT2ABC采用自回归采样方式。给定一个起始片段（如包含调性、节拍等元信息的ABC头部），模型根据当前上下文预测下一个token的概率分布，然后从该分布中采样得到实际生成的token，将其追加到序列末尾，再作为下一步预测的输入。此过程反复迭代，直至生成$angle.l "eos" angle.r$或达到预设的最大长度。
+在生成阶段，GPT2ABC采用自回归采样方式。给定一个起始片段（如包含调性、节拍等元信息的ABC头部），模型根据当前上下文预测下一个token的概率分布，然后从该分布中采样得到实际生成的token，将其追加到序列末尾，再作为下一步预测的输入。此过程反复迭代，直至生成$⟨ "eos" ⟩$或达到预设的最大长度。
 
 为平衡生成的多样性与质量，本文在采样阶段引入了以下调控机制：
 
@@ -1159,7 +1169,7 @@ $ theta^* = arg max_theta cal(L)_"ABC"(theta), quad theta "initialized from" the
 
 这一范式的优势在于两个层面：其一，模型无需在有限的ABC语料上从头学习基础的序列建模机制，大幅降低了对训练数据规模的依赖；其二，预训练阶段积累的通用表示能力（如位置感知、长距离依赖）可直接为音乐结构建模所用，加速收敛并提升生成质量。
 
-然而，直接对LLaMA-7B进行全参数微调面临严峻的计算资源挑战。完整微调需要更新全部70亿个参数，不仅需要存储与参数等量的梯度张量和优化器状态（Adam优化器需额外存储一阶矩与二阶矩，共需约 $3 times 7 text{B}$ 个浮点数的额外显存），还需要数十小时的训练迭代才能收敛。此外，在数据规模有限（约10,000首乐曲）的情形下，全参数微调面临显著的过拟合风险，可能破坏预训练阶段习得的通用表示。为此，本研究采用LoRA参数高效微调技术，在极大降低计算代价的同时有效规避过拟合，使得在单张消费级GPU上进行高质量微调成为可能。
+然而，直接对LLaMA-7B进行全参数微调面临严峻的计算资源挑战。完整微调需要更新全部70亿个参数，不仅需要存储与参数等量的梯度张量和优化器状态（Adam优化器需额外存储一阶矩与二阶矩，共需约 $3 times 7 B$ 个浮点数的额外显存），还需要数十小时的训练迭代才能收敛。此外，在数据规模有限（约10,000首乐曲）的情形下，全参数微调面临显著的过拟合风险，可能破坏预训练阶段习得的通用表示。为此，本研究采用LoRA参数高效微调技术，在极大降低计算代价的同时有效规避过拟合，使得在单张消费级GPU上进行高质量微调成为可能。
 
 
 === 面向ABC记谱法的扩展分词器
@@ -1187,19 +1197,21 @@ LLaMA原生分词器基于字节对编码（Byte Pair Encoding, BPE）算法，�
 
 **步骤二：符号去重与合法性验证**。对提取的候选符号集合进行去重，并通过ABC语法解析器验证其合法性，剔除由文本噪声产生的无效符号。
 
-**步骤三：词表合并**。将经验证的ABC特殊token集合 $cal{V}_"ABC"$ 附加至原生词表 $cal{V}_"LLaMA"}$（保留原有32,000个token不变），构建扩展词表：
+**步骤三：词表合并**。将经验证的ABC特殊token集合 $cal(V)_"ABC"$ 附加至原生词表 $cal(V)_"LLaMA"}$（保留原有32,000个token不变），构建扩展词表：
 
-$ cal{V}_"ext" = cal{V}_"LLaMA" union cal{V}_"ABC" $
+$ cal(V)_"ext" = cal(V)_"LLaMA" union cal(V)_"ABC" $
 
 扩展后词表规模约为33,500个token，新增约1,500个ABC领域专有token。
 
-**步骤四：Embedding层扩展**。相应地扩展模型的token embedding矩阵 $bold(E) in bb(R)^{|cal{V}_"LLaMA"| times d}$ 为 $bold(E)' in bb(R)^{|cal{V}_"ext"| times d}$。对于原有词表中的token，直接继承预训练的embedding向量：
+**步骤四：Embedding层扩展**。相应地扩展模型的token embedding矩阵 $bold(E) in bb(R)^{|cal(V)_"LLaMA"| times d}$ 为 $bold(E)' in bb(R)^{|cal(V)_"ext"| times d}$。对于原有词表中的token，直接继承预训练的embedding向量：
 
-$ bold(E)'[i] = bold(E)[i], quad forall i in cal{V}_"LLaMA" $
+$ bold(E)'[i] = bold(E)[i], quad forall i in cal(V)_"LLaMA" $
 
 对于新增ABC特殊token，其embedding向量采用均值初始化策略——以原有词表embedding矩阵的列均值为初始值，并叠加小幅随机扰动：
 
-$ bold(E)'[j] = frac(1, |cal{V}_"LLaMA"|) sum_(i in cal{V}_"LLaMA") bold(E)[i] + epsilon, quad epsilon tilde cal{N}(0, sigma^2 bold(I})), quad forall j in cal{V}_"ABC" $
+$
+  bold(E)'[j] = frac(1, |cal(V)_"LLaMA"|) sum_(i in cal(V)_"LLaMA") bold(E)[i] + epsilon, quad epsilon tilde cal(N)(0, sigma^2 bold(I})), quad forall j in cal(V)_"ABC"
+$
 
 其中$sigma$为较小的标准差（本文取$sigma = 0.02$）。相比完全随机初始化，均值初始化使新增token的初始表示位于原有embedding空间的中心区域，在微调早期能够更稳定地接收梯度信号，加速新增token语义的学习。在微调过程中，新增token的embedding向量随LoRA适配器一同更新，逐步习得与ABC记谱法相关的语义表示——例如，小节线"|"的embedding会编码段落边界语义，调号"K:G"的embedding会编码G大调的音阶特性。
 
@@ -1218,7 +1230,9 @@ $ bold(W) = bold(W)_0 + Delta bold(W) $
 
 LoRA将 $Delta bold(W)$ 约束为秩 $r$ 的矩阵，通过两个低维矩阵的乘积表示：
 
-$ Delta bold(W) = bold(B) bold(A), quad bold(B) in bb(R)^{d times r}, quad bold(A) in bb(R)^{r times k}, quad r min(d, k) $
+$
+  Delta bold(W) = bold(B) bold(A), quad bold(B) in bb(R)^{d times r}, quad bold(A) in bb(R)^{r times k}, quad r min(d, k)
+$
 
 在前向传播中，对于输入向量 $bold(x) in bb(R)^k$，输出计算为：
 
@@ -1230,13 +1244,13 @@ $ bold(h) = bold(W)_0 bold(x) + frac(alpha, r) bold(B) bold(A) bold(x) $
 
 其中 $alpha$ 为超参数，本研究设置为32。该缩放因子确保低秩更新既不过小（无法适配任务）也不过大（破坏预训练知识）。
 
-在参数初始化策略上，矩阵 $bold(A)$ 采用高斯随机初始化 $bold(A) tilde cal{N}(0, sigma^2 bold(I))$，而矩阵 $bold(B)$ 初始化为零矩阵。这一非对称初始化策略确保训练起始阶段 $Delta bold(W) = bold(B)bold(A) = bold(0)$，即LoRA的加入不改变模型的初始预测行为，保证训练的稳定性。
+在参数初始化策略上，矩阵 $bold(A)$ 采用高斯随机初始化 $bold(A) tilde cal(N)(0, sigma^2 bold(I))$，而矩阵 $bold(B)$ 初始化为零矩阵。这一非对称初始化策略确保训练起始阶段 $Delta bold(W) = bold(B)bold(A) = bold(0)$，即LoRA的加入不改变模型的初始预测行为，保证训练的稳定性。
 
 ==== 参数效率分析
 
 相比完整微调，LoRA的参数效率可以量化如下。对于一个形状为 $d times k$ 的权重矩阵，完整微调需要更新 $d times k$ 个参数，而LoRA仅需更新 $(d + k) times r$ 个参数（矩阵 $bold(A)$ 和 $bold(B)$ 的参数之和）。参数压缩比为：
 
-$ rho = frac{(d + k) times r}{d times k} approx frac{2r}{min(d,k)} $
+$ rho = frac((d + k) times r, d times k) approx frac(2r, min(d, k)) $
 
 对于LLaMA-7B中典型的注意力投影矩阵（$d = k = 4096$，$r = 16$），压缩比约为 $rho approx 2 times 16 / 4096 approx 0.78%$，即LoRA参数量仅为完整微调的不足1%。
 
@@ -1293,13 +1307,15 @@ LLaMA-LoRA沿用因果语言建模（Causal Language Modeling，CLM）作为训�
 
 $ P_theta (bold(x)) = product_(t=1)^T P_theta (x_t | x_1, dots, x_{t-1}) $
 
-训练目标为最大化训练集 $cal{D}_"train"}$ 上的对数似然：
+训练目标为最大化训练集 $cal(D)_"train"}$ 上的对数似然：
 
-$ cal{L}_"CLM"(theta) = sum_(bold(x) in cal{D}_"train"}) sum_(t=1)^T log P_theta (x_t | x_1, dots, x_{t-1}) $
+$ cal(L)_"CLM"(theta) = sum_(bold(x) in cal(D)_"train"}) sum_(t=1)^T log P_theta (x_t | x_1, dots, x_{t-1}) $
 
 等价地，最小化负对数似然（交叉熵损失）：
 
-$ cal{L}_"CE"(theta) = - frac(1, |cal{D}_"train"| dot T) sum_(bold(x) in cal{D}_"train"}) sum_(t=1)^T log P_theta (x_t | x_(< t)) $
+$
+  cal(L)_"CE"(theta) = - frac(1, |cal(D)_"train"| dot T) sum_(bold(x) in cal(D)_"train"}) sum_(t=1)^T log P_theta (x_t | x_(< t))
+$
 
 其中 $theta$ 表示全部可训练参数（即LoRA矩阵 $\{bold(A)_i, bold(B)_i\}$ 与新增token的embedding向量），冻结参数 $theta_0$（原始LLaMA权重）不参与梯度计算。
 
@@ -1309,19 +1325,23 @@ $ cal{L}_"CE"(theta) = - frac(1, |cal{D}_"train"| dot T) sum_(bold(x) in cal{D}_
 
 优化器选用AdamW，其更新规则在标准Adam基础上引入权重衰减（weight decay）作为L2正则化的一种近似形式，以抑制参数过度增长：
 
-$ bold(m)_t &= beta_1 bold(m)_{t-1} + (1 - beta_1) bold(g)_t \
-bold(v)_t &= beta_2 bold(v)_{t-1} + (1 - beta_2) bold(g)_t^2 \
-hat(bold(m))_t &= bold(m)_t / (1 - beta_1^t), quad hat(bold(v))_t = bold(v)_t / (1 - beta_2^t) \
-theta_t &= theta_{t-1} - eta frac(hat(bold(m))_t, sqrt(hat(bold(v))_t) + epsilon) - eta lambda theta_{t-1} $
+$
+       bold(m)_t & = beta_1 bold(m)_{t-1} + (1 - beta_1) bold(g)_t \
+       bold(v)_t & = beta_2 bold(v)_{t-1} + (1 - beta_2) bold(g)_t^2 \
+  hat(bold(m))_t & = bold(m)_t / (1 - beta_1^t), quad hat(bold(v))_t = bold(v)_t / (1 - beta_2^t) \
+         theta_t & = theta_{t-1} - eta frac(hat(bold(m))_t, sqrt(hat(bold(v))_t) + epsilon) - eta lambda theta_{t-1}
+$
 
 其中 $bold(g)_t$ 为当前步梯度，$beta_1 = 0.9$，$beta_2 = 0.999$，$epsilon = 10^{-8}$，权重衰减系数 $lambda = 0.01$，基础学习率 $eta = 2 times 10^{-4}$。
 
 学习率调度采用线性预热（Linear Warmup）策略：在训练前 $T_"warm" = 100$ 步内，学习率从0线性递增至基础学习率 $eta_0$；此后保持恒定直至训练结束：
 
-$ eta_t = cases(
-  eta_0 dot t / T_"warm" \, & t <= T_"warm",
-  eta_0 \, & t > T_"warm"
-) $
+$
+  eta_t = cases(
+    eta_0 dot t / T_"warm" \, & t <= T_"warm",
+    eta_0 \, & t > T_"warm"
+  )
+$
 
 预热阶段通过抑制训练初期的大幅参数更新，避免随机初始化的LoRA矩阵在早期产生过大的梯度扰动，保护预训练权重的稳定性。
 
@@ -1354,15 +1374,15 @@ $ B_"eff" = B_"step" times G = 4 times 4 = 16 $
 
 $ x_{T_0 + t} tilde P_theta (x | x_{1:T_0 + t - 1}), quad t = 1, 2, dots $
 
-直至采样到 $angle.l "eos" angle.r$ 标记或序列长度达到预设上限 $L_"max" = 512$。
+直至采样到 $⟨ "eos" ⟩$ 标记或序列长度达到预设上限 $L_"max" = 512$。
 
 ==== 温度缩放
 
 为调节生成多样性与质量的平衡，引入温度参数 $tau in (0, +infinity)$ 对输出logits进行缩放：
 
-$ P_tau (x_t = v | x_{< t}) = frac(exp(bold(z)_t[v] / tau), sum_{v' in cal{V}_"ext"} exp(bold(z)_t[v'] / tau)) $
+$ P_tau (x_t = v | x_{< t}) = frac(exp(bold(z)_t[v] / tau), sum_{v' in cal(V)_"ext"} exp(bold(z)_t[v'] / tau)) $
 
-温度 $ tau \to 0$ 时，分布退化为贪心解码（argmax）；$tau = 1$ 时为原始模型分布；$ tau > 1$ 时分布趋于均匀，多样性增加但质量下降；$tau < 1$ 时分布集中于高概率token，质量提升但多样性降低。本研究设置 $tau = 0.8$，使分布略微向高概率区间集中，在保持生成稳定性的同时保留适度的旋律变化。
+温度 $tau \to 0$ 时，分布退化为贪心解码（argmax）；$tau = 1$ 时为原始模型分布；$tau > 1$ 时分布趋于均匀，多样性增加但质量下降；$tau < 1$ 时分布集中于高概率token，质量提升但多样性降低。本研究设置 $tau = 0.8$，使分布略微向高概率区间集中，在保持生成稳定性的同时保留适度的旋律变化。
 
 ==== 结构约束后处理
 
@@ -1471,7 +1491,7 @@ $ P_tau (x_t = v | x_{< t}) = frac(exp(bold(z)_t[v] / tau), sum_{v' in cal{V}_"e
 **语言建模指标**：
 
 - *测试损失（Test Loss）*：测试集上的平均交叉熵损失，直接衡量模型对未见ABC序列的概率拟合质量。
-- *困惑度（Perplexity，PPL）*：测试损失的指数形式，$"PPL" = exp(cal{L}_"test")$，反映模型对真实数据分布的整体不确定性，值越低越好。
+- *困惑度（Perplexity，PPL）*：测试损失的指数形式，$"PPL" = exp(cal(L)_"test")$，反映模型对真实数据分布的整体不确定性，值越低越好。
 
 **音乐质量指标**：
 
@@ -1625,9 +1645,9 @@ K:Dmaj
 
 === ABCTokenizer的设计与实现
 
-针对ABC记谱法高度规则化的语法结构与音乐语义边界问题，本文设计并实现了专用的ABCTokenizer分词器。通用自然语言分词器（如BPE）在处理ABC文本时会将具有完整音乐语义的复合符号（如"|:"、"K:Gmaj"、"M:6/8"）错误地切分为若干无意义的字符碎片，导致序列冗长且语义结构破碎；字符级分词方案虽能保留原始信息，但会造成序列长度膨胀、注意力计算代价增大。ABCTokenizer针对上述问题，采用贪婪最长匹配（Greedy Longest-Match）策略构建分词核心算法：维护一个文本指针，在每一步优先尝试匹配长度为4、3、2、1的子串是否存在于专用词表中，从长到短依次尝试，确保"|:"等复合符号不被拆散；对无法匹配的字符回退至$angle.l "unk" angle.r$标记，保证分词器的鲁棒性。
+针对ABC记谱法高度规则化的语法结构与音乐语义边界问题，本文设计并实现了专用的ABCTokenizer分词器。通用自然语言分词器（如BPE）在处理ABC文本时会将具有完整音乐语义的复合符号（如"|:"、"K:Gmaj"、"M:6/8"）错误地切分为若干无意义的字符碎片，导致序列冗长且语义结构破碎；字符级分词方案虽能保留原始信息，但会造成序列长度膨胀、注意力计算代价增大。ABCTokenizer针对上述问题，采用贪婪最长匹配（Greedy Longest-Match）策略构建分词核心算法：维护一个文本指针，在每一步优先尝试匹配长度为4、3、2、1的子串是否存在于专用词表中，从长到短依次尝试，确保"|:"等复合符号不被拆散；对无法匹配的字符回退至$⟨ "unk" ⟩$标记，保证分词器的鲁棒性。
 
-在词表构建上，ABCTokenizer涵盖音高符号、时值标记、调性与节拍声明、装饰音记号、和弦标注及各类小节线变体，同时引入$angle.l "bos" angle.r$、$angle.l "eos" angle.r$、$angle.l "pad" angle.r$等序列边界与对齐控制token，构成语义层次清晰的分层词表。编码阶段在token序列两端自动附加边界标记，帮助模型准确感知旋律的起止结构；解码阶段对控制性token进行过滤，还原出符合标准ABC语法的纯净乐谱文本，供打谱软件或音频合成器直接使用。相比通用分词方案，ABCTokenizer能够在保留乐谱结构信息的同时有效控制序列长度，使每个token都承载明确的音乐语义，显著降低了下游模型学习ABC语法规律的难度。
+在词表构建上，ABCTokenizer涵盖音高符号、时值标记、调性与节拍声明、装饰音记号、和弦标注及各类小节线变体，同时引入$⟨ "bos" ⟩$、$⟨ "eos" ⟩$、$⟨ "pad" ⟩$等序列边界与对齐控制token，构成语义层次清晰的分层词表。编码阶段在token序列两端自动附加边界标记，帮助模型准确感知旋律的起止结构；解码阶段对控制性token进行过滤，还原出符合标准ABC语法的纯净乐谱文本，供打谱软件或音频合成器直接使用。相比通用分词方案，ABCTokenizer能够在保留乐谱结构信息的同时有效控制序列长度，使每个token都承载明确的音乐语义，显著降低了下游模型学习ABC语法规律的难度。
 
 === GPT2ABC模型的构建与验证
 
@@ -1696,7 +1716,7 @@ K:Dmaj
 
 当前基于Transformer的方案在处理超过256个token的长序列时，注意力计算的平方复杂度$O(L^2)$制约了其对完整多段落乐曲的全局结构建模能力；在超过有效注意力窗口的跨段落范围内，模型对主题呼应、调性回归等高层次音乐结构的感知能力有所下降。
 
-未来可从以下方向攻克长程建模挑战。**线性注意力与稀疏注意力**：引入Longformer、BigBird等线性或稀疏注意力机制，将注意力复杂度从$O(L^2)$降至$O(L)$或$O(L sqrt{L})$，支持更长序列的端到端建模。**层次化结构建模**：采用分层的生成架构，底层模型负责在音符和小节级别生成局部旋律细节，高层模型负责在乐句和段落级别规划全局结构框架，两个层次通过跨层注意力或潜变量进行耦合，实现"先谋篇布局、再填充细节"的从粗到细生成策略。**记忆增强机制**：引入外部记忆模块（如Transformer-XL的循环记忆、Memorizing Transformer的KNN记忆等），使模型能够在有限的注意力窗口外持续保留对远处重要上下文的访问能力，增强对旋律主题的长程记忆与复现。
+未来可从以下方向攻克长程建模挑战。**线性注意力与稀疏注意力**：引入Longformer、BigBird等线性或稀疏注意力机制，将注意力复杂度从$O(L^2)$降至$O(L)$或$O(L sqrt(L))$，支持更长序列的端到端建模。**层次化结构建模**：采用分层的生成架构，底层模型负责在音符和小节级别生成局部旋律细节，高层模型负责在乐句和段落级别规划全局结构框架，两个层次通过跨层注意力或潜变量进行耦合，实现"先谋篇布局、再填充细节"的从粗到细生成策略。**记忆增强机制**：引入外部记忆模块（如Transformer-XL的循环记忆、Memorizing Transformer的KNN记忆等），使模型能够在有限的注意力窗口外持续保留对远处重要上下文的访问能力，增强对旋律主题的长程记忆与复现。
 
 === 模型压缩与边缘部署
 
