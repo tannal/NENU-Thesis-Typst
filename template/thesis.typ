@@ -97,40 +97,48 @@
 
 //* 中文摘要
 #abstract(
-  keywords: ("ABC记谱法", "音乐生成", "序列建模", "GPT-2", "LoRA", "参数高效微调", "深度学习"),
+  keywords: (
+    "ABC记谱法",
+    "符号音乐生成",
+    "模型规模扩展定律",
+    "十二平均律循环群",
+    "自注意力机制",
+    "双轨扩展律",
+    "计算音乐学",
+  ),
 )[
-  音乐自动生成是人工智能与计算音乐学的重要交叉研究方向，旨在使计算机能够自主创作符合音乐规律的作品。ABC记谱法作为一种基于纯文本的音乐符号系统，广泛应用于传统民谣与器乐曲的数字化存储，其结构化语法特性使其天然适合作为序列生成模型的建模对象。然而，现有研究对文本化音乐表示的生成建模关注不足，且缺乏在统一实验条件下对多种序列建模架构进行系统性对比的工作。
+  符号音乐自动生成是人工智能、序列机器学习与计算音乐学的重要交叉研究方向，旨在使计算机自主创作符合音乐学语法规律与艺术美感的声音作品。ABC记谱法作为一种基于纯文本的紧凑乐谱系统，具备高度结构化的语法特征，天然契合自回归序列生成建模。然而，现有研究长期面临两大理论与实践瓶颈：一是基础序列架构在音乐离散语法建模上的归纳偏置缺乏统一受控的量化对比与梯度动力学机理解析；二是受限于高质量乐谱语料的天然匮乏，大模型时代以神经扩展定律（Scaling Laws）为代表的系统性参数扩张规律在符号音乐领域尚属空白。
 
-  本文围绕ABC记谱法音乐自动生成任务，从专用分词器设计、多架构序列建模、大语言模型参数高效微调三个层面展开研究。首先，针对ABC记谱法的语义边界特性，设计并实现了ABCTokenizer分词器。该分词器采用贪婪最长匹配策略，将乐谱文本解析为具有音乐语义的最小单元，有效避免了通用分词器对复合符号的错误切分，并通过完整的编解码流水线为下游模型提供结构清晰的序列表示。
+  针对上述挑战，本文围绕专用符号分词、多架构基准对齐、代数对称性数据扩增、底层高性能算力底座以及神经扩展定律实证展开了系统性研究。首先，针对通用统计分词器破坏乐理边界的缺陷，基于“预测有效性与关系无损性”理论框架，设计了专用分词系统 ABCTokenizer。该分词器采用贪婪最长匹配策略，将原本离散开放的乐谱文本精确浓缩为仅含 91 个规则级专有 Token 的紧凑代数空间，实现了复合小节线与调式修饰记号的无歧义切分。
 
-  其次，在统一超参数配置下实现了RNN、LSTM、Transformer和GPT2ABC四种序列建模架构，并进行了系统性对比实验。实验结果表明，GPT2ABC在测试损失（0.316）和困惑度（1.372）两项指标上全面领先，相比Transformer基线分别降低34.6%和15.3%，同时在参数量（2.52M）与训练效率上与Transformer基本持平，验证了预训练策略对ABC音乐生成任务的显著迁移增益。
+  其次，在统一语料与超参数约束下，系统对比了 Vanilla RNN、LSTM、标准 Transformer 与 GPT2ABC 四种序列架构。从 BPTT 雅可比矩阵连乘的动力学分析出发，揭示了循环网络雅可比谱半径衰减导致的梯度弥散与“小节遗忘症”；实验表明，GPT2ABC 凭借全注意力直连机制取得最佳收敛表现，测试集损失降至 0.31628，困惑度达到 1.3720，较双层 LSTM 显著降低 19.6%，同时训练吞吐量提升 84%，确立了因果自注意力架构在离散音乐建模上的帕累托最优地位。
 
-  进一步地，本文提出了基于预训练大语言模型LLaMA-2的参数高效微调方案（LLaMA-LoRA）。通过在LLaMA原生词表基础上扩展约1500个ABC领域专有token构建扩展分词器，并将LoRA低秩适配器注入注意力投影矩阵（秩$r=16$），仅以占总参数0.06%的可训练参数量（约4.2M）实现高质量微调，在单张GPU上6小时内完成训练。实验表明，LLaMA-LoRA在困惑度（15.3）、语法正确率（93.8%）和结构完整性（91.6%）等指标上均优于全部基线方法，人工盲测整体质量评分达4.2/5.0，消融实验进一步确认扩展分词器是最关键的单一贡献组件。
+  进一步地，为探索符号音乐自回归建模的规模跃迁规律，针对大参数模型在有限语料下遭遇的过拟合理论边界（$D prop N^(0.74)$），本文证明了十二平均律半音阶模 12 循环群 $(bb(Z)_(12), +)$ 变换下的“相对音程差分不变性定理”与“小节时值代数守恒定理”，构建了无损全音域移调增强流水线，将民间语料扩充 12 倍至 550,200 首独立曲目（近 1 亿 Token）。基于此，面向 NVIDIA RTX 4090 单卡物理显存边界，自主研发了纯 C/CUDA 原生训练引擎，完成了 Nano（0.24M）至 Large（85.39M）五阶几何等比参数梯队的端到端训练与 808M 极限规模勘测。拟合结果首次严格确立了符号音乐领域的参数扩展定律：$cal(L)(N) = ((1.84 times 10^4) / N)^(0.138) + 0.825$（$R^2 = 0.9942$）。实测标度指数 $alpha_N = 0.138$ 达通用自然语言领域的 1.8 倍，实证揭示了小词表强约束符号系统对参数扩张具备更高的边际敏感性，并测定了不可约理论熵界为 0.825 nats。
 
-  本文的主要贡献在于：设计了面向ABC记谱法语义结构的专用分词器；首次在统一条件下系统对比了四种序列建模架构在ABC音乐生成任务上的表现；提出并验证了将大语言模型通过LoRA高效迁移至音乐符号生成领域的完整技术方案；建立了涵盖语言建模质量、音乐结构合理性、计算效率与主观质量的多维评估体系，为相关研究提供了可复现的实验基础。
+  最后，本文提出了涵盖统计学习层与计算音乐学认知层的“双轨扩展律（Dual-Track Scaling Law）”。量化评估表明，85.39M 模型在 9 维 MusPy 指标上实现了尺度涌现（调式一致性达 0.9928，独特音级数收敛至 7.08），并在时域自相似矩阵（SSM）中自发涌现出跨越 16 小节的平行副对角线动机条纹；结合 POP909 语料成功实现了流行音乐主副歌 $A - A' - B - A''$ 主导动机的高质量受控变奏，构建了从纯文本符号到物理弦振动音频渲染的全闭环体系。
 ]
 
 //* 英文摘要
 #abstract-en(
   keywords: (
     "ABC notation",
-    "music generation",
-    "sequence modeling",
-    "GPT-2",
-    "LoRA",
-    "parameter-efficient fine-tuning",
-    "deep learning",
+    "symbolic music generation",
+    "scaling laws",
+    "cyclic group transposition",
+    "self-attention",
+    "dual-track scaling law",
+    "computational musicology",
   ),
 )[
-  Automatic music generation is an important interdisciplinary research direction combining artificial intelligence and computational musicology, aiming to enable computers to autonomously compose musical works that conform to musical principles. ABC notation, as a plain-text music symbol system widely used for digitizing traditional folk and instrumental music, possesses structured syntactic properties that make it naturally suited for sequence generation modeling. However, existing research has paid insufficient attention to generative modeling of text-based music representations, and systematic comparisons of multiple sequence modeling architectures under unified experimental conditions remain lacking.
+  Automatic symbolic music generation is an essential interdisciplinary research field bridging artificial intelligence, sequential machine learning, and computational musicology, aiming to enable computers to autonomously compose musical works that conform to musicological syntax and aesthetic principles. ABC notation, as a compact plain-text music score system with highly structured grammatical features, is naturally suited for autoregressive sequence modeling. However, existing research faces two fundamental challenges: first, the lack of systematic, controlled comparative benchmarks and gradient dynamical analyses regarding the inductive biases of different sequential architectures in discrete musical syntax; second, the absence of empirical investigations into neural scaling laws in symbolic music due to the acute scarcity of high-fidelity annotated musical corpora.
 
-  This thesis investigates automatic music generation for ABC notation from three perspectives: dedicated tokenizer design, multi-architecture sequence modeling, and parameter-efficient fine-tuning of large language models. First, ABCTokenizer is designed and implemented to address the semantic boundary characteristics of ABC notation. Adopting a greedy longest-match strategy, it parses musical scores into minimal units carrying musical semantics, effectively preventing the erroneous segmentation of composite symbols by general-purpose tokenizers, and provides structurally coherent sequence representations to downstream models through a complete encode-decode pipeline.
+  To address these limitations, this thesis investigates dedicated symbolic tokenization, multi-architecture benchmark alignment, algebraic symmetry-based data augmentation, lightweight high-performance computing engines, and empirical scaling laws for symbolic music. First, to overcome the semantic fragmentation caused by generic statistical tokenizers, ABCTokenizer is designed based on the "Predictive Effectiveness and Relational Losslessness" framework. Utilizing a deterministic greedy longest-match strategy, it compacts open score texts into a concise vocabulary of 91 domain-specific tokens, ensuring unambiguous tokenization of composite bar lines and tonal modifiers.
 
-  Second, four sequence modeling architectures—RNN, LSTM, Transformer, and GPT2ABC—are implemented under unified hyperparameter configurations and evaluated systematically. Experimental results show that GPT2ABC achieves the best performance on both test loss (0.316) and perplexity (1.372), outperforming the Transformer baseline by 34.6% and 15.3% respectively, while remaining comparable in parameter count (2.52M) and training efficiency, confirming the significant transfer gain of pre-training for ABC music generation.
+  Second, under unified corpus partitioning and hyperparameter configurations, this thesis conducts a controlled comparative study across four sequential architectures: Vanilla RNN, LSTM, Standard Transformer, and GPT2ABC. By analyzing the dynamical singular values of the BPTT Jacobian matrix, this work elucidates the gradient vanishing and "measure amnesia" phenomena inherent in recurrent networks. Empirical results demonstrate that GPT2ABC achieves optimal convergence owing to its unconstrained all-pair attention, reducing test loss to 0.31628 and perplexity to 1.3720 (a 19.6% reduction compared to two-layer LSTM) while enhancing training throughput by 84%, establishing the Pareto optimality of causal self-attention in discrete musical modeling.
 
-  Furthermore, this thesis proposes LLaMA-LoRA, a parameter-efficient fine-tuning scheme based on the pre-trained large language model LLaMA-2. An extended tokenizer is constructed by appending approximately 1,500 ABC domain-specific tokens to the native LLaMA vocabulary. LoRA low-rank adapters (rank $r=16$) are injected into the attention projection matrices, enabling high-quality fine-tuning with only 0.06% of total parameters (approximately 4.2M trainable) and completing training on a single GPU within 6 hours. Experiments demonstrate that LLaMA-LoRA outperforms all baselines on perplexity (15.3), syntactic correctness (93.8%), and structural completeness (91.6%), achieving an overall human evaluation score of 4.2/5.0. Ablation studies further confirm that the extended tokenizer is the single most critical contributing component.
+  Furthermore, to explore the scale transition dynamics of autoregressive music models and mitigate the theoretical overfitting boundary ($D prop N^(0.74)$) on limited corpora, this thesis proves the "relative pitch-interval invariance theorem" and "measure duration algebraic conservation theorem" under the twelve-tone equal temperament cyclic group $(bb(Z)_(12), +)$. A lossless full-pitch transposition augmentation pipeline is developed, expanding the folk music corpus 12-fold to 550,200 unique tunes (approximately 98.9M tokens). Leveraging a single NVIDIA RTX 4090 GPU (24GB VRAM), a pure C/CUDA 12.6 native training engine is engineered to train a five-tier geometric parameter ladder ranging from Nano (0.24M) to Large (85.39M), alongside an 808M Limit exploration. The regression fitting rigorously establishes the first parameter scaling law in symbolic music: $cal(L)(N) = ((1.84 times 10^4) / N)^(0.138) + 0.825$ ($R^2 = 0.9942$). The measured scaling exponent $alpha_N = 0.138$ is approximately 1.8 times that of natural language processing, empirically demonstrating the superior marginal sensitivity of small-vocabulary, strongly-constrained symbolic systems to parameter expansion, while identifying an irreducible theoretical entropy floor of 0.825 nats.
 
-  The main contributions of this thesis are as follows: a dedicated tokenizer designed for the semantic structure of ABC notation; the first systematic comparison of four sequence modeling architectures for ABC music generation under unified conditions; a complete technical scheme for efficiently transferring large language models to musical symbol generation via LoRA, with thorough experimental validation; and a multi-dimensional evaluation framework covering language modeling quality, musical structure soundness, computational efficiency, and subjective quality, providing a reproducible experimental foundation for related research.
+  Finally, this thesis proposes the "Dual-Track Scaling Law" framework spanning both statistical learning metrics and computational musicological dimensions. Quantitative evaluations reveal that the 85.39M model exhibits significant scale emergence across 9-dimensional MusPy metrics (scale consistency reaches 0.9928, unique pitch classes converge to 7.08) and spontaneously exhibits off-diagonal stripes spanning 16 measures in self-similarity matrices (SSM). Integrated with the POP909 corpus, the framework accomplishes high-quality prefix-guided $A - A' - B - A''$ motif variations, providing an end-to-end closed loop from discrete text generation to physical acoustic wave synthesis.
 ]
 
 
@@ -145,93 +153,81 @@
 
 //* 符号表
 #notation[
-  // ── 模型与架构缩写 ───────────────────────────────────────────────────────
+  // ── 模型、架构与系统缩写 ─────────────────────────────────────────────────
   / RNN: 循环神经网络（Recurrent Neural Network）
   / LSTM: 长短期记忆网络（Long Short-Term Memory）
-  / GPT-2: 生成式预训练Transformer第二版（Generative Pre-trained Transformer 2）
-  / LLaMA: 大语言模型元AI（Large Language Model Meta AI）
-  / LoRA: 大语言模型低秩适配（Low-Rank Adaptation of Large Language Models）
-  / BPE: 字节对编码分词算法（Byte Pair Encoding）
-  / CLM: 因果语言建模（Causal Language Modeling）
-  / MHA: 多头自注意力机制（Multi-Head Attention）
-  / FFN: 位置前馈网络（Feed-Forward Network）
-  / Pre-LN: 前置层归一化残差连接（Pre-Layer Normalization）
+  / GPT-2: 生成式预训练 Transformer 第二版（Generative Pre-trained Transformer 2）
+  / GPT2ABC: 本文提出的面向 ABC 记谱法的因果解码自注意力音乐生成模型
+  / BPTT: 沿时间反向传播算法（Backpropagation Through Time）
+  / MHA: 多头因果自注意力机制（Multi-Head Attention）
+  / MLP: 多层感知机前馈网络（Multi-Layer Perceptron / FFN）
+  / Pre-LN: 前置层归一化残差拓扑结构（Pre-Layer Normalization）
+  / SSM: 自身相似度矩阵（Self-Similarity Matrix）
+  / GEMM: 通用稠密矩阵乘法（General Matrix Multiply）
+  / CEC: 恒定误差轮联机制（Constant Error Carousel）
 
-  // ── 序列与词表 ───────────────────────────────────────────────────────────
-  / $bold(x)$: ABC记谱序列，$bold(x) = (x_1, x_2, dots, x_T)$
-  / $x_t$: 序列第 $t$ 个位置的token
-  / $T$: 序列长度
-  / $cal(V)$: 词表（token集合）
-  / $cal(V)_"LLaMA"$: LLaMA原生BPE词表，规模32,000
-  / $cal(V)_"ABC"$: 新增的ABC领域专有token集合，规模约1,500
-  / $cal(V)_"ext"$: 扩展后词表，$cal(V)_"ext" = cal(V)_"LLaMA" union cal(V)_"ABC"$，规模约33,500
+  // ── 序列表示与词表空间 ───────────────────────────────────────────────────
+  / $bold(x)$: ABC 记谱离散符号序列，$bold(x) = (x_1, x_2, dots, x_T)$
+  / $x_t$: 序列第 $t$ 个离散时间步的 Token
+  / $T$: 输入序列长度（本文模型上下文窗口统一取 $T = 256$）
+  / $cal(V)$: 离散音乐词表（Token 集合）
+  / $|cal(V)|$: 词表规模，本文 ABCTokenizer 精简词表 $|cal(V)| = 91$
+  / $K_"max"$: 分词贪婪最长匹配的最大窗口长度，本文取 $K_"max" = 4$
   / $⟨"bos"⟩$: 序列起始特殊标记（Beginning of Sequence）
   / $⟨"eos"⟩$: 序列终止特殊标记（End of Sequence）
-  / $⟨"pad"⟩$: 序列填充特殊标记（Padding Token）
-  / $⟨"unk"⟩$: 未知符号特殊标记（Unknown Token）
+  / $⟨"pad"⟩$: 序列填充对齐标记（Padding Token）
+  / $⟨"unk"⟩$: 未登录/未知符号标记（Unknown Token）
 
-  // ── 模型表示与维度 ───────────────────────────────────────────────────────
-  / $d_"model"$: 模型隐层维度（嵌入维度）
-  / $d_k$: 单注意力头的键/查询向量维度，$d_k = d_"model" \/ h$
-  / $h$: 注意力头数
-  / $N$: Transformer解码器层数
-  / $bold(E)$: Token嵌入矩阵，$bold(E) in bb(R)^{T times d_"model"}$
-  / $bold(P)$: 可学习位置编码矩阵，$bold(P) in bb(R)^{T times d_"model"}$
-  / $bold(H)^{(l)}$: 第 $l$ 层Transformer的输出隐状态，$bold(H)^{(l)} in bb(R)^{T times d_"model"}$
-  / $bold(W)^E$: 与输入Embedding共享权重的输出投影矩阵，$bold(W)^E in bb(R)^{d_"model" times |cal(V)|}$
-  / $bold(z)_t$: 输出层第 $t$ 步的logits向量
+  // ── 网络维度与张量表示 ───────────────────────────────────────────────────
+  / $L$: Transformer 解码器堆叠层数
+  / $d$: 模型隐层特征维度（$d_"model"$）
+  / $h$: 多头注意力头数
+  / $d_k$: 单注意力头的键/查询子空间维度，$d_k = d \/ h$
+  / $bold(E)$: 词嵌入矩阵（Token Embedding），$bold(E) in bb(R)^{T times d}$
+  / $bold(P)$: 可学习位置编码矩阵（Position Embedding），$bold(P) in bb(R)^{T times d}$
+  / $bold(H)^{(l)}$: 第 $l$ 层 Transformer 解码块输出特征张量
+  / $bold(W)_E$: 词嵌入权重矩阵（输入与输出分类头权重绑定），$bold(W)_E in bb(R)^{|cal(V)| times d}$
+  / $bold(z)_t$: 输出层第 $t$ 步未经归一化的分类对数几率向量（Logits）
 
-  // ── 注意力机制 ───────────────────────────────────────────────────────────
-  / $bold(Q)_k$: 第 $k$ 个注意力头的查询矩阵（Query）
-  / $bold(K)_k$: 第 $k$ 个注意力头的键矩阵（Key）
-  / $bold(V)_k$: 第 $k$ 个注意力头的值矩阵（Value）
-  / $bold(W)_k^Q, bold(W)_k^K, bold(W)_k^V$: 第 $k$ 头查询、键、值投影权重矩阵
-  / $bold(W)^O$: 多头注意力输出投影权重矩阵
-  / $bold(M)$: 因果掩码矩阵，$bold(M)_{i j} = -infinity$（当 $j > i$ 时），确保自回归特性
+  // ── 注意力投影与因果掩码 ─────────────────────────────────────────────────
+  / $bold(Q)_m, bold(K)_m, bold(V)_m$: 第 $m$ 个注意力头的查询、键、值张量
+  / $bold(W)_(Q,m), bold(W)_(K,m), bold(W)_(V,m)$: 第 $m$ 个注意力头的线性投影权重矩阵
+  / $bold(W)_O$: 多头注意力拼接输出投影矩阵，$bold(W)_O in bb(R)^(d times d)$
+  / $bold(M)$: 因果下三角掩码矩阵（Causal Mask），$bold(M)_(i j) = 0$（$i >= j$）或 $-infinity$（$i < j$）
 
-  // ── LoRA参数 ─────────────────────────────────────────────────────────────
-  / $bold(W)_0$: 预训练基础权重矩阵（训练中冻结），$bold(W)_0 in bb(R)^{d times k}$
-  / $Delta bold(W)$: 微调阶段的权重更新矩阵，$Delta bold(W) = bold(B) bold(A)$
-  / $bold(A)$: LoRA低秩分解矩阵A，$bold(A) in bb(R)^{r times k}$，高斯随机初始化
-  / $bold(B)$: LoRA低秩分解矩阵B，$bold(B) in bb(R)^{d times r}$，零初始化
-  / $r$: LoRA低秩维度，本文取 $r = 16$
-  / $alpha$: LoRA缩放超参数，本文取 $alpha = 32$；实际缩放比为 $alpha \/ r = 2$
-  / $rho$: LoRA参数压缩比，$rho approx 2r \/ min(d, k)$
+  // ── 代数对称性与数据增强 ─────────────────────────────────────────────────
+  / $bb(G)_"Pitch"$: 十二平均律半音阶代数循环群，$bb(G)_"Pitch" = (bb(Z)_(12), +)$
+  / $p$: 绝对半音阶整数音高值（MIDI Pitch，$p in [0, 127]$）
+  / $cal(T)_k$: 十二平均律无损音高移调算子，$cal(T)_k (p) = (p + k) mod 12$
+  / $Delta bold(P)$: 相邻旋律音程相对阶差向量，$Delta p_i = p_(i+1) - p_i$
+  / $cal(M)_k$: 复合音乐三元组全变换算子，$cal(M)_k (n_i) = (cal(T)_k (p_i), d_i, t_i)$
 
-  // ── 训练目标与损失 ───────────────────────────────────────────────────────
-  / $theta$: 全部可训练参数（LoRA矩阵与新增token嵌入向量）
-  / $theta_0$: 冻结的预训练权重（原始LLaMA权重）
-  / $cal(D)_"train"$: 训练集
-  / $cal(L)_"CLM"$: 因果语言建模对数似然目标（最大化）
-  / $cal(L)_"CE"$: 交叉熵损失（最小化），$cal(L)_"CE" = -frac(1, |cal(D)|T) sum log P_theta (x_t | x_{<t})$
+  // ── 神经扩展定律（Scaling Laws）参数 ─────────────────────────────────────
+  / $N$: 模型非嵌入参数量（Non-Embedding Parameters），$N = L dot (12 d^2 + 13 d)$
+  / $D$: 训练集有效数据规模（总 Token 数量）
+  / $C$: 自回归语言模型训练浮点运算总开销（FLOPs），$C approx 6 N D$
+  / $cal(L)(N)$: 模型在非嵌入参数量为 $N$ 时的测试/验证交叉熵损失
+  / $alpha_N$: 参数规模标度指数（Scaling Exponent），本文实测拟合值 $alpha_N = 0.138$
+  / $N_c$: 特征尺度常数，本文拟合值 $N_c = 1.84 times 10^4$
+  / $cal(L)_oo$: 理论渐近不可约信息熵下界（Irreducible Loss），本文拟合值 $cal(L)_oo = 0.825 " nats"$
+  / $R^2$: 经验幂律回归方程的判定系数（拟合优度），本文实测 $R^2 = 0.9942$
+  / $delta cal(L)$: 泛化差距 / 经验过拟合损失增量，$delta cal(L) = cal(L)_"val" - cal(L)_"train"$
 
-  // ── 优化器（AdamW） ──────────────────────────────────────────────────────
-  / $bold(g)_t$: 第 $t$ 步梯度
-  / $bold(m)_t$: Adam一阶矩估计（梯度指数移动平均）
-  / $bold(v)_t$: Adam二阶矩估计（梯度平方指数移动平均）
-  / $beta_1$: 一阶矩衰减系数，本文取 $beta_1 = 0.9$
-  / $beta_2$: 二阶矩衰减系数，本文取 $beta_2 = 0.999$
-  / $epsilon$: 数值稳定项，本文取 $epsilon = 10^{-8}$
-  / $eta$: 学习率；基础学习率 $eta_0 = 2 times 10^{-4}$
-  / $lambda$: 权重衰减系数，本文取 $lambda = 0.01$
-  / $T_"warm"$: 学习率线性预热步数，本文取 $T_"warm" = 100$
+  // ── 硬件显存预算对账（RTX 4090 单卡物理约束） ─────────────────────────────
+  / $M_"param"$: 浮点权重参数常驻显存，$M_"param" = 4N " 字节"$
+  / $M_"grad"$: 参数反向梯度张量显存，$M_"grad" = 4N " 字节"$
+  / $M_"opt"$: AdamW 一阶动量与二阶动量状态显存，$M_"opt" = 8N " 字节"$
+  / $M_"static"$: 单精度训练总静态显存，$M_"static" = 16N " 字节"$
+  / $M_"total"$: 单步训练总物理显存占用（静态显存 + 动态前向激活显存缓冲区）
 
-  // ── 梯度累积与批次 ───────────────────────────────────────────────────────
-  / $B_"step"$: 单步实际批次大小，本文取 $B_"step" = 4$
-  / $G$: 梯度累积步数，本文取 $G = 4$
-  / $B_"eff"$: 有效批次大小，$B_"eff" = B_"step" times G = 16$
-
-  // ── 生成策略 ─────────────────────────────────────────────────────────────
-  / $tau$: 温度参数；$tau < 1$ 分布集中，$tau > 1$ 分布均匀，本文取 $tau = 0.8$
-  / $p$: Top-$p$ 核采样概率质量阈值，本文取 $p = 0.9$
-  / $k$: Top-$k$ 截断采样保留的候选token数
-  / $cal(V)_t^{(p)}$: 第 $t$ 步Top-$p$采样的动态候选集合
-  / $L_"max"$: 自回归生成的最大序列长度，本文取 $L_"max" = 512$
-
-  // ── 评估指标 ─────────────────────────────────────────────────────────────
-  / PPL: 困惑度（Perplexity），$"PPL" = exp(cal(L)_"test")$，越低越好
-  / NLL: 负对数似然（Negative Log-Likelihood），即测试集交叉熵损失
+  // ── 采样控制与计算音乐学评估指标 ─────────────────────────────────────────
+  / $tau$: 采样温度系数（Temperature），$tau < 1$ 趋于保守，$tau > 1$ 增强多样性
+  / $p$: Top-$p$ 动态核采样概率质量阈值（Nucleus Sampling）
+  / $"PPL"$: 困惑度（Perplexity），$"PPL" = exp(cal(L)_"test")$
+  / $bold(S)$: 自身相似度矩阵（Self-Similarity Matrix），$bold(S) in bb(R)^(T times T)$
+  / $bold(v)_t$: 时间步 $t$ 处的 12 维色度音级特征向量（Chroma Vector）
 ]
+
 
 //* 正文
 #show: mainmatter
