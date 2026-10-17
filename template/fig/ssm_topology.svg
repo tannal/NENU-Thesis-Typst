@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 380" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .main-title { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; text-anchor: middle; }
+      .matrix-border { stroke: #111111; stroke-width: 2; fill: none; }
+      .callout-line { stroke: #111111; stroke-width: 1.4; fill: none; marker-end: url(#dot); }
+      .callout-title { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: bold; }
+      .callout-desc  { fill: #475569; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11.5px; }
+    </style>
+    <marker id="dot" markerWidth="6" markerHeight="6" refX="3" refY="3">
+      <circle cx="3" cy="3" r="2.5" fill="#111111" />
+    </marker>
+  </defs>
+
+  <text x="425" y="32" class="main-title">Self-Similarity Matrix (SSM) Topological Patterns in Macro-Structure Analysis</text>
+
+  <!-- SSM Matrix Canvas (280x280) at (80, 60) -->
+  <g transform="translate(80, 60)">
+    <!-- Base Background: Low similarity / key contrast -->
+    <rect x="0" y="0" width="280" height="280" fill="#f8fafc" />
+
+    <!-- Checkerboard Blocks: Section A (0-140) and Section B (140-280) -->
+    <rect x="0" y="0" width="140" height="140" fill="#eff6ff" />
+    <rect x="140" y="140" width="140" height="140" fill="#eff6ff" />
+    <rect x="140" y="0" width="140" height="140" fill="#fef2f2" fill-opacity="0.6" />
+    <rect x="0" y="140" width="140" height="140" fill="#fef2f2" fill-opacity="0.6" />
+
+    <!-- Local Phrase Blocks along Diagonal (2~4 bars) -->
+    <rect x="15" y="15" width="40" height="40" fill="#fef08a" stroke="#eab308" stroke-width="1" fill-opacity="0.7" />
+    <rect x="75" y="75" width="40" height="40" fill="#fef08a" stroke="#eab308" stroke-width="1" fill-opacity="0.7" />
+    <rect x="155" y="155" width="40" height="40" fill="#fef08a" stroke="#eab308" stroke-width="1" fill-opacity="0.7" />
+    <rect x="215" y="215" width="40" height="40" fill="#fef08a" stroke="#eab308" stroke-width="1" fill-opacity="0.7" />
+
+    <!-- Off-diagonal Parallel Stripes (Δ = 8 bars and 16 bars) -->
+    <!-- +8 bar stripe -->
+    <line x1="70" y1="0" x2="280" y2="210" stroke="#10b981" stroke-width="3.5" stroke-dasharray="6,2" />
+    <line x1="0" y1="70" x2="210" y2="280" stroke="#10b981" stroke-width="3.5" stroke-dasharray="6,2" />
+    <!-- +16 bar stripe (Strict recurrence of Section A) -->
+    <line x1="140" y1="0" x2="280" y2="140" stroke="#059669" stroke-width="4" />
+    <line x1="0" y1="140" x2="140" y2="280" stroke="#059669" stroke-width="4" />
+
+    <!-- Main Diagonal i = j (Self-Identity Line = 1.0) -->
+    <line x1="0" y1="0" x2="280" y2="280" stroke="#dc2626" stroke-width="4.5" />
+
+    <!-- Outer Frame & Ticks -->
+    <rect x="0" y="0" width="280" height="280" class="matrix-border" />
+    <text x="70" y="-8" font-size="11" font-weight="bold" fill="#111111" text-anchor="middle">Section A (1~16)</text>
+    <text x="210" y="-8" font-size="11" font-weight="bold" fill="#111111" text-anchor="middle">Section B (17~32)</text>
+    <text x="-12" y="75" font-size="11" font-weight="bold" fill="#111111" text-anchor="end">Part A</text>
+    <text x="-12" y="215" font-size="11" font-weight="bold" fill="#111111" text-anchor="end">Part B</text>
+  </g>
+
+  <!-- Right Side: Structural Callout Legend & Explanations -->
+  <g transform="translate(420, 65)">
+    <!-- Callout 1: Main Diagonal -->
+    <line x1="0" y1="30" x2="-80" y2="30" class="callout-line" />
+    <text x="15" y="25" class="callout-title" fill="#b91c1c">① Main Diagonal (i = j)</text>
+    <text x="15" y="44" class="callout-desc">Identity line where cosine similarity strictly equals 1.0.</text>
+
+    <!-- Callout 2: Local Motifs -->
+    <line x1="0" y1="95" x2="-180" y2="95" class="callout-line" />
+    <text x="15" y="90" class="callout-title" fill="#a16207">② Local Block Patterns</text>
+    <text x="15" y="109" class="callout-desc">Local 2~4 bar phrases, arpeggios, and short motifs.</text>
+
+    <!-- Callout 3: Off-Diagonal Stripes -->
+    <line x1="0" y1="160" x2="-140" y2="135" class="callout-line" />
+    <text x="15" y="155" class="callout-title" fill="#047857">③ Off-Diagonal Parallel Stripes</text>
+    <text x="15" y="174" class="callout-desc">8-bar &amp; 16-bar recurrence proving |: A :|: B :| binary form memory.</text>
+
+    <!-- Callout 4: Checkerboard Blocks -->
+    <line x1="0" y1="225" x2="-200" y2="200" class="callout-line" />
+    <text x="15" y="220" class="callout-title" fill="#1e40af">④ Checkerboard Blocks</text>
+    <text x="15" y="239" class="callout-desc">Tonal harmony contrast between Verse/Chorus or Part A/B.</text>
+  </g>
+</svg>

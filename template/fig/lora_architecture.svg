@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 360" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .box { stroke: #111111; stroke-width: 1.8; rx: 5; }
+      .box-frozen { fill: #eff6ff; stroke: #1e40af; stroke-dasharray: 4,3; }
+      .box-lora   { fill: #ecfdf5; stroke: #047857; }
+      .circle-add { fill: #fef3c7; stroke: #d97706; stroke-width: 2; }
+      .arrow      { stroke: #111111; stroke-width: 1.8; fill: none; marker-end: url(#arrowhead); }
+      .title-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; text-anchor: middle; }
+      .node-text  { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: bold; text-anchor: middle; }
+      .dim-text   { fill: #475569; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11.5px; text-anchor: middle; }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#111111" />
+    </marker>
+  </defs>
+
+  <text x="425" y="32" class="title-text">Low-Rank Adaptation (LoRA) Forward Forward Parallel Stream</text>
+
+  <!-- Input Vector x -->
+  <g transform="translate(40, 150)">
+    <rect x="0" y="0" width="110" height="60" class="box" fill="#f8fafc" />
+    <text x="55" y="28" class="node-text">Input x</text>
+    <text x="55" y="48" class="dim-text">dim = d_in</text>
+  </g>
+
+  <!-- Split Paths -->
+  <path d="M 150,180 L 190,180 L 190,100 L 230,100" class="arrow" />
+  <path d="M 150,180 L 190,180 L 190,260 L 230,260" class="arrow" />
+
+  <!-- Upper Path: Frozen Pre-trained Weight W0 -->
+  <g transform="translate(230, 60)">
+    <rect x="0" y="0" width="250" height="80" class="box box-frozen" />
+    <text x="125" y="34" class="node-text" fill="#1e3a8a">Pretrained Weights W₀</text>
+    <text x="125" y="54" class="dim-text">d_out × d_in (FROZEN ❄️)</text>
+    <text x="125" y="70" class="dim-text">Full Rank Parameters</text>
+  </g>
+
+  <!-- Lower Path: LoRA Bypass (Matrix A & B) -->
+  <!-- Matrix A -->
+  <g transform="translate(230, 220)">
+    <rect x="0" y="0" width="130" height="80" class="box box-lora" />
+    <text x="65" y="34" class="node-text" fill="#065f46">Matrix A</text>
+    <text x="65" y="54" class="dim-text">r × d_in</text>
+    <text x="65" y="70" class="dim-text">~ N(0, σ²)</text>
+  </g>
+
+  <!-- Inner Link A -> B -->
+  <line x1="360" y1="260" x2="410" y2="260" class="arrow" />
+  <text x="385" y="250" class="dim-text" font-weight="bold">r (Rank)</text>
+
+  <!-- Matrix B -->
+  <g transform="translate(410, 220)">
+    <rect x="0" y="0" width="130" height="80" class="box box-lora" />
+    <text x="65" y="34" class="node-text" fill="#065f46">Matrix B</text>
+    <text x="65" y="54" class="dim-text">d_out × r</text>
+    <text x="65" y="70" class="dim-text">Init = 0</text>
+  </g>
+
+  <!-- Scaling Factor alpha/r -->
+  <line x1="540" y1="260" x2="590" y2="260" class="arrow" />
+  <g transform="translate(590, 235)">
+    <rect x="0" y="0" width="75" height="50" class="box" fill="#ecfdf5" stroke="#059669" />
+    <text x="37.5" y="30" class="node-text" fill="#047857">× (α / r)</text>
+  </g>
+
+  <!-- Upper line to Add Node -->
+  <path d="M 480,100 L 705,100 L 705,160" class="arrow" />
+  <!-- Lower line to Add Node -->
+  <path d="M 665,260 L 705,260 L 705,200" class="arrow" />
+
+  <!-- Addition Node -->
+  <circle cx="705" cy="180" r="18" class="circle-add" />
+  <text x="705" y="186" class="node-text" font-size="18">+</text>
+
+  <!-- Output Vector h -->
+  <line x1="723" y1="180" x2="765" y2="180" class="arrow" />
+  <g transform="translate(765, 150)">
+    <rect x="0" y="0" width="65" height="60" class="box" fill="#f8fafc" />
+    <text x="32.5" y="28" class="node-text">h</text>
+    <text x="32.5" y="48" class="dim-text">d_out</text>
+  </g>
+</svg>

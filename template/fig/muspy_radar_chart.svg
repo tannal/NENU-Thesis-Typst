@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 620" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .radar-axis { stroke: #111111; stroke-width: 1.2; stroke-dasharray: 2,3; }
+      .radar-grid { stroke: #d1d5db; stroke-width: 1; fill: none; }
+      .radar-label { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; font-weight: bold; }
+      .legend-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; font-weight: 600; }
+      .main-title  { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; font-weight: bold; text-anchor: middle; }
+      .poly-ground { stroke: #111111; stroke-width: 2.2; stroke-dasharray: 6,4; fill: #111111; fill-opacity: 0.05; }
+      .poly-rnn    { stroke: #ef4444; stroke-width: 2.2; fill: #ef4444; fill-opacity: 0.12; }
+      .poly-lstm   { stroke: #f59e0b; stroke-width: 2.2; fill: #f59e0b; fill-opacity: 0.12; }
+      .poly-gpt2   { stroke: #10b981; stroke-width: 3.0; fill: #10b981; fill-opacity: 0.22; }
+    </style>
+  </defs>
+
+  <text x="425" y="32" class="main-title">9-Dimensional MusPy Musicological Alignment Across Generative Architectures</text>
+
+  <!-- Center (360, 310), Radius = 200 px. 9 Axes, Angle step = 360 / 9 = 40 deg -->
+  <!-- Axis Angles:
+       0: -90 deg (Top): Pitch Range
+       1: -50 deg: N Pitches
+       2: -10 deg: N Pitch Classes
+       3:  30 deg: Polyphony
+       4:  70 deg: Scale Consistency
+       5: 110 deg: Pitch Entropy
+       6: 150 deg: Pitch Class Entropy
+       7: 190 deg: Empty Beat Rate
+       8: 230 deg: Groove Consistency
+  -->
+
+  <g transform="translate(360, 310)">
+    <!-- Concentric Web Rings (20%, 40%, 60%, 80%, 100% Benchmark, 120%) -->
+    <polygon points="0,-40 25.7,-30.6 39.4,-6.9 34.6,20 13.7,37.6 -13.7,37.6 -34.6,20 -39.4,-6.9 -25.7,-30.6" class="radar-grid" />
+    <polygon points="0,-80 51.4,-61.3 78.8,-13.9 69.3,40 27.4,75.2 -27.4,75.2 -69.3,40 -78.8,-13.9 -51.4,-61.3" class="radar-grid" />
+    <polygon points="0,-120 77.1,-91.9 118.2,-20.8 103.9,60 41.0,112.8 -41.0,112.8 -103.9,60 -118.2,-20.8 -77.1,-91.9" class="radar-grid" />
+    <polygon points="0,-160 102.8,-122.6 157.6,-27.8 138.6,80 54.7,150.4 -54.7,150.4 -138.6,80 -157.6,-27.8 -102.8,-122.6" class="radar-grid" />
+    <!-- 100% Benchmark Ring (Radius 160) -->
+    <polygon points="0,-160 102.8,-122.6 157.6,-27.8 138.6,80 54.7,150.4 -54.7,150.4 -138.6,80 -157.6,-27.8 -102.8,-122.6" stroke="#111111" stroke-width="1.4" fill="none" />
+    <polygon points="0,-200 128.6,-153.2 197.0,-34.7 173.2,100 68.4,187.9 -68.4,187.9 -173.2,100 -197.0,-34.7 -128.6,-153.2" class="radar-grid" />
+
+    <!-- 9 Radial Axes -->
+    <line x1="0" y1="0" x2="0" y2="-215" class="radar-axis" />
+    <line x1="0" y1="0" x2="138.2" y2="-164.7" class="radar-axis" />
+    <line x1="0" y1="0" x2="211.7" y2="-37.3" class="radar-axis" />
+    <line x1="0" y1="0" x2="186.2" y2="107.5" class="radar-axis" />
+    <line x1="0" y1="0" x2="73.5" y2="202.0" class="radar-axis" />
+    <line x1="0" y1="0" x2="-73.5" y2="202.0" class="radar-axis" />
+    <line x1="0" y1="0" x2="-186.2" y2="107.5" class="radar-axis" />
+    <line x1="0" y1="0" x2="-211.7" y2="-37.3" class="radar-axis" />
+    <line x1="0" y1="0" x2="-138.2" y2="-164.7" class="radar-axis" />
+
+    <!-- Ground Truth (Benchmark = 100%, Radius = 160) -->
+    <polygon points="0,-160 102.8,-122.6 157.6,-27.8 138.6,80 54.7,150.4 -54.7,150.4 -138.6,80 -157.6,-27.8 -102.8,-122.6" class="poly-ground" />
+
+    <!-- RNN Baseline (Severe deviations in Range, Scale, Classes, Groove) -->
+    <!-- Normalized: Range 95%, N Pitches 87%, N Classes 91%, Poly 100%, Scale 94%, P_Ent 87%, PC_Ent 88%, Empty 14%, Groove 92% -->
+    <polygon points="0,-152 89.4,-106.6 143.4,-25.3 138.6,80 51.4,141.3 -47.6,130.8 -122.0,70.4 -22.1,-3.9 -94.6,-112.8" class="poly-rnn" />
+
+    <!-- LSTM Baseline (Closer, but conservative) -->
+    <!-- Normalized: Range 99%, N Pitches 98%, N Classes 97%, Poly 100%, Scale 100%, P_Ent 98%, PC_Ent 99%, Empty 28%, Groove 101% -->
+    <polygon points="0,-158 100.7,-120.1 152.8,-27.0 138.6,80 54.7,150.4 -53.6,147.4 -137.2,79.2 -44.2,-7.8 -103.8,-123.8" class="poly-lstm" />
+
+    <!-- GPT-2 Large (Almost perfectly overlapping Ground Truth, except Empty Beat Rate) -->
+    <!-- Normalized: Range 105%, N Pitches 103%, N Classes 99%, Poly 100%, Scale 100%, P_Ent 100%, PC_Ent 100%, Empty 5%, Groove 99% -->
+    <polygon points="0,-168 105.9,-126.3 156.0,-27.5 138.6,80 54.7,150.4 -54.7,150.4 -138.6,80 -7.8,-1.4 -101.8,-121.4" class="poly-gpt2" />
+
+    <!-- Axis Labels -->
+    <text x="0" y="-225" text-anchor="middle" class="radar-label">Pitch Range</text>
+    <text x="155" y="-175" text-anchor="start" class="radar-label">N Pitches</text>
+    <text x="225" y="-35" text-anchor="start" class="radar-label">N Pitch Classes</text>
+    <text x="198" y="122" text-anchor="start" class="radar-label">Polyphony (1.0)</text>
+    <text x="80" y="222" text-anchor="start" class="radar-label">Scale Consistency</text>
+    <text x="-80" y="222" text-anchor="end" class="radar-label">Pitch Entropy</text>
+    <text x="-198" y="122" text-anchor="end" class="radar-label">Pitch Class Entropy</text>
+    <text x="-225" y="-35" text-anchor="end" class="radar-label">Empty Beat Rate</text>
+    <text x="-155" y="-175" text-anchor="end" class="radar-label">Groove Consistency</text>
+  </g>
+
+  <!-- Legend Box (Right side) -->
+  <g transform="translate(640, 90)">
+    <rect x="0" y="0" width="180" height="150" fill="#ffffff" fill-opacity="0.9" stroke="#111111" stroke-width="1.2" rx="4" />
+
+    <line x1="15" y1="25" x2="45" y2="25" class="poly-ground" stroke-width="2.2" />
+    <text x="55" y="29" class="legend-text">Dataset (Ground Truth)</text>
+
+    <line x1="15" y1="55" x2="45" y2="55" class="poly-gpt2" stroke-width="3" />
+    <text x="55" y="59" class="legend-text">GPT-2 Large (Ours)</text>
+
+    <line x1="15" y1="85" x2="45" y2="85" class="poly-lstm" stroke-width="2.2" />
+    <text x="55" y="89" class="legend-text">LSTM Baseline</text>
+
+    <line x1="15" y1="115" x2="45" y2="115" class="poly-rnn" stroke-width="2.2" />
+    <text x="55" y="119" class="legend-text">Vanilla RNN</text>
+
+    <text x="15" y="140" font-size="10.5" fill="#4b5563" font-family="sans-serif">100% = Dataset Target</text>
+  </g>
+</svg>

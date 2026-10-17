@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 380" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .box { stroke: #111111; stroke-width: 1.8; rx: 6; }
+      .box-meta   { fill: #eff6ff; stroke: #2563eb; }
+      .box-time   { fill: #fef2f2; stroke: #dc2626; }
+      .box-pitch  { fill: #ecfdf5; stroke: #059669; }
+      .box-form   { fill: #fffbeb; stroke: #d97706; }
+      .main-title { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; text-anchor: middle; }
+      .dim-title  { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13.5px; font-weight: bold; text-anchor: middle; }
+      .item-code  { fill: #1e293b; font-family: "Courier New", Courier, monospace; font-size: 12px; font-weight: bold; }
+      .item-desc  { fill: #475569; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; }
+      .core-hub   { fill: #f8fafc; stroke: #111111; stroke-width: 2; rx: 8; }
+      .hub-text   { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; }
+      .conn-line  { stroke: #111111; stroke-width: 1.6; stroke-dasharray: 4,4; fill: none; }
+    </style>
+  </defs>
+
+  <text x="440" y="30" class="main-title">ABC Notation Multi-Dimensional Semantic Representation Architecture</text>
+
+  <!-- Central Hub: ABC Plain Text Score -->
+  <g transform="translate(340, 140)">
+    <rect x="0" y="0" width="200" height="90" class="core-hub" />
+    <text x="100" y="38" class="hub-text">ABC Plain Text Stream</text>
+    <text x="100" y="60" class="item-desc" text-anchor="middle">Compact ASCII Rational Representation</text>
+  </g>
+
+  <!-- Connectors -->
+  <line x1="220" y1="100" x2="340" y2="160" class="conn-line" />
+  <line x1="660" y1="100" x2="540" y2="160" class="conn-line" />
+  <line x1="220" y1="270" x2="340" y2="205" class="conn-line" />
+  <line x1="660" y1="270" x2="540" y2="205" class="conn-line" />
+
+  <!-- Quadrant 1: Metadata Declaration Layer (Top-Left) -->
+  <g transform="translate(30, 50)">
+    <rect x="0" y="0" width="250" height="130" class="box box-meta" />
+    <text x="125" y="26" class="dim-title" fill="#1e40af">1. Metadata Headers</text>
+    <line x1="15" y1="36" x2="235" y2="36" stroke="#bfdbfe" />
+    <text x="20" y="58" class="item-code">M: 4/4, 6/8</text>
+    <text x="110" y="58" class="item-desc">Metric Time Signature</text>
+    <text x="20" y="80" class="item-code">K: G, Dmaj</text>
+    <text x="110" y="80" class="item-desc">Tonal Key Signature</text>
+    <text x="20" y="102" class="item-code">L: 1/8, Q: 120</text>
+    <text x="110" y="102" class="item-desc">Unit Length &amp; Tempo</text>
+  </g>
+
+  <!-- Quadrant 2: Temporal & Metric Dimension (Top-Right) -->
+  <g transform="translate(600, 50)">
+    <rect x="0" y="0" width="250" height="130" class="box box-time" />
+    <text x="125" y="26" class="dim-title" fill="#991b1b">2. Temporal &amp; Metric Axis</text>
+    <line x1="15" y1="36" x2="235" y2="36" stroke="#fecaca" />
+    <text x="20" y="58" class="item-code">|</text>
+    <text x="50" y="58" class="item-desc">Barline Metric Arithmetic</text>
+    <text x="20" y="80" class="item-code">2, /2, 3</text>
+    <text x="90" y="80" class="item-desc">Rational Duration Scaling</text>
+    <text x="20" y="102" class="item-code">&gt;, &lt;</text>
+    <text x="60" y="102" class="item-desc">Dotted Hornpipe Syncopation</text>
+  </g>
+
+  <!-- Quadrant 3: Pitch & Harmonic Dimension (Bottom-Left) -->
+  <g transform="translate(30, 210)">
+    <rect x="0" y="0" width="250" height="130" class="box box-pitch" />
+    <text x="125" y="26" class="dim-title" fill="#065f46">3. Pitch &amp; Harmonic Axis</text>
+    <line x1="15" y1="36" x2="235" y2="36" stroke="#a7f3d0" />
+    <text x="20" y="58" class="item-code">^F, _B, =G</text>
+    <text x="115" y="58" class="item-desc">Accidentals (♯, ♭, ♮)</text>
+    <text x="20" y="80" class="item-code">C vs c, ', ,</text>
+    <text x="115" y="80" class="item-desc">Octave Register Shifts</text>
+    <text x="20" y="102" class="item-code">[CEG]</text>
+    <text x="80" y="102" class="item-desc">Vertical Polyphonic Chords</text>
+  </g>
+
+  <!-- Quadrant 4: Structural & Macro Form Dimension (Bottom-Right) -->
+  <g transform="translate(600, 210)">
+    <rect x="0" y="0" width="250" height="130" class="box box-form" />
+    <text x="125" y="26" class="dim-title" fill="#92400e">4. Macro Form &amp; Structure</text>
+    <line x1="15" y1="36" x2="235" y2="36" stroke="#fde68a" />
+    <text x="20" y="58" class="item-code">|: A :|: B :|</text>
+    <text x="120" y="58" class="item-desc">Binary Dance Form (AABB)</text>
+    <text x="20" y="80" class="item-code">[1, [2</text>
+    <text x="80" y="80" class="item-desc">Volta Variant Endings</text>
+    <text x="20" y="102" class="item-code">||, |]</text>
+    <text x="80" y="102" class="item-desc">Section &amp; Score Terminators</text>
+  </g>
+</svg>
