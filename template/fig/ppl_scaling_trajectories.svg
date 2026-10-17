@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 500" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .axis { stroke: #111111; stroke-width: 2; }
+      .grid { stroke: #e5e7eb; stroke-width: 1; stroke-dasharray: 4,4; }
+      .tick-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; }
+      .label-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; }
+      .legend-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; font-weight: 600; }
+      .line-nano { stroke: #ef4444; stroke-width: 2.2; fill: none; }
+      .line-mini { stroke: #f97316; stroke-width: 2.2; fill: none; }
+      .line-base { stroke: #eab308; stroke-width: 2.2; fill: none; }
+      .line-med  { stroke: #3b82f6; stroke-width: 2.2; fill: none; }
+      .line-large{ stroke: #10b981; stroke-width: 3.2; fill: none; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="425" y="35" text-anchor="middle" class="label-text" font-size="16">Validation Perplexity (Val PPL) Scaling Trajectories across Training Steps</text>
+
+  <!-- Y Axis: PPL 2.0 to 14.0 (Height 360px -> 30px per unit) -->
+  <line x1="85" y1="420" x2="790" y2="420" class="axis" />
+  <line x1="85" y1="60" x2="85" y2="420" class="axis" />
+
+  <!-- Y Ticks -->
+  <text x="75" y="424" text-anchor="end" class="tick-text">2.0</text>
+  <line x1="85" y1="360" x2="790" y2="360" class="grid" /><text x="75" y="364" text-anchor="end" class="tick-text">4.0</text>
+  <line x1="85" y1="300" x2="790" y2="300" class="grid" /><text x="75" y="304" text-anchor="end" class="tick-text">6.0</text>
+  <line x1="85" y1="240" x2="790" y2="240" class="grid" /><text x="75" y="244" text-anchor="end" class="tick-text">8.0</text>
+  <line x1="85" y1="180" x2="790" y2="180" class="grid" /><text x="75" y="184" text-anchor="end" class="tick-text">10.0</text>
+  <line x1="85" y1="120" x2="790" y2="120" class="grid" /><text x="75" y="124" text-anchor="end" class="tick-text">12.0</text>
+  <line x1="85" y1="60" x2="790" y2="60" class="grid" /><text x="75" y="64" text-anchor="end" class="tick-text">14.0</text>
+
+  <!-- X Ticks (0 to 3000 Steps) -->
+  <text x="85" y="440" text-anchor="middle" class="tick-text">0</text>
+  <line x1="202" y1="60" x2="202" y2="420" class="grid" /><text x="202" y="440" text-anchor="middle" class="tick-text">500</text>
+  <line x1="320" y1="60" x2="320" y2="420" class="grid" /><text x="320" y="440" text-anchor="middle" class="tick-text">1000</text>
+  <line x1="437" y1="60" x2="437" y2="420" class="grid" /><text x="437" y="440" text-anchor="middle" class="tick-text">1500</text>
+  <line x1="555" y1="60" x2="555" y2="420" class="grid" /><text x="555" y="440" text-anchor="middle" class="tick-text">2000</text>
+  <line x1="672" y1="60" x2="672" y2="420" class="grid" /><text x="672" y="440" text-anchor="middle" class="tick-text">2500</text>
+  <line x1="790" y1="60" x2="790" y2="420" class="grid" /><text x="790" y="440" text-anchor="middle" class="tick-text">3000</text>
+
+  <!-- Axis Labels -->
+  <text x="437" y="475" text-anchor="middle" class="label-text">Training Steps</text>
+  <text x="30" y="240" text-anchor="middle" class="label-text" transform="rotate(-90 30,240)">Validation Perplexity (Val PPL)</text>
+
+  <!-- Trajectories -->
+  <!-- Nano (0.24M): starts ~13.8 -> 7.28 (Y = 420 - (7.28-2)*30 = 261.6) -->
+  <path d="M 85,66 Q 140,180 202,215 T 320,242 T 555,258 T 790,261.6" class="line-nano" />
+
+  <!-- Mini (1.15M): starts ~13.2 -> 4.82 (Y = 420 - (4.82-2)*30 = 335.4) -->
+  <path d="M 85,84 Q 140,225 202,272 T 320,312 T 555,331 T 790,335.4" class="line-mini" />
+
+  <!-- Base (9.59M): starts ~12.5 -> 3.71 (Y = 420 - (3.71-2)*30 = 368.7) -->
+  <path d="M 85,105 Q 140,260 202,318 T 320,350 T 555,365 T 790,368.7" class="line-base" />
+
+  <!-- Medium (25.4M): starts ~11.8 -> 3.03 (Y = 420 - (3.03-2)*30 = 389.1) -->
+  <path d="M 85,126 Q 140,290 202,346 T 320,373 T 555,385 T 790,389.1" class="line-med" />
+
+  <!-- Large (85.4M): steep descent -> 2.47 (Y = 420 - (2.47-2)*30 = 405.9) -->
+  <path d="M 85,145 Q 130,325 202,376 T 320,396 T 555,403 T 790,405.9" class="line-large" />
+
+  <!-- Legend -->
+  <g transform="translate(560, 75)">
+    <rect x="0" y="0" width="215" height="135" fill="#ffffff" fill-opacity="0.88" stroke="#111111" stroke-width="1.2" rx="4" />
+    <line x1="15" y1="22" x2="45" y2="22" class="line-large" stroke-width="3.2" />
+    <text x="55" y="26" class="legend-text">Large (85.4M) | PPL=2.47</text>
+
+    <line x1="15" y1="46" x2="45" y2="46" class="line-med" stroke-width="2.2" />
+    <text x="55" y="50" class="legend-text">Medium (25.4M) | PPL=3.03</text>
+
+    <line x1="15" y1="70" x2="45" y2="70" class="line-base" stroke-width="2.2" />
+    <text x="55" y="74" class="legend-text">Base (9.59M) | PPL=3.71</text>
+
+    <line x1="15" y1="94" x2="45" y2="94" class="line-mini" stroke-width="2.2" />
+    <text x="55" y="98" class="legend-text">Mini (1.15M) | PPL=4.82</text>
+
+    <line x1="15" y1="118" x2="45" y2="118" class="line-nano" stroke-width="2.2" />
+    <text x="55" y="122" class="legend-text">Nano (0.24M) | PPL=7.28</text>
+  </g>
+</svg>

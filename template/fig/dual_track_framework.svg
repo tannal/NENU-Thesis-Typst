@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 320" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .box { stroke: #111111; stroke-width: 1.8; rx: 6; }
+      .box-input { fill: #f3f4f6; }
+      .box-track1 { fill: #dbeafe; }
+      .box-track2 { fill: #d1fae5; }
+      .box-emerge { fill: #fef3c7; }
+      .arrow { stroke: #111111; stroke-width: 1.8; fill: none; marker-end: url(#arrowhead); }
+      .text-title { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13.5px; font-weight: bold; text-anchor: middle; }
+      .text-desc { fill: #374151; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#111111" />
+    </marker>
+  </defs>
+
+  <!-- Left: Model Scale Expansion (N) -->
+  <g transform="translate(30, 80)">
+    <rect x="0" y="0" width="160" height="150" class="box box-input" />
+    <text x="80" y="30" class="text-title">Model Scale (N)</text>
+    <line x1="15" y1="42" x2="145" y2="42" stroke="#d1d5db" />
+    <text x="20" y="65" class="text-desc">• Nano: 0.24M</text>
+    <text x="20" y="88" class="text-desc">• Base: 9.59M</text>
+    <text x="20" y="111" class="text-desc">• Large: 85.39M</text>
+    <text x="20" y="134" class="text-desc">• XL: 302.85M</text>
+  </g>
+
+  <!-- Split Arrows -->
+  <path d="M 190,130 C 230,130 230,80 270,80" class="arrow" />
+  <path d="M 190,180 C 230,180 230,230 270,230" class="arrow" />
+
+  <!-- Track 1: Statistical Learning -->
+  <g transform="translate(270, 30)">
+    <rect x="0" y="0" width="260" height="100" class="box box-track1" />
+    <text x="130" y="26" class="text-title">Track 1: Statistical Learning</text>
+    <line x1="15" y1="36" x2="245" y2="36" stroke="#bfdbfe" />
+    <text x="20" y="58" class="text-desc">• Cross-Entropy Test Loss: 1.985 → 0.906</text>
+    <text x="20" y="78" class="text-desc">• Perplexity (PPL): 7.28 → 2.47</text>
+    <text x="20" y="94" class="text-desc" fill="#2563eb" font-weight="bold">Power-Law Fit: α_N = 0.142 (R² = 0.995)</text>
+  </g>
+
+  <!-- Track 2: Computational Musicology -->
+  <g transform="translate(270, 180)">
+    <rect x="0" y="0" width="260" height="105" class="box box-track2" />
+    <text x="130" y="26" class="text-title">Track 2: Cognitive Musicology</text>
+    <line x1="15" y1="36" x2="245" y2="36" stroke="#a7f3d0" />
+    <text x="20" y="56" class="text-desc">• Scale Consistency: 0.777 → 0.994</text>
+    <text x="20" y="75" class="text-desc">• N Pitch Classes: 12.0 → 7.15 (Ground: 7.17)</text>
+    <text x="20" y="94" class="text-desc">• Bar Syntax Validity: 61.2% → 98.4%</text>
+  </g>
+
+  <!-- Join Arrows -->
+  <line x1="530" y1="80" x2="580" y2="120" class="arrow" />
+  <line x1="530" y1="230" x2="580" y2="180" class="arrow" />
+
+  <!-- Right: Cognitive Emergence -->
+  <g transform="translate(580, 60)">
+    <rect x="0" y="0" width="230" height="180" class="box box-emerge" />
+    <text x="115" y="28" class="text-title">Structural Emergence</text>
+    <line x1="15" y1="38" x2="215" y2="38" stroke="#fde68a" />
+    <text x="20" y="62" class="text-desc" font-weight="bold">1. Scale Invariance:</text>
+    <text x="32" y="80" class="text-desc">Strict 7-note tonal alignment</text>
+    <text x="20" y="104" class="text-desc" font-weight="bold">2. Metric Conservation:</text>
+    <text x="32" y="122" class="text-desc">4/4 Bar arithmetic adherence</text>
+    <text x="20" y="146" class="text-desc" font-weight="bold">3. Long-Range SSM Motifs:</text>
+    <text x="32" y="164" class="text-desc">16-bar off-diagonal recurrence</text>
+  </g>
+</svg>

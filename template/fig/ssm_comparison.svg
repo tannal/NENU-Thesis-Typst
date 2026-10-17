@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 340" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .title-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; text-anchor: middle; }
+      .sub-title { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; text-anchor: middle; }
+      .frame { stroke: #111111; stroke-width: 1.8; fill: none; }
+      .desc-text { fill: #4b5563; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <text x="425" y="30" class="title-text">Self-Similarity Matrix (SSM) Evolution Across Model Scales</text>
+
+  <!-- Panel 1: Nano (0.24M) -->
+  <g transform="translate(50, 60)">
+    <text x="100" y="-10" class="sub-title">(a) Nano (0.24M)</text>
+    <!-- Background low-similarity noise -->
+    <rect x="0" y="0" width="200" height="200" fill="#f8fafc" />
+    <!-- Blurred main diagonal only -->
+    <line x1="0" y1="0" x2="200" y2="200" stroke="#ef4444" stroke-width="12" stroke-opacity="0.75" />
+    <line x1="0" y1="0" x2="200" y2="200" stroke="#b91c1c" stroke-width="4" />
+    <rect x="0" y="0" width="200" height="200" class="frame" />
+    <text x="100" y="222" class="desc-text">Main diagonal blur only</text>
+    <text x="100" y="238" class="desc-text">Memory decays within 1~2 bars</text>
+  </g>
+
+  <!-- Panel 2: Base (9.59M) -->
+  <g transform="translate(325, 60)">
+    <text x="100" y="-10" class="sub-title">(b) Base (9.59M)</text>
+    <rect x="0" y="0" width="200" height="200" fill="#f8fafc" />
+    <!-- Main diagonal -->
+    <line x1="0" y1="0" x2="200" y2="200" stroke="#eab308" stroke-width="8" stroke-opacity="0.8" />
+    <line x1="0" y1="0" x2="200" y2="200" stroke="#a16207" stroke-width="3" />
+    <!-- Local 4-bar blocks along diagonal -->
+    <rect x="20" y="20" width="30" height="30" fill="#fef08a" fill-opacity="0.7" stroke="#ca8a04" stroke-width="1" />
+    <rect x="70" y="70" width="30" height="30" fill="#fef08a" fill-opacity="0.7" stroke="#ca8a04" stroke-width="1" />
+    <rect x="120" y="120" width="30" height="30" fill="#fef08a" fill-opacity="0.7" stroke="#ca8a04" stroke-width="1" />
+    <rect x="160" y="160" width="30" height="30" fill="#fef08a" fill-opacity="0.7" stroke="#ca8a04" stroke-width="1" />
+    <rect x="0" y="0" width="200" height="200" class="frame" />
+    <text x="100" y="222" class="desc-text">Short-range block repetitions</text>
+    <text x="100" y="238" class="desc-text">Maintains local 2~4 bar phrases</text>
+  </g>
+
+  <!-- Panel 3: Large (85.39M) -->
+  <g transform="translate(600, 60)">
+    <text x="100" y="-10" class="sub-title">(c) Large (85.39M)</text>
+    <rect x="0" y="0" width="200" height="200" fill="#f8fafc" />
+    <!-- Main diagonal -->
+    <line x1="0" y1="0" x2="200" y2="200" stroke="#10b981" stroke-width="5" />
+    <!-- Off-diagonal stripes (8-bar & 16-bar recurrence) -->
+    <!-- +8 bar stripe -->
+    <line x1="50" y1="0" x2="200" y2="150" stroke="#059669" stroke-width="3.5" stroke-dasharray="8,2" />
+    <line x1="0" y1="50" x2="150" y2="200" stroke="#059669" stroke-width="3.5" stroke-dasharray="8,2" />
+    <!-- +16 bar stripe -->
+    <line x1="100" y1="0" x2="200" y2="100" stroke="#047857" stroke-width="3.8" />
+    <line x1="0" y1="100" x2="100" y2="200" stroke="#047857" stroke-width="3.8" />
+    <rect x="0" y="0" width="200" height="200" class="frame" />
+    <text x="100" y="222" class="desc-text" font-weight="bold" fill="#047857">Sharp off-diagonal stripes</text>
+    <text x="100" y="238" class="desc-text">Global 16-bar AABB form recall</text>
+  </g>
+</svg>

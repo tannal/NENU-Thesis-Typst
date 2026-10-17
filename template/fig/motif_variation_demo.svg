@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .box { stroke: #111111; stroke-width: 1.8; rx: 5; }
+      .box-prefix { fill: #e0e7ff; stroke: #4338ca; }
+      .box-a-prime { fill: #dbeafe; stroke: #1d4ed8; }
+      .box-b { fill: #fef3c7; stroke: #b45309; }
+      .box-a-end { fill: #d1fae5; stroke: #047857; }
+      .arrow { stroke: #111111; stroke-width: 1.8; fill: none; marker-end: url(#arrowhead); }
+      .section-tag { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: bold; text-anchor: middle; }
+      .abc-code { fill: #1e293b; font-family: "Courier New", Courier, monospace; font-size: 12px; font-weight: bold; text-anchor: middle; }
+      .desc-text { fill: #475569; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; text-anchor: middle; }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#111111" />
+    </marker>
+  </defs>
+
+  <text x="450" y="30" class="section-tag" font-size="16">Hierarchical Motif Evolution in Controlled Pop Melody Generation (A - A' - B - A'')</text>
+
+  <!-- Flow Sequence of 4 Blocks -->
+  <!-- Block 1: Motif A (User Prompt) -->
+  <g transform="translate(30, 65)">
+    <rect x="0" y="0" width="180" height="200" class="box box-prefix" />
+    <text x="90" y="30" class="section-tag" fill="#3730a3">Prompt: Theme A</text>
+    <text x="90" y="50" class="desc-text">(User Seed Conditioning)</text>
+    <line x1="15" y1="62" x2="165" y2="62" stroke="#c7d2fe" />
+    <text x="90" y="90" class="abc-code">M:4/4 K:C</text>
+    <text x="90" y="112" class="abc-code">|: C E G A |</text>
+    <text x="90" y="134" class="abc-code">G E D2 |</text>
+    <line x1="15" y1="150" x2="165" y2="150" stroke="#c7d2fe" />
+    <text x="90" y="172" class="desc-text">4-note motif kern</text>
+    <text x="90" y="190" class="desc-text">Tonic arpeggio statement</text>
+  </g>
+
+  <line x1="210" y1="165" x2="250" y2="165" class="arrow" />
+
+  <!-- Block 2: Variation A' -->
+  <g transform="translate(250, 65)">
+    <rect x="0" y="0" width="180" height="200" class="box box-a-prime" />
+    <text x="90" y="30" class="section-tag" fill="#1e40af">Generated: A'</text>
+    <text x="90" y="50" class="desc-text">(Parallel Period Variation)</text>
+    <line x1="15" y1="62" x2="165" y2="62" stroke="#bfdbfe" />
+    <text x="90" y="90" class="abc-code">| C E G A |</text>
+    <text x="90" y="112" class="abc-code">c B G2 |</text>
+    <line x1="15" y1="150" x2="165" y2="150" stroke="#bfdbfe" />
+    <text x="90" y="172" class="desc-text">Rhythm preserved</text>
+    <text x="90" y="190" class="desc-text">High-octane c-B inflection</text>
+  </g>
+
+  <line x1="430" y1="165" x2="470" y2="165" class="arrow" />
+
+  <!-- Block 3: Chorus Contrast B -->
+  <g transform="translate(470, 65)">
+    <rect x="0" y="0" width="180" height="200" class="box box-b" />
+    <text x="90" y="30" class="section-tag" fill="#92400e">Chorus Peak: B</text>
+    <text x="90" y="50" class="desc-text">(Dynamic Contrast Expansion)</text>
+    <line x1="15" y1="62" x2="165" y2="62" stroke="#fde68a" />
+    <text x="90" y="90" class="abc-code">| e2 d c | d e g2 |</text>
+    <text x="90" y="112" class="abc-code">| a g e d | c4 :|</text>
+    <line x1="15" y1="150" x2="165" y2="150" stroke="#fde68a" />
+    <text x="90" y="172" class="desc-text">High octave leaps (e-g-a)</text>
+    <text x="90" y="190" class="desc-text">Sustained tension closure</text>
+  </g>
+
+  <line x1="650" y1="165" x2="690" y2="165" class="arrow" />
+
+  <!-- Block 4: Cadence Resolution A'' -->
+  <g transform="translate(690, 65)">
+    <rect x="0" y="0" width="180" height="200" class="box box-a-end" />
+    <text x="90" y="30" class="section-tag" fill="#065f46">Resolution: A''</text>
+    <text x="90" y="50" class="desc-text">(Global Tonal Cadence)</text>
+    <line x1="15" y1="62" x2="165" y2="62" stroke="#a7f3d0" />
+    <text x="90" y="90" class="abc-code">| C E G A |</text>
+    <text x="90" y="112" class="abc-code">G E D C |] </text>
+    <line x1="15" y1="150" x2="165" y2="150" stroke="#a7f3d0" />
+    <text x="90" y="172" class="desc-text">Re-statement of motif A</text>
+    <text x="90" y="190" class="desc-text">Grounds on Root Tonic C</text>
+  </g>
+</svg>

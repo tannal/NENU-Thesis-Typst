@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 500" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .axis { stroke: #111111; stroke-width: 2; }
+      .grid { stroke: #e5e7eb; stroke-width: 1; stroke-dasharray: 4,4; }
+      .tick-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; }
+      .label-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; }
+      .fit-line { stroke: #3b82f6; stroke-width: 2.8; fill: none; }
+      .extrap-line { stroke: #3b82f6; stroke-width: 2.2; stroke-dasharray: 6,4; fill: none; }
+      .data-point { fill: #ef4444; stroke: #111111; stroke-width: 1.8; }
+      .point-label { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11.5px; font-weight: bold; }
+      .asymptote { stroke: #9ca3af; stroke-width: 1.5; stroke-dasharray: 5,5; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="425" y="35" text-anchor="middle" class="label-text" font-size="16">Power-Law Fit of Test Loss vs. Non-Embedding Parameters in Log-Log Scale</text>
+
+  <!-- Coordinate frame: X in log10(N) from 5.0 to 9.2 (span 4.2 -> 700px, 166.7px per unit)
+       Y in Loss L(N) from 0.70 to 2.10 (span 1.40 -> 360px, 257.1px per unit) -->
+  <line x1="90" y1="420" x2="800" y2="420" class="axis" />
+  <line x1="90" y1="60" x2="90" y2="420" class="axis" />
+
+  <!-- Y Ticks -->
+  <text x="80" y="424" text-anchor="end" class="tick-text">0.70</text>
+  <line x1="90" y1="368.6" x2="800" y2="368.6" class="grid" /><text x="80" y="372" text-anchor="end" class="tick-text">0.90</text>
+  <line x1="90" y1="317.1" x2="800" y2="317.1" class="grid" /><text x="80" y="321" text-anchor="end" class="tick-text">1.10</text>
+  <line x1="90" y1="265.7" x2="800" y2="265.7" class="grid" /><text x="80" y="270" text-anchor="end" class="tick-text">1.30</text>
+  <line x1="90" y1="214.3" x2="800" y2="214.3" class="grid" /><text x="80" y="218" text-anchor="end" class="tick-text">1.50</text>
+  <line x1="90" y1="162.8" x2="800" y2="162.8" class="grid" /><text x="80" y="167" text-anchor="end" class="tick-text">1.70</text>
+  <line x1="90" y1="111.4" x2="800" y2="111.4" class="grid" /><text x="80" y="115" text-anchor="end" class="tick-text">1.90</text>
+  <line x1="90" y1="60" x2="800" y2="60" class="grid" /><text x="80" y="64" text-anchor="end" class="tick-text">2.10</text>
+
+  <!-- X Ticks: log10(N) 5.0, 6.0, 7.0, 8.0, 9.0 -->
+  <text x="90" y="440" text-anchor="middle" class="tick-text">5.0 (100K)</text>
+  <line x1="256.7" y1="60" x2="256.7" y2="420" class="grid" /><text x="256.7" y="440" text-anchor="middle" class="tick-text">6.0 (1M)</text>
+  <line x1="423.3" y1="60" x2="423.3" y2="420" class="grid" /><text x="423.3" y="440" text-anchor="middle" class="tick-text">7.0 (10M)</text>
+  <line x1="590.0" y1="60" x2="590.0" y2="420" class="grid" /><text x="590.0" y="440" text-anchor="middle" class="tick-text">8.0 (100M)</text>
+  <line x1="756.7" y1="60" x2="756.7" y2="420" class="grid" /><text x="756.7" y="440" text-anchor="middle" class="tick-text">9.0 (1B)</text>
+
+  <text x="445" y="475" text-anchor="middle" class="label-text">Non-Embedding Parameters log₁₀(N)</text>
+  <text x="30" y="240" text-anchor="middle" class="label-text" transform="rotate(-90 30,240)">Validation Loss L(N) (nats)</text>
+
+  <!-- Theoretical Asymptote L_inf = 0.725 -->
+  <line x1="90" y1="413.6" x2="800" y2="413.6" class="asymptote" />
+  <text x="790" y="408" text-anchor="end" class="tick-text" fill="#6b7280">Entropy Floor L_∞ = 0.725</text>
+
+  <!-- Solid Fit Curve -->
+  <path d="M 123,67.7 C 220,165 350,240 420,262.5 S 520,345 578,366.9 S 630,383 670,388.7" class="fit-line" />
+  <!-- Extrapolation dashed -->
+  <path d="M 670,388.7 Q 705,394 760,400" class="extrap-line" />
+
+  <!-- Data Points -->
+  <!-- Nano -->
+  <circle cx="154" cy="89.6" r="6" class="data-point" />
+  <text x="165" y="86" class="point-label">Nano (0.24M, 1.985)</text>
+
+  <!-- Mini -->
+  <circle cx="267" cy="195.4" r="6" class="data-point" />
+  <text x="278" y="192" class="point-label">Mini (1.15M, 1.573)</text>
+
+  <!-- Base -->
+  <circle cx="420" cy="262.5" r="6" class="data-point" />
+  <text x="432" y="258" class="point-label">Base (9.59M, 1.312)</text>
+
+  <!-- Medium -->
+  <circle cx="491" cy="314.7" r="6" class="data-point" />
+  <text x="502" y="310" class="point-label">Med (25.4M, 1.109)</text>
+
+  <!-- Large -->
+  <circle cx="578" cy="366.9" r="6.5" class="data-point" fill="#10b981" />
+  <text x="590" y="362" class="point-label" fill="#047857">Large (85.4M, 0.906)</text>
+
+  <!-- XL -->
+  <circle cx="670" cy="388.7" r="6.5" class="data-point" fill="#10b981" />
+  <text x="682" y="384" class="point-label" fill="#047857">XL (302.8M, 0.821)</text>
+
+  <!-- Limit (Extrapolated) -->
+  <circle cx="741" cy="398.8" r="5.5" fill="#ffffff" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3,2" />
+  <text x="748" y="396" class="point-label" fill="#2563eb">Limit Extrap (808M, 0.782)</text>
+
+  <!-- Annotation Box -->
+  <g transform="translate(480, 75)">
+    <rect x="0" y="0" width="280" height="90" fill="#ffffff" fill-opacity="0.9" stroke="#111111" stroke-width="1.2" rx="4" />
+    <text x="15" y="25" class="point-label" font-size="13">L(N) = (3.12×10³ / N)^0.142 + 0.725</text>
+    <text x="15" y="48" class="point-label" font-size="12" fill="#2563eb">Scaling Exponent α_N = 0.142 (R² = 0.9951)</text>
+    <text x="15" y="72" class="point-label" font-size="11.5" fill="#4b5563">Higher sensitivity than NLP (α_NLP ≈ 0.076)</text>
+  </g>
+</svg>
