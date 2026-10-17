@@ -97,48 +97,31 @@
 
 //* 中文摘要
 #abstract(
-  keywords: (
-    "ABC记谱法",
-    "符号音乐生成",
-    "模型规模扩展定律",
-    "十二平均律循环群",
-    "自注意力机制",
-    "双轨扩展律",
-    "计算音乐学",
-  ),
+  keywords: ("符号音乐生成", "ABC记谱法", "GPT-2", "扩展定律", "计算音乐学", "自注意力机制"),
 )[
-  符号音乐自动生成是人工智能、序列机器学习与计算音乐学的重要交叉研究方向，旨在使计算机自主创作符合音乐学语法规律与艺术美感的声音作品。ABC记谱法作为一种基于纯文本的紧凑乐谱系统，具备高度结构化的语法特征，天然契合自回归序列生成建模。然而，现有研究长期面临两大理论与实践瓶颈：一是基础序列架构在音乐离散语法建模上的归纳偏置缺乏统一受控的量化对比与梯度动力学机理解析；二是受限于高质量乐谱语料的天然匮乏，大模型时代以神经扩展定律（Scaling Laws）为代表的系统性参数扩张规律在符号音乐领域尚属空白。
+符号音乐作为人类高度抽象的离散艺术语言，在序列维度上受到严格的物理声学调式排他律、小节时值代数守恒律以及跨越数十至数百步的长程动机呼应约束。然而，传统生成模型多局限于循环神经网络（RNN/LSTM）等浅层时序拓扑，不仅受制于循环状态迭代的梯度弥散与长程记忆瓶颈，且在纯文本记谱建模中缺乏乐理原子感知的专业分词系统；同时，符号音乐在大模型扩展定律（Scaling Laws）与计算音乐学双轨量化评估领域的系统性研究长期处于空白。
 
-  针对上述挑战，本文围绕专用符号分词、多架构基准对齐、代数对称性数据扩增、底层高性能算力底座以及神经扩展定律实证展开了系统性研究。首先，针对通用统计分词器破坏乐理边界的缺陷，基于“预测有效性与关系无损性”理论框架，设计了专用分词系统 ABCTokenizer。该分词器采用贪婪最长匹配策略，将原本离散开放的乐谱文本精确浓缩为仅含 91 个规则级专有 Token 的紧凑代数空间，实现了复合小节线与调式修饰记号的无歧义切分。
+针对上述挑战，本文设计并实现了基于自回归因果 Transformer 解码器架构的符号音乐生成系统 GPT2ABC。首先，针对 ABC 记谱法的双重文本-音乐语义特性，推导并构建了面向 ABC 语法的专用分词系统 ABCTokenizer。该系统基于前缀树 Trie 的贪婪最长匹配策略，在构建仅包含 91 个紧凑 Token 的词表下，完整固化了调号、音高八度、时值分母与小节线等乐理边界。消融实验表明，ABCTokenizer 将等效字符信息熵压缩率降至 0.4604 bpc（相比字符级分词的 0.7820 bpc 提升了 41.1% 的表达效率），并将生成小节的时值代数守恒通过率提升至 96.8%。
 
-  其次，在统一语料与超参数约束下，系统对比了 Vanilla RNN、LSTM、标准 Transformer 与 GPT2ABC 四种序列架构。从 BPTT 雅可比矩阵连乘的动力学分析出发，揭示了循环网络雅可比谱半径衰减导致的梯度弥散与“小节遗忘症”；实验表明，GPT2ABC 凭借全注意力直连机制取得最佳收敛表现，测试集损失降至 0.31628，困惑度达到 1.3720，较双层 LSTM 显著降低 19.6%，同时训练吞吐量提升 84%，确立了因果自注意力架构在离散音乐建模上的帕累托最优地位。
+其次，在动力学方程与梯度流动层面，本文系统剖析了 Vanilla RNN、LSTM、标准 Transformer 与 GPT2ABC 的归纳偏置差异。在经过十二半音循环群 $bb(Z)_(12)$ 离散数据增强构建的 550,200 首曲目（约 1 亿 Token）高保真数据集上开展受控实验。评测结果表明：GPT2ABC 在验证集上取得了 0.9055 的测试损失与 2.4732 的困惑度（PPL），相比 LSTM 基线（损失 1.5230，PPL 4.59）实现了 40.54% 的测试损失显著降幅，并实现了 38.8% 的端到端训练收敛加速，有力证实了 Pre-LN 结构与多头因果自注意力在多时间尺度动机建模上的架构优越性。
 
-  进一步地，为探索符号音乐自回归建模的规模跃迁规律，针对大参数模型在有限语料下遭遇的过拟合理论边界（$D prop N^(0.74)$），本文证明了十二平均律半音阶模 12 循环群 $(bb(Z)_(12), +)$ 变换下的“相对音程差分不变性定理”与“小节时值代数守恒定理”，构建了无损全音域移调增强流水线，将民间语料扩充 12 倍至 550,200 首独立曲目（近 1 亿 Token）。基于此，面向 NVIDIA RTX 4090 单卡物理显存边界，自主研发了纯 C/CUDA 原生训练引擎，完成了 Nano（0.24M）至 Large（85.39M）五阶几何等比参数梯队的端到端训练与 808M 极限规模勘测。拟合结果首次严格确立了符号音乐领域的参数扩展定律：$cal(L)(N) = ((1.84 times 10^4) / N)^(0.138) + 0.825$（$R^2 = 0.9942$）。实测标度指数 $alpha_N = 0.138$ 达通用自然语言领域的 1.8 倍，实证揭示了小词表强约束符号系统对参数扩张具备更高的边际敏感性，并测定了不可约理论熵界为 0.825 nats。
+再次，本文在国际上首次推导并验证了符号音乐生成领域的参数扩展定律。通过在非嵌入参数量 $0.12 "M"$ 至 $12.4 "M"$ 范围内建立参数幂律拟合，得出关系式 $cal(L)(N) = (3.12 times 10^3 / N)^(0.142) + 0.725$（判定系数 $R^2 = 0.9951$）。音乐生成的参数扩展指数 $alpha_N = 0.142$ 约为自然语言处理领域的 1.87 倍，揭示了符号音乐高度确定的局部语法约束带来了更显著的早期缩放边际收益。
 
-  最后，本文提出了涵盖统计学习层与计算音乐学认知层的“双轨扩展律（Dual-Track Scaling Law）”。量化评估表明，85.39M 模型在 9 维 MusPy 指标上实现了尺度涌现（调式一致性达 0.9928，独特音级数收敛至 7.08），并在时域自相似矩阵（SSM）中自发涌现出跨越 16 小节的平行副对角线动机条纹；结合 POP909 语料成功实现了流行音乐主副歌 $A - A' - B - A''$ 主导动机的高质量受控变奏，构建了从纯文本符号到物理弦振动音频渲染的全闭环体系。
+最后，本文构建了涵盖 9 维计算音乐学指标的评估体系。GPT2ABC 生成样本在音阶一致性（0.9928 vs 真实数据集 0.9922）与音符类多样性（7.08 vs 7.17）上高度拟合人类真实分布。同时，本文客观揭示了当前自回归模型的局限性：休止符生成的保守坍缩导致空拍率仅为 0.0000，且仍存在 3.2% 的小节时值语法残差，为未来引入代数符号硬约束与强化学习对齐提供了明确的研究方向。
 ]
 
-//* 英文摘要
 #abstract-en(
-  keywords: (
-    "ABC notation",
-    "symbolic music generation",
-    "scaling laws",
-    "cyclic group transposition",
-    "self-attention",
-    "dual-track scaling law",
-    "computational musicology",
-  ),
+  keywords: ("Symbolic Music Generation", "ABC Notation", "GPT-2", "Scaling Laws", "Computational Musicology", "Self-Attention"),
 )[
-  Automatic symbolic music generation is an essential interdisciplinary research field bridging artificial intelligence, sequential machine learning, and computational musicology, aiming to enable computers to autonomously compose musical works that conform to musicological syntax and aesthetic principles. ABC notation, as a compact plain-text music score system with highly structured grammatical features, is naturally suited for autoregressive sequence modeling. However, existing research faces two fundamental challenges: first, the lack of systematic, controlled comparative benchmarks and gradient dynamical analyses regarding the inductive biases of different sequential architectures in discrete musical syntax; second, the absence of empirical investigations into neural scaling laws in symbolic music due to the acute scarcity of high-fidelity annotated musical corpora.
+Symbolic music, as a highly structured and discrete human cognitive representation, is governed by rigorous physical-acoustic modal exclusivity, algebraic bar duration conservation, and long-range motif recurrence spanning dozens of measures. However, traditional symbolic generation approaches predominantly rely on shallow recurrent topologies such as RNNs and LSTMs, which suffer from severe gradient dissipation, finite hidden-state information bottlenecks, and the absence of specialized tokenization capable of preserving musical atomic boundaries. Furthermore, empirical investigations concerning power-law scaling laws and multidimensional computational musicological evaluations in symbolic music remain largely unexplored.
 
-  To address these limitations, this thesis investigates dedicated symbolic tokenization, multi-architecture benchmark alignment, algebraic symmetry-based data augmentation, lightweight high-performance computing engines, and empirical scaling laws for symbolic music. First, to overcome the semantic fragmentation caused by generic statistical tokenizers, ABCTokenizer is designed based on the "Predictive Effectiveness and Relational Losslessness" framework. Utilizing a deterministic greedy longest-match strategy, it compacts open score texts into a concise vocabulary of 91 domain-specific tokens, ensuring unambiguous tokenization of composite bar lines and tonal modifiers.
+To address these challenges, this thesis presents GPT2ABC, an end-to-end symbolic music generation framework based on the Pre-LN causal Transformer decoder architecture. First, tailored to the dual text-music semantic nature of ABC notation, we derive ABCTokenizer based on a trie-based greedy longest-matching scheme. Operating with a compact vocabulary of only 91 tokens, it preserves critical musical boundaries including key signatures, octave registers, note duration modifiers, and bar lines. Cross-tokenizer ablation demonstrates that ABCTokenizer achieves an equivalent character information compression of 0.4604 bits-per-character (bpc), yielding a 41.1% compression gain over character-level tokenization (0.7820 bpc) while boosting bar metric validity to 96.8%.
 
-  Second, under unified corpus partitioning and hyperparameter configurations, this thesis conducts a controlled comparative study across four sequential architectures: Vanilla RNN, LSTM, Standard Transformer, and GPT2ABC. By analyzing the dynamical singular values of the BPTT Jacobian matrix, this work elucidates the gradient vanishing and "measure amnesia" phenomena inherent in recurrent networks. Empirical results demonstrate that GPT2ABC achieves optimal convergence owing to its unconstrained all-pair attention, reducing test loss to 0.31628 and perplexity to 1.3720 (a 19.6% reduction compared to two-layer LSTM) while enhancing training throughput by 84%, establishing the Pareto optimality of causal self-attention in discrete musical modeling.
+Second, from the perspectives of dynamical equations and gradient flow mechanics, we systematically analyze the inductive biases of Vanilla RNN, LSTM, standard Post-LN Transformer, and GPT2ABC. Controlled benchmarks conducted on a high-fidelity folk corpus augmented via the twelve-semitone cyclic group $bb(Z)_(12)$ (550,200 tunes, ~100M tokens) show that GPT2ABC achieves a test loss of 0.9055 and a perplexity of 2.4732. This represents a 40.54% loss reduction over the LSTM baseline (loss 1.5230, PPL 4.59) and a 38.8% training convergence speedup, empirically verifying the superiority of Pre-LN causal self-attention in capturing multi-scale hierarchical motifs.
 
-  Furthermore, to explore the scale transition dynamics of autoregressive music models and mitigate the theoretical overfitting boundary ($D prop N^(0.74)$) on limited corpora, this thesis proves the "relative pitch-interval invariance theorem" and "measure duration algebraic conservation theorem" under the twelve-tone equal temperament cyclic group $(bb(Z)_(12), +)$. A lossless full-pitch transposition augmentation pipeline is developed, expanding the folk music corpus 12-fold to 550,200 unique tunes (approximately 98.9M tokens). Leveraging a single NVIDIA RTX 4090 GPU (24GB VRAM), a pure C/CUDA 12.6 native training engine is engineered to train a five-tier geometric parameter ladder ranging from Nano (0.24M) to Large (85.39M), alongside an 808M Limit exploration. The regression fitting rigorously establishes the first parameter scaling law in symbolic music: $cal(L)(N) = ((1.84 times 10^4) / N)^(0.138) + 0.825$ ($R^2 = 0.9942$). The measured scaling exponent $alpha_N = 0.138$ is approximately 1.8 times that of natural language processing, empirically demonstrating the superior marginal sensitivity of small-vocabulary, strongly-constrained symbolic systems to parameter expansion, while identifying an irreducible theoretical entropy floor of 0.825 nats.
+Third, this work establishes the first parameter scaling law for symbolic music. Across model capacities ranging from 0.12M to 12.4M non-embedding parameters, the empirical loss follows a strict power-law scaling trajectory: $cal(L)(N) = (3.12 times 10^3 / N)^(0.142) + 0.725$ with a goodness-of-fit $R^2 = 0.9951$. The scaling exponent $alpha_N = 0.142$ is approximately 1.87 times that observed in natural language modeling, proving that the deterministic syntactic and harmonic constraints of music enable significantly faster marginal returns during early capacity scaling.
 
-  Finally, this thesis proposes the "Dual-Track Scaling Law" framework spanning both statistical learning metrics and computational musicological dimensions. Quantitative evaluations reveal that the 85.39M model exhibits significant scale emergence across 9-dimensional MusPy metrics (scale consistency reaches 0.9928, unique pitch classes converge to 7.08) and spontaneously exhibits off-diagonal stripes spanning 16 measures in self-similarity matrices (SSM). Integrated with the POP909 corpus, the framework accomplishes high-quality prefix-guided $A - A' - B - A''$ motif variations, providing an end-to-end closed loop from discrete text generation to physical acoustic wave synthesis.
+Finally, a dual-track evaluation framework integrating 9-dimensional MusPy statistical metrics is established. Generated pieces closely match the ground-truth human distribution in scale consistency (0.9928 vs 0.9922) and unique pitch classes (7.08 vs 7.17). Meanwhile, we honestly identify critical limitations: a collapsed empty beat rate of 0.0000 reveals conservative rest suppression, and a 3.2% bar syntax residual error highlights the necessity of neuro-symbolic algebraic constraints in future research.
 ]
 
 
@@ -238,7 +221,7 @@
 
 == 研究背景与意义
 
-=== 人工智能音乐生成的发展与范式演变
+=== 人工智能音乐生成的发展历程
 
 音乐作为人类文明中最为精妙与古老的象征性艺术形式之一，本质上是由离散符号在时间维度上高度有序组织而成的复合认知结构。从古希腊毕达哥拉斯学派对琴弦比例与和谐音程的数学探索，到巴赫在《赋格的艺术》中展现的高度严密的对位结构，音乐创作始终交织着严谨的数理逻辑与丰富的情感审美。伴随着现代计算科学与人工智能技术的蓬勃发展，使计算机自主理解、建模并生成具备音乐学规范与艺术美感的声音作品，已成为计算音乐学（Computational Musicology）与通用人工智能领域的长盛不衰的核心命题#cite(<briot2020deep>)#cite(<carnovalini2020computational>)。广义的人工智能音乐生成涵盖了旋律构思、和声织体编配、节奏多尺度组织乃至端到端音响合成等多元维度，其核心挑战在于模型必须在离散时间步序列中同时捕获局部音符的音高时值约束、短程音型动机的变奏再现，以及宏观段落调性走向的长距离跨度依赖#cite(<hernandez2021music>)。
 
@@ -246,7 +229,7 @@
 
 深度学习技术的突破性进展彻底重塑了音乐生成的范式格局。卷积神经网络、循环神经网络（RNN及其长短期记忆变体LSTM）以及生成对抗网络相继被用于建模符号音乐序列，使得模型能够直接从大规模乐谱语料中自监督学习连续隐空间表征#cite(<sturm2016music>)#cite(<dong2018musegan>)。进一步地，随着自注意力机制与Transformer架构在自然语言处理领域的全面主导#cite(<vaswani2017attention>)，基于自回归生成的语言建模范式被成功拓展至离散符号音乐领域，催生了Music Transformer#cite(<huang2018music>)、MuseNet以及针对多轨层级结构的变体#cite(<roberts2018hierarchical>)等具有宏观结构保持能力的代表性模型。当前，以大规模预训练大语言模型为基座的迁移学习更展现出惊人的泛化潜能。这一演变轨迹表明，符号音乐生成研究的核心驱动力，正在从外部硬编码规则的演绎范式，彻底转向以大规模高质量符号语料驱动、依托深层神经网络归纳偏置与参数扩展效应的自组织学习范式。
 
-=== ABC记谱法在离散序列建模中的独特性与挑战
+=== ABC记谱法在序列建模中的特性与难点
 
 在符号音乐表征体系中，输入表示的选择直接决定了生成模型的问题定义边界与计算复杂度。长期以来，符号音乐研究多以MIDI协议及其事件衍生流（如MIDI-like、REMI、OctupleMIDI等）作为主流数据格式#cite(<hawthorne2018maestro>)。然而，MIDI协议作为上世纪八十年代制定的硬件通信标准，其设计初衷是记录乐器动作触发的物理时间戳（Note-On、Note-Off、Time-Shift与Velocity），导致其在表征纯粹的旋律结构与曲式逻辑时存在显著局限。一方面，MIDI时间线切分粒度过细，导致单个声部的符号序列长度极易膨胀至数千乃至上万步，引发了注意力计算代价关于序列长度二次方爆炸的严重问题；另一方面，MIDI剥离了调号、拍号、小节线、反复记号与乐句装饰等关键音乐学高层元数据，迫使模型必须在未显式提供节拍骨架的稀疏时间离散流中隐式推断乐理结构。
 
@@ -254,7 +237,7 @@
 
 然而，将ABC记谱法直接置于自回归深度序列建模之下，亦引出了一系列亟待解决的理论与工程挑战。其一在于分词界面的表征有效性问题。ABC文本中充斥着具有严格形式文法约束的复合符号（例如重复节线 `|:`、复合小节线 `:|`、带装饰音的八度升降记号等），若粗暴采用面向英文自然语言的字节对编码（BPE）算法#cite(<sennrich2016neural>)#cite(<fradet2023bpe>)，会导致完整的音乐语素被随机切碎，破坏音乐因果关联；若直接退化为朴素的单字符切分，则词表虽小，却大幅拉长了预测步长并增加了前缀预测的条件不确定性。其二在于离散语法的强鲁棒性要求。ABC文本对括号配对、小节线对齐与拍值总和的合法性具有严苛要求，单一预测字符的语法崩溃即可导致整首乐谱无法被下游解析器编译与渲染。其三在于不同网络架构在处理ABC长程语法约束与动机变奏时的内在归纳偏置差异。如何在理论上界定ABC记谱法的分词表征边界，并在统一的实验环境下系统量化循环网络、自注意力网络与最新状态空间模型在语法忠实度与音乐审美性上的表现鸿沟，构成了当前学术界尚未完全澄清的关键空白。
 
-=== 课题研究的理论价值与实际应用前景
+=== 课题研究价值与应用前景
 
 深入探索基于自回归序列建模的ABC音乐生成系统，在基础理论研究与实际文化工程应用两个维度均具有极其重要的价值。在理论研究层面，本课题为离散符号序列的表征边界理论提供了全新的实验验证范式。借鉴最新的分词有效性与无损性理论框架#cite(<wang2026howfar>)，研究ABC记谱法的分词边界有助于从信息论视角厘清：究竟应当将哪些音乐观察事实固化于离散分词词表之中，又应当将哪些层级依赖交由神经网络隐状态自主学习。同时，在统一受控的数据基准下，系统对比传统递归架构与现代自注意力架构在音乐时序预测上的雅可比梯度衰减机理与多维音乐学统计偏置，能够深化对不同深度学习架构建模离散结构能力的理论认知。进一步地，通过构建跨越多个数量级的模型参数梯队，首次在离散符号音乐语料上严格实证神经扩展定律（Neural Scaling Laws）的幂律适用性及其在对称群数据增强下的性能极限#cite(<kaplan2020scaling>)#cite(<hoffmann2022training>)，为生成式音乐大模型的参数配置与训练计算预算分配提供了不可或缺的量化理论判据。
 
@@ -262,25 +245,25 @@
 
 == 国内外研究现状
 
-=== 符号音乐表示与分词方法研究现状
+=== 符号音乐表示与分词方法
 
 符号音乐的离散数字化表征构成了计算音乐生成的逻辑基石。在过去数十年间，研究人员围绕如何将连续流变的多声部音响转化为适宜离散序列模型处理的符号格式开展了广泛探索。早期研究直接借鉴标准MIDI文件协议，将其按绝对时间轴切分为音符矩阵（Piano-Roll）。Piano-Roll表征通过二维二值矩阵指示各个离散时间步长上128个MIDI音高的激活状态，能够直观对接卷积神经网络与递归网络。然而，Piano-Roll在时间维度上的高频等间隔采样导致稀疏度极高，无法有效保留音符连音、时值延展与复杂切分音的结构语义，且难以拓展至长篇乐曲生成。针对这一缺陷，Oore等人提出了一种基于事件序列的MIDI-like表征，通过引入Note-On、Note-Off、Time-Shift和Velocity四类离散事件，将音乐组织为一维时间序列，极大地推进了自回归网络在音乐生成中的应用。随后，众多针对性改进方案相继涌现，如Huang等人提出的REMI表征引入了显式的节拍标记（Bar、Beat）以强化节拍网格感知#cite(<huang2020pop>)；Chou等人提出的OctupleMIDI以及MuMIDI则通过复合标记（Compound Token）技术将音高、时值、力度等多维属性打包在单个复合时间步内，显著缩减了序列长度#cite(<hsiao2021compound>)。
 
 尽管MIDI事件流在流行音乐多声部建模中取得了长足进展，但其繁复的时间对齐开销与音乐学高层语法信息的缺失，促使部分学者重新审视传统文本记谱系统的表征优越性。以ABC记谱法与Humdrum \*\*kern为代表的文本格式在学术界受到了高度关注。以Sturm等人在爱尔兰民间音乐生成中的开创性工作为标志#cite(<sturm2016music>)，ABC记谱法凭借其对调性、拍号、装饰音与小节反复的显式标定，被确立为民间单声部旋律序列生成的黄金标准。然而，文本格式的引入直接带来了分词粒度权衡（Tokenization Trade-off）这一经典课题。早期研究普遍采用单字符切分方案（Character-level），该方案虽然词表微小且无未登录词问题，但使得一首普通乐曲的长度迅速扩大至数千字符，加剧了自注意力机制在训练过程中的显存压力与长程注意力耗散。自然语言处理领域通用的BPE（Byte-Pair Encoding）与WordPiece算法随后被尝试引入符号音乐分词#cite(<fradet2023bpe>)#cite(<fradet2023impact>)，但通用词表合并算法由于缺乏先验音乐理论指导，频繁将小节线、临时变音记号与核心音名错误切分，引发了严重的音乐语义断层。近期，Yi Wang在其关于分词边界与预测有效性的奠基性理论研究中指出，分词系统的设计本质上是在“事实-标记边界”（Fact–Token Boundary）与“标记-状态边界”（Token–State Boundary）之间寻找帕累托最优平衡，过度的词表压缩会引入有害的静态关系承诺，而过于细碎的分词则会损害模型的预测有效性#cite(<wang2026howfar>)。这一理论洞见揭示出，针对ABC记谱法构建兼具形式文法无损性与音乐音程语义完备性的专用分词算法，是打破符号音乐自回归建模瓶颈的首要基石。
 
-=== 符号音乐自回归建模架构演进
+=== 符号音乐自回归生成架构
 
 自回归序列建模构成了符号音乐深度生成的经典骨架，其架构历经了从浅层递归网络、深层门控循环网络到自注意力机制与最新状态空间模型的演进历程。在循环神经网络时代，Bengio等人与Hochreiter等人的开创性研究系统揭示了基本循环神经网络（Vanilla RNN）在反向传播过程中面临的雅可比矩阵连乘导致的梯度消失与梯度爆炸物理本质#cite(<bengio1994learning>)#cite(<pascanu2013difficulty>)。由于Vanilla RNN的隐藏状态更新函数直接依赖于未经恒等映射保护的非线性激活变换，其长程时间步依赖项的雅可比矩阵谱半径极易偏离单位范数，使得跨越数个小节的调性或动机约束在反向传播中呈指数级衰减。为了克服这一缺陷，Hochreiter与Schmidhuber设计的长短期记忆网络（LSTM）通过引入由输入门、遗忘门、输出门和恒等线性传递的主元胞（Cell State）构成的加性信息流动通道，极大缓解了时间轴上的梯度弥散问题#cite(<hochreiter1997long>)，并在布鲁斯即兴与巴赫合唱曲生成中得到了早期实证#cite(<eck2002finding>)#cite(<liang2017automatic>)。Sturm等人在其著名的Folk-RNN研究中，成功利用多层LSTM对数万首爱尔兰民歌ABC序列进行建模，验证了门控循环单元在维持旋律局部调性与短程动机再现方面的有效性#cite(<sturm2016music>)。然而，循环网络在本质上仍受限于固定维度隐状态对历史上下文信息的信息瓶颈（Information Bottleneck），当序列长度超越两百步后，LSTM依然无法维持稳定的宏观曲式对偶与全局乐段呼应。
 
 Vaswani等人提出的Transformer架构凭借多头自注意力机制（Multi-Head Self-Attention）彻底颠覆了序列建模范式#cite(<vaswani2017attention>)。自注意力机制消除了时序循环依赖，允许任意两个时间步之间的信息通过点积注意力直接发生交互，从而在理论上将长程依赖的路径长度缩减至$cal(O)(1)$常数级别。针对音乐领域对相对时间跨度与周期性节拍网格的特殊敏感性，Huang等人提出的Music Transformer通过引入内存高效的相对位置编码机制（Skewing Algorithm），显著提升了模型捕获长程音符关联与跨段落动机重复的能力#cite(<huang2018music>)。随后，以GPT-2为代表的因果单向Decoder-only自注意力架构被确立为现代离散自回归生成的核心支柱#cite(<radford2019language>)。在音乐生成任务中，GPT-2架构展现出对复杂调性结构、嵌套反复记号与高层旋律走向的强悍建模能力#cite(<geerlings2020interacting>)。近年来，为了克服自注意力机制在长序列下计算与内存开销关于序列长度呈二次方复杂度增长（$cal(O)(T^2)$）的问题，稀疏注意力#cite(<child2019generating>)以及以S4、Mamba为代表的结构化状态空间模型（State Space Models, SSM）崭露头角。SSM通过时不变线性微分方程的离散化表征与选择性状态扫描，实现了推理阶段常数级内存开销（$cal(O)(1)$）与训练阶段全局可并行计算的高效统一，为超长序列符号音乐生成的底层架构选型开辟了崭新的探索方向。
 
-=== 大语言模型迁移与参数高效微调在音乐生成中的应用
+=== 大语言模型迁移与参数高效微调
 
 近年来，基础大语言模型（Foundation Large Language Models）在通用认知与常识推理领域的革命性突破，为音乐生成研究提供了极具潜力的跨领域迁移范式。LLaMA#cite(<touvron2023llama>)#cite(<touvron2023llama2>)、GPT-3#cite(<brown2020language>)等具有数十亿乃至数百亿参数的巨型预训练模型，在数万亿token的海量多语言文本上习得了非凡的抽象语法理解、逻辑演绎与深层上下文关联建模能力。尽管其预训练语料以自然语言为主，但数学、计算机代码以及形式文法亦在其中占据相当比例。音乐符号序列在本质上与计算机程序代码呈现出高度的同构性：二者均具备严格的形式文法校验规则、多层嵌套的作用域（小节与代码块）以及跨越长程距离的调用引用关系（动机反复与函数调用）。这一内在同构性为利用大语言模型强大的跨模态先验能力迁移赋能符号音乐生成奠定了坚实的理论前提#cite(<zeng2021musicbert>)。
 
 然而，将千亿级参数的大模型全量重新训练或全参数微调以适配音乐领域，在实际科研与工程落地中面临着难以承受的算力门槛与灾难性遗忘风险。为了解决这一矛盾，参数高效微调（Parameter-Efficient Fine-Tuning, PEFT）技术应运而生#cite(<houlsby2019adapter>)#cite(<li2021prefix>)。Hu等人提出的低秩自适应微调技术（LoRA, Low-Rank Adaptation）通过冻结预训练基础模型的全部原始权重矩阵 $W_0 in bb(R)^(d times k)$，仅在Transformer的注意力投影分支上并行引入由极小本征秩 $r << min(d, k)$ 构成的低秩分解矩阵乘积 $Delta W = B A$（其中 $B in bb(R)^(d times r)$，$A in bb(R)^(r times k)$），将训练参数量大幅缩减至原始参数总量的百分之一甚至千分之一#cite(<hu2022lora>)#cite(<aghajanyan2021intrinsic>)。在符号音乐领域，ChatMusician等前沿工作率先探索了将LLaMA等通用大语言模型通过LoRA微调至ABC记谱法生成与音乐学问答推理任务中，初步展示了通用大语言模型直接涌现出音乐创作与调性逻辑推理能力的巨大潜力。然而，当前的先验迁移研究主要聚焦于定性效果展示或简单的下游多轮对话，普遍缺乏对词表扩充策略引发的嵌入层扰动效应的机理分析，更鲜有研究在统一硬件与控制变量条件下，将基于通用底座微调的大模型与专门在音乐语料上从零预训练（Pre-trained from scratch）的高性能因果Transformer进行严谨的多维度量化性能对比。
 
-=== 神经模型扩展定律与现有研究的局限性
+=== 模型扩展定律与现有研究局限
 
 在自然语言处理与计算机视觉领域，Kaplan等人及Hoffmann等人（Chinchilla）关于深层神经网络扩展定律（Neural Scaling Laws）的开创性实证研究确立了大模型工程化的数理基石#cite(<kaplan2020scaling>)#cite(<hoffmann2022training>)。他们的研究表明，语言模型的交叉熵测试损失$L$与参数量$N$、数据集规模$D$以及训练计算浮点数总量$C$之间，严格遵循着平滑的特征幂律分布关系，其数学形式可普遍表达为$L(N) = (N_c / N)^(alpha_N)$。这一扩展定律表明，模型的性能增益在跨越数个数量级时并不存在突然的平台停滞，只要均衡扩张模型规模与高质量数据存量，交叉熵损失即可呈现出可精确预测的单调递减。
 
@@ -294,7 +277,7 @@ Vaswani等人提出的Transformer架构凭借多头自注意力机制（Multi-He
 
 第四，端到端工程实现高度依赖碎片化的高级封装库，缺乏高吞吐、零依赖的底层高性能计算与合成闭环。多数前沿研究将算法逻辑碎片化地分散在庞大的Python第三方生态中，不仅推理与训练吞吐受制于解释器开销，且所生成的ABC文本往往需要借助外部商业打谱软件或复杂的MIDI渲染管线方能试听，缺乏从离散符号生成直接跨越到拟真物理声学渲染的端到端轻量闭环支持。
 
-== 本文主要研究内容与技术路线
+== 研究内容与技术路线
 
 === 主要研究内容
 
@@ -306,7 +289,7 @@ Vaswani等人提出的Transformer架构凭借多头自注意力机制（Multi-He
 
 第三，离散对称群数据增强下的神经模型扩展定律实证、跨域前缀调控与声学物理建模。针对符号音乐语料匮乏导致的模型扩展“数据饱和”瓶颈，本文基于十二平均律在音高移位下的半群代数性质，从数学上严格推导并证明了十二半音全音域调性转调的几何等价性，通过十二半音离散循环群$(bb(Z)_(12), +)$转调构建保真数据增强管线，成功将数万首民间音乐语料扩充至近亿级token规模，彻底打破了参数扩展的数据壁垒。在此基础上，本文构建了跨越五个数量级参数梯度的因果模型梯队，严格拟合并验证了符号音乐自回归建模的幂律扩展定律#cite(<kaplan2020scaling>)。随后，进一步拓展探索了状态空间模型（SSM）在乐曲长程自相似动机矩阵（SSM）中的捕获能力#cite(<foote2000visualizing>)，并实现了基于POP909流行音乐前缀条件提示的跨域受控生成机制#cite(<wang2020pop909>)。最后，针对轻量级终端试听需求，自主研发了基于Karplus-Strong物理弦振动方程的离散声学渲染合成引擎#cite(<karplus1983digital>)，打通了从纯文本ABC代码生成直接过渡至高保真立体声声学波形渲染的完整闭环。
 
-=== 技术路线图
+=== 技术路线
 
 本文的技术路线遵循“表征理论分析与工程底座搭建 $->$ 多架构基准量化对比与机理剖析 $->$ 大规模参数扩展定律验证与受控生成 $->$ 物理声学闭环落地”的递进逻辑展开。系统技术路线的整体流向与模块交互关系如@fig-tech-roadmap 所示。
 
@@ -331,9 +314,9 @@ Vaswani等人提出的Transformer架构凭借多头自注意力机制（Multi-He
 
 = 相关理论与技术
 
-== 符号音乐表示与分词计算理论
+== 符号音乐表示与分词理论
 
-=== 符号音乐表征范式与 ABC 记谱法结构解析
+=== 符号音乐表征与 ABC 记谱法
 
 在计算机音乐生成与音乐信息检索（Music Information Retrieval, MIR）领域，音乐信息的数字化表征主要划分为三大层次：连续声学音频波形（Acoustic Waveforms）、时间-事件离散序列（如标准 MIDI 文件）以及基于人类乐理语法的符号文本记谱（Symbolic Music Score Notation）@briot2020deep @carnovalini2020computational。连续声学音频包含丰富的演奏微观表情、乐器物理音色与空间混响，但其极高的时间采样率（通常为 44.1 kHz）导致序列过于冗长，给自回归生成模型的长期结构建模带来了难以承受的计算开销 @dieleman2018challenge；MIDI 协议通过记录音符开启（Note-On）、关闭（Note-Off）、通道音量与弯音轮等物理事件实现了对音乐表现的有效抽象，但在本质上仍然是面向硬件合成器的事件流，缺乏清晰的调式、拍号、和声功能以及小节边界等宏观乐理上下文信息 @hawthorne2018maestro @zeng2021musicbert。
 
@@ -348,7 +331,7 @@ Vaswani等人提出的Transformer架构凭借多头自注意力机制（Multi-He
 
 图 @fig-abc-structure 展示了 ABC 记谱法在多维层面的语义耦合关系。正是这种高度紧凑、富含结构规则且计算开销极低的有理数表达体系，为后续构建基于自回归语言模型的离散音乐生成引擎提供了理想的数学载体。
 
-=== 序列分词界限与可预测有效性理论
+=== 序列分词界限与有效性理论
 
 在深度序列建模中，将原始符号转换为神经网络可处理的离散 Token 序列是整个生成系统的起点。然而，长期以来，关于“分词应该走多远（How Far Should Tokenization Go）”这一根本问题，学术界始终缺乏系统性的理论度量标准。在自然语言处理中广泛采用的字节对编码（Byte Pair Encoding, BPE）算法 @sennrich2016neural 是一种基于无损字符共现频率统计的贪婪合并策略。若不加甄别地将 BPE 直接照搬至符号音乐领域，会导致严重的“语义边界破碎”与“隐式长程依赖断裂” @fradet2023bpe @fradet2023impact。在 ABC 记谱法中，诸如 `|:`（重复起始小节线）、`M:4/4`（四四拍声明）或 `^f/2`（升 F 音八分音符）这类具有完整不可分割乐理内涵的原语单元，会被通用 BPE 切割为多个互不相关的孤立字符片段，既丢失了音符的整体音乐学特征，又人为拉长了注意力上下文序列长度。
 
@@ -357,9 +340,9 @@ Vaswani等人提出的Transformer架构凭借多头自注意力机制（Multi-He
 第二边界为“Token-状态边界（Token-State Boundary）”，由关系无损性原则（Relational Losslessness Principle）所主导。该原则严格论证了：任何依赖于全局上下文环境的关系组织（Context-Dependent Relations），严禁由静态分词器在推理前进行生硬的预先固化与几何拓扑绑定。该理论通过严格的反例实证揭示：在静态分词阶段人为施加固定的五度循环圈（Circle of Fifths）几何相位嵌入，不仅无法带来生成增益，反而会导致显著的关系冗余码长损失 $E_("rel") > 0$；而保持关系开放（Relation-Open）的 Token 接口，让自注意力机制在深层隐状态动态构建上下文相关的协和音程关联，才是逼近最小描述长度的最优解。这一前沿理论深刻指导了本研究的底层架构设计：在第三章中，本系统所设计的音乐规则分词器 ABCTokenizer 严格遵循“事实-Token 边界”，将离散小节线、拍号及音名完整切分，消除了字符碎片化带来的多余计算熵；同时，系统遵循“Token-状态边界”，拒绝任何破坏模型自主学习能力的人工生硬硬编码，让多层因果自注意力网络在深层隐空间自发涌现出跨小节的宏观动机发展规律。
 
 
-== 循环序列建模与梯度流动物理机制
+== 循环序列模型与梯度动力学
 
-=== 循环神经网络及其时序反向传播动力学
+=== 循环神经网络与时序反向传播
 
 序列深度学习的核心在于对离散时间序列建立概率依赖模型 @bengio1994learning。在因果自回归生成任务中，设输入序列由向量序列 $bold(x) = (bold(x)_1, bold(x)_2, dots, bold(x)_T)$ 表征，循环神经网络（Recurrent Neural Network, RNN）通过在网络内部引入递归环路，使得前序时间步的信息能够在隐状态向量中持续演进与累加。在任意时间步 $t$，标准 Elman 循环单元接收当前输入向量 $bold(x)_t in bb(R)^d$ 以及前一时间步的隐藏状态 $bold(h)_(t-1) in bb(R)^h$，并通过仿射变换与非线性激活函数映射生成当前的隐藏状态 $bold(h)_t in bb(R)^h$ 以及输出分布向量 $bold(y)_t in bb(R)^V$：
 
@@ -373,7 +356,7 @@ $ bold(y)_t = "softmax"(bold(W)_(h y) bold(h)_t + bold(b)_y) $ <eq-rnn-forward-y
 
 $ frac(partial cal(L)_T, partial bold(W)_(h h)) = sum_(k=1)^T frac(partial cal(L)_T, partial bold(h)_T) paren(product_(j=k+1)^T frac(partial bold(h)_j, partial bold(h)_(j-1))) frac(partial bold(h)_k, partial bold(W)_(h h)) $ <eq-bptt-chain-rule>
 
-=== 梯度弥散与爆炸的数理证明
+=== 梯度弥散与爆炸的数理分析
 
 方程 @eq-bptt-chain-rule 中核心项是跨越连续时间步的雅可比传递矩阵乘积 $product_(j=k+1)^T frac(partial bold(h)_j, partial bold(h)_(j-1))$。根据隐状态更新方程 @eq-rnn-forward-h，相邻时间步的一阶偏导雅可比矩阵可精确求导为：
 
@@ -389,7 +372,7 @@ $ lim_(Delta t -> oo) (gamma dot rho)^(Delta t) = bold(0) $ <eq-gradient-vanishi
 
 这一极限即为深度学习理论中著名的“梯度弥散（Gradient Vanishing）定理”。在符号音乐生成的应用场景中，这一物理失效带来了灾难性后果：民间舞曲或古典乐段中核心的平行乐句、调式回归与小节线反复通常跨越数十乃至上百个离散音符 Token（即 $Delta t > 100$）。当梯度弥散发生时，网络深层的权重更新信号完全被局部短程噪声所淹没，模型根本无法感知上百步之前的调号声明或起始动机，因而不可避免地陷入调式漂移与结构失忆。相反地，若初始化或训练扰动导致 $rho > 1 / gamma$，连乘项将以指数级发生爆炸（Gradient Explosion），导致数值溢出与训练坍塌。这种严重的非线性动力学不稳定性，使得朴素循环神经网络在长程结构音乐生成任务上遭遇了不可逾越的理论天花板。
 
-=== 长短期记忆网络（LSTM）的门控拓扑与加性恒等流动
+=== 长短期记忆网络的门控机制
 
 为了彻底打破乘性雅可比链式传递引发的指数衰减诅咒，Hochreiter 与 Schmidhuber 于 1997 年开创性地提出了长短期记忆网络（Long Short-Term Memory, LSTM）@hochreiter1997long。LSTM 的革命性突破在于其在传统的非线性隐藏状态 $bold(h)_t$ 之外，引入了一条具备恒等直连特性的内部存储通道——细胞状态（Cell State, $bold(C)_t in bb(R)^h$），并通过三个可微的门控机制（遗忘门、输入门、输出门）对该通路的信息流动实施精细的动态调控。
 
@@ -416,9 +399,9 @@ $ frac(partial bold(C)_t, partial bold(C)_(t-1)) = bold("diag")(bold(f)_t) $ <eq
 从方程 @eq-lstm-additive-grad 可以清晰地看到，若遗忘门激活向量 $bold(f)_t$ 的元素饱和接近于 $1$，则雅可比矩阵退化为一个恒等映射矩阵，误差梯度便能像在超导通道中一样，跨越任意长的时间间隔近乎无损地逆向流淌回遥远的历史时刻。这种加性恒等流动机制使得 LSTM 第一次具备了稳定捕捉数百步音乐依赖模式的能力 @eck2002finding @liang2017automatic，并直接孕育了民谣音乐生成领域的早期里程碑工作 folk-rnn @sturm2016music。
 
 
-== 因果注意力解码架构与预训练大语言模型
+== 因果自注意力与大语言模型
 
-=== Transformer 架构与因果多头自注意力机制
+=== Transformer 架构与因果自注意力
 
 尽管 LSTM 凭借门控机制显著延缓了梯度弥散，但其基于时间步严格串行的递归计算本质，使得其在现代大规模并行处理器（如 GPU）上无法实现跨序列位置的并发计算；更为关键的是，即便引入加性细胞通路，当序列长度超越千步时，将无限维度的音乐历史硬性压缩入有限维度隐向量 $bold(h)_t$ 的物理限制，依然会导致长程音乐动机记忆的渐进式退化。
 
@@ -457,7 +440,7 @@ $ "MLP"(bold(Z)) = "GELU"(bold(Z) bold(W)_(f c 1) + bold(b)_(f c 1)) bold(W)_(f 
 
 由于自注意力机制在任意两个时间步 $i$ 与 $j$ 之间建立的信息交互路径长度恒定为 $cal(O)(1)$，它彻底消除了距离衰减壁垒，使长程复杂动机的发展与曲式结构呼应在数学上获得了最直接的表征通道 @geerlings2020interacting。在工程训练方面，现代 Transformer 广泛结合解耦权重衰减（AdamW）优化算法 @loshchilov2017decoupled 与前沿无锁纯原生算子栈 @karpathy2024llmc，进一步释放了自回归注意力的训练吞吐潜力。
 
-=== 预训练大语言模型与规模化能力跃迁
+===  预训练大语言模型演进
 
 基于上述 Decoder-only 架构的深度语言模型，在经过数万亿级 Token 的海量文本语料无监督预训练后，展现出了惊人的泛化与上下文学习（In-Context Learning）能力 @brown2020language。在开源大模型技术演进中，Meta 提出的 LLaMA 家族（LLaMA-1、LLaMA-2、LLaMA-3）代表了当今开源基础语言模型的事实标准 @touvron2023llama @touvron2023llama2。
 
@@ -470,7 +453,7 @@ $ "RMSNorm"(bold(x)) = frac(bold(x), "RMS"(bold(x))) dot.o bold(g), quad "RMS"(b
 
 预训练语言模型的核心价值在于其所积累的“通用序列归纳偏置” @zeng2021musicbert。尽管其原始语料以自然语言文本为主，但自然语言与符号音乐在宏观层面上皆由离散符号序列所驱动，二者在层级语法嵌套、跨周期模式重复以及上下文指代逻辑上共享深刻的底层数学结构相似性。这一跨领域的结构同构性，为将大规模预训练模型的通用序列建模能力高效迁移至符号音乐生成领域奠定了坚实的理论可行性。在采样解码阶段，此类因果模型通常结合 Top-$k$ @fan2018hierarchical 与核采样（Top-$p$ / Nucleus Sampling）@holtzman2019curious 策略，以平衡音乐旋律的结构确定性与艺术创造多样性。
 
-=== 参数高效微调（PEFT）与低秩自适应（LoRA）理论
+=== 参数高效微调与 LoRA 理论
 
 直接对数十亿参数规模的大语言模型（如 LLaMA-7B）针对垂直领域的 ABC 音乐语料进行全参数微调，面临着难以逾越的工程与理论阻碍。从计算物理层面审视，全参数更新需要为全部 70 亿个参数分配等量的梯度显存，并在 AdamW 优化器中存储两倍于参数量的一阶动量与二阶动量张量，仅优化器状态即需耗费高达 $84 "GB"$ 的超大显存空间，远超单张消费级 GPU 的承载极限；从泛化理论层面审视，由于高保真标注音乐语料规模相对有限，盲目更新全部权重极易引发过拟合灾难性遗忘，破坏预训练阶段所习得的深层通用序列特征表示。
 
@@ -502,9 +485,9 @@ $ rho = frac(d^2, 2 d r) = frac(d, 2r) = frac(4096, 32) = 128 $
 全模型维度的显存占用由此被压缩至原本的不足 $1\%$。在部署推理阶段，低秩乘积矩阵 $frac(alpha, r) bold(B) bold(A)$ 可直接通过单次矩阵加法无损熔断并入原始主干参数 $bold(W)_0$，因而在前向生成时不会引入任何额外的推理时延，实现了参数效率与工业部署的终极平衡。
 
 
-== 神经语言模型扩展定律（Scaling Laws）理论体系
+== 神经语言模型扩展定律
 
-=== 幂律缩放假说与非嵌入参数统计标准
+=== 幂律缩放假说与参数统计标准
 
 2020 年，Kaplan 等人针对自回归因果 Transformer 模型在大量多源文本建模上的实证分析，确立了深度序列生成模型领域里程碑式的扩展定律（Scaling Laws）@kaplan2020scaling。随后 Hoffmann 等人（Chinchilla 定律）进一步完善了在计算预算约束下的最优参数-Token 配比关系 @hoffmann2022training。该理论打破了长期以来依靠工程试错设计网络的范式，首次证明了模型的测试交叉熵损失 $cal(L)$ 与其非嵌入参数量 $N$、语料规模 $D$ 以及训练总浮点运算量 $C$ 之间，在横跨数个数量级的广阔区间内严格服从确定性的幂律函数关系：
 
@@ -518,7 +501,7 @@ $ N = L dot (12 d^2 + 13 d) $ <eq-ch2-exact-nonemb>
 
 这一解析式表明非嵌入参数量与网络隐层宽度 $d$ 呈严格的二次方依赖关系，决定了通过横向扩宽网络可实现参数规模的高效指数跃升。
 
-=== 数据-容量协同演化与过拟合临界边界
+=== 数据容量与过拟合边界
 
 孤立扩大模型参数规模并不必然带来生成质量的提升。若训练数据量 $D$ 无法提供足够的样本多样性，模型庞大的自由度将诱发对有限样本的高次多项式过拟合。在泛化误差分析中，过拟合损失增量 $delta cal(L) = cal(L)_("val") - cal(L)_("train")$ 与模型参数、数据规模之间的幂律耦合方程为 @kaplan2020scaling @hoffmann2022training：
 
@@ -530,7 +513,7 @@ $ D_("min") prop N^(0.74) $ <eq-ch2-dmin>
 
 方程 @eq-ch2-dmin 揭示了一个残酷的理论边界：当模型参数规模扩大 10 倍时，所需训练语料的有效规模必须至少扩大 5.5 倍；若模型跨越两个数量级扩张 100 倍，有效数据需求将剧增至原本的 30 倍以上。在符号音乐领域，高保真标准乐谱数据天生稀缺 @wang2020pop909，这在理论上严密确立了：在开展任何高阶大参数量音乐大模型研究前，必须构筑具有代数数学保真度的巨量数据扩增流水线。
 
-=== 符号音乐离散空间中的固有信息熵下界
+=== 符号音乐的固有信息熵下界
 
 方程 @eq-ch2-kaplan-n 中的理论极限损失 $cal(L)_oo$ 具有深刻的信息论与统计物理内涵。在香农信息论体系中，任何平稳遍历随机过程皆存在一个固有的条件信息熵率（Entropy Rate）：
 
@@ -539,9 +522,9 @@ $ H(cal(X)) = lim_(T -> oo) frac(1, T) H(X_1, X_2, dots, X_T) $ <eq-ch2-entropy-
 对于开放域通用自然语言，由于日常会话包含极其广袤的世界常识不确定性、语用模糊性以及多义词发散性，其实测测得的不可约熵界通常在 $1.5 ~ 1.8 " nats"$ 之间浮动。而在符号音乐体系中，音符序列受到西方十二平均律协和和声体系、调式五度循环调性中心（Tonal Center）以及强小节对称律动的严格物理制约。在给定前序调号与前半句动机后，终止式主音的收束在统计上呈现高度确定的尖峰概率分布。因此，符号音乐语言模型的真实不可约物理熵界 $cal(L)_oo^("Music")$ 必然显著低于自然语言，其理论下界收敛于更低区间（如第四章在实测拟合中严格测定的 $0.725 " nats"$），展现出符号音乐高度自洽的理性代数美感。为进一步捕获音乐在长程动机与曲式反复中的自相似结构，结合自相似矩阵（Self-Similarity Matrix, SSM）的可视化与拓扑分析方法 @foote2000visualizing，亦构成了剖析离散符号长程动机关联的重要分析工具。
 
 
-== 序列生成评估理论与计算音乐学量化指标
+== 生成评估与计算音乐学指标
 
-=== 交叉熵损失与困惑度（Perplexity）的数学本质
+=== 交叉熵损失与困惑度
 
 评估自回归序列概率生成模型的质量，首要的客观统计度量标准是交叉熵损失与困惑度。对于长度为 $T$ 的测试乐谱序列 $bold(x) = (x_1, x_2, dots, x_T)$，模型对该序列赋予的联合发生概率为其单步条件预测概率的因果连乘积。对应的平均对数损失定义为交叉熵：
 
@@ -553,7 +536,7 @@ $ "PPL" = exp(H(P, Q)) = exp(- frac(1, T) sum_(t=1)^T log_e Q(x_t | x_(<t))) = (
 
 从几何与信息论视角审视，困惑度在物理上代表了语言模型在推断下一个音符或语法标记时，平均面临的*“等价有效分支选择数（Equivalent Branching Factor）”*。若模型的测试困惑度为 $"PPL" = 10$，意味着模型在每个预测时间步的不确定性等价于在 10 个等概率的候选分支中进行均匀随机选择。困惑度越低，表明模型对真实音乐语法分布的拟合越精确。在符号音乐微型词表（$|V|=91$）中，若困惑度能从基线模型的 7.28（Vanilla RNN）与 4.59（LSTM）显著压降至 GPT-2 Large 的 2.47 附近，意味着模型在每个决策点的不确定性被极限压缩到了约 2.47 个候选分支，足以证明模型已经深度内化了音级跳进与调式骨干音的确定性规则。此外，在下游物理合成与声学回放中，生成的符号序列还可无缝对接 Karplus-Strong 离散物理弦振动合成管线 @karplus1983digital，实现由文本到物理波形的闭环音响校验。
 
-=== 9 维客观计算音乐学量化指标体系
+=== 客观计算音乐学指标
 
 尽管困惑度提供了强大的信息论统计测度，但纯粹的标量概率无法完全表征生成乐曲在人类乐理层面的旋律美学特征。为此，本文全面复现并引入了由 Dong 等人提出的国际通用符号音乐客观评估系统 MusPy @dong2020muspy。该体系涵盖 9 个互不重叠的计算音乐学维度，通过对比生成乐曲集与人类真实数据集在各特征上的均值（Mean）与标准差（Standard Deviation）的一致性，实现对生成质量的客观量化对账：
 
@@ -574,7 +557,7 @@ $ "PPL" = exp(H(P, Q)) = exp(- frac(1, T) sum_(t=1)^T log_e Q(x_t | x_(<t))) = (
 本章系统梳理与推导的理论与技术基石，在逻辑上直接贯通并支撑了后续各章节的深入展开：ABC 记谱法与分词理论为第三章多模型对比与数据流通奠定了规范的数据协议；循环网络与注意力的梯度流动分析直接从机理上解释了第三章实验中 RNN 梯度坍塌与 GPT-2 稳定收敛的物理原因；而模型扩展定律理论、十二平均律对称性与 SSM 矩阵分析法，则直接构成了第四章在单卡算力约束下系统探索五阶模型规模跃迁的理论航标。
 
 
-= 基于GPT-2的ABC音乐生成模型与架构对比评测
+= 基于自回归架构的ABC音乐生成模型基准对比
 
 本章系统阐述本文提出的符号音乐生成系统 GPT2ABC 的理论模型与实验验证。针对符号音乐在序列建模中所具备的高度结构化与离散符号特性，首先建立专为 ABC 记谱法设计的符号切分系统 ABCTokenizer，推导其基于贪婪最长匹配策略的形式化分词与编解码数学映射，并通过控制变量实验对比字符级、子词级与专用乐理分词对同构模型训练效率与表示容量的影响；随后，从动力学方程、时序状态转移与梯度流动机制出发，系统对比传统循环神经网络（RNN）、长短期记忆网络（LSTM）以及自注意力 Transformer 架构在音乐序列建模中的理论优劣，并详细形式化构建 GPT2ABC 的因果解码器架构、输入表示空间与多目标生成调控策略；最后，在标准公开民谣数据集上开展对比实验，结合测试损失、困惑度（Perplexity）及计算资源消耗的多维实验数据，深入探究自注意力机制在捕捉音乐长程调性、节拍小节一致性与动机呼应上的机理优势。
 
@@ -585,7 +568,7 @@ $ "PPL" = exp(H(P, Q)) = exp(- frac(1, T) sum_(t=1)^T log_e Q(x_t | x_(<t))) = (
 
 == 面向ABC记谱法的专用分词系统（ABCTokenizer）
 
-=== 设计动机与语言-音乐双重语义特性
+=== 设计动机与乐理语义特性
 
 ABC 记谱法作为一种广泛应用于民间器乐曲与传统民谣数字化的纯文本符号系统，在序列结构上兼具自然语言的离散文本特征与严格的形式乐理语法规则。一份合法的 ABC 乐谱不仅由元数据头部（如乐曲标识符 `X:`、调号声明 `K:`、拍号声明 `M:` 及基准时值 `L:`）界定全局声学背景，其正文旋律流更包含了高度紧凑的复合音符、八度修饰符、显式升降记号、连音与重复小节线（如 `|:` 与 `:|`）。这些音乐要素在物理文本中往往以极短字符簇的形式出现，例如升半音标记 `^C`、双重小节线 `||` 或三连音前缀 `(3`。
 
@@ -593,7 +576,7 @@ ABC 记谱法作为一种广泛应用于民间器乐曲与传统民谣数字化�
 
 为此，本文遵循“最小不可分乐理语义单元”原则，构建了专用分词系统 ABCTokenizer。该系统基于显式形式文法设计离散符号集，将每个带有八度上下标及临时升降号的音符定义为原子元，使复合小节线、拍号声明与调式前缀均作为独立 Token 映射入词表空间，在根源上消除子词切分造成的乐理边界歧义。
 
-=== 分词算法的形式化表述
+=== 分词算法形式化推导
 
 ABCTokenizer 的核心切分逻辑采用确定性贪婪最长匹配（Greedy Longest-Match）策略。设待切分的原始 ABC 文本为有限字符序列 $S = (c_1, c_2, dots, c_L)$，预定义的有限音乐词表为 $italic("Vocab")$，其中 Token 的最大字符串长度为 $K_"max"$（本文实现中设定 $K_"max" = 4$）。算法维护一个输入游标指针 $i in {1, dots, L}$，在每一步匹配中，算法自顶向下遍历候选切片窗口长度 $k in {K_"max", K_"max"-1, dots, 1}$，优先寻找使得子串切片属于词表的最大前缀：
 
@@ -624,7 +607,7 @@ $ k^* = max { k in {1, dots, K_"max"} | S[i : i + k] in italic("Vocab") } $
   caption: [基于贪婪最长匹配的 ABC 序列分词算法],
 ) <algo-tokenize>
 
-=== 数值张量编码与逆向解码映射
+=== 编解码映射与逆向还原
 
 分词阶段生成的离散符号序列必须双向可逆地投影为整数索引张量与可解析乐谱文本。令离散映射双射函数 $f_"id": italic("Vocab") union {chevron.l "pad" chevron.r, chevron.l "unk" chevron.r, chevron.l "bos" chevron.r, chevron.l "eos" chevron.r} arrow.r.l.long {0, 1, dots, |V|-1}$ 为词表编号查找表。在编码阶段，模型必须具备对完整乐章起止结构的感知先验，因此输入序列两端被分别赋予序列起始符 $chevron.l "bos" chevron.r$ 与序列终止符 $chevron.l "eos" chevron.r$：
 
@@ -632,7 +615,7 @@ $ bold(x) = (f_"id"(chevron.l "bos" chevron.r), f_"id"(t_1), f_"id"(t_2), dots, 
 
 在自回归推断完成后，逆向解码映射 $f_"dec": bb(N)^* arrow.r.l.long Sigma^*$ 接收模型输出的离散索引流，通过反向查表获取字符串。为消除推理控制符号对最终排版渲染引擎的干扰，解码器设置技术性状态过滤器，定义过滤谓词 $phi(i d) = [f_"id"^(-1)(i d) in.not {chevron.l "pad" chevron.r, chevron.l "unk" chevron.r, chevron.l "bos" chevron.r, chevron.l "eos" chevron.r}]$，最终由合法字符元经由字符串流连接算子直接重构为满足 ABC 2.1 工业标准的乐谱明文。该流水线消除了传统自回归模型末端产生非法字符悬垂的风险，确保了声学合成器与乐谱渲染引擎的兼容性。
 
-=== 分词策略对模型性能影响的控制变量实验
+=== 分词策略对比实验
 
 为严密验证分词器对下游模型学习能力的影响，本小节设立单一变量控制实验：固定完全相同的因果 Transformer 解码器架构（统一为 12 层、隐藏维度 256、注意力头数 8，参数量约 2.5M），分别在字符级分词（Char）、通用子词分词（BPE-256）以及本文专用分词（ABCTokenizer）三套语料上进行完全相同的 50 轮训练。
 
@@ -677,17 +660,17 @@ $ bold(x) = (f_"id"(chevron.l "bos" chevron.r), f_"id"(t_1), f_"id"(t_2), dots, 
 
 结合表 @tab:tokenizer_model_ablation 与@fig-tokenizer-comparison，实验结果揭示了分词算法在符号音乐建模中的深刻影响：
 
-1. **跨分词器公允评估准则——比特字符率（BPC）的断崖式领先**：由于不同分词器的单个 Token 字符跨度不同，直接比较其 Token 级别的测试损失（如 Char 的 0.5420 vs ABCTokenizer 的 0.9055）在信息论上是不公允的。引入归一化每字符比特率指标后：
+1. *跨分词器公允评估准则——比特字符率（BPC）的断崖式领先*：由于不同分词器的单个 Token 字符跨度不同，直接比较其 Token 级别的测试损失（如 Char 的 0.5420 vs ABCTokenizer 的 0.9055）在信息论上是不公允的。引入归一化每字符比特率指标后：
    $ "BPC" = frac(cal(L)_"token", ln(2) dot "Compression Ratio") $
-   ABCTokenizer 取得了 **0.4604 bpc** 的优异水平，相比 Char（0.7820 bpc）与 BPE-256（0.7842 bpc）分别降低了 41.1% 与 41.3%。这一实证有力证明了专用乐理分词不仅是形式上的序列压缩，更是从信息论源头消除了语法歧义，使模型对每个字符的平均不确定性几乎减半。
-2. **序列长度平方律对训练吞吐的物理制约**：自注意力矩阵的点积计算复杂度随序列长度呈平方增长（$cal(O)(T^2)$）。字符级分词使平均单曲序列长度膨胀至 426.5 Token，其 50 轮训练耗时高达 **386.4 秒**；而 ABCTokenizer 将序列长度有效控制在 150.2 Token，训练耗时大幅压减至 **174.2 秒**，计算效率提升超过 120%。
-3. **乐理边界完整性对时值守恒的根本保障**：Char 与 BPE 分词经常在音符与小节线交界处生硬截断，导致模型生成的小节时值合法率仅有 72.4% 与 88.6%；而 ABCTokenizer 将音高、时值及小节线作为不可分原子 Token，生成乐谱的小节合法率高达 **96.8%**。
+   ABCTokenizer 取得了 *0.4604 bpc* 的优异水平，相比 Char（0.7820 bpc）与 BPE-256（0.7842 bpc）分别降低了 41.1% 与 41.3%。这一实证有力证明了专用乐理分词不仅是形式上的序列压缩，更是从信息论源头消除了语法歧义，使模型对每个字符的平均不确定性几乎减半。
+2. *序列长度平方律对训练吞吐的物理制约*：自注意力矩阵的点积计算复杂度随序列长度呈平方增长（$cal(O)(T^2)$）。字符级分词使平均单曲序列长度膨胀至 426.5 Token，其 50 轮训练耗时高达 *386.4 秒*；而 ABCTokenizer 将序列长度有效控制在 150.2 Token，训练耗时大幅压减至 *174.2 秒*，计算效率提升超过 120%。
+3. *乐理边界完整性对时值守恒的根本保障*：Char 与 BPE 分词经常在音符与小节线交界处生硬截断，导致模型生成的小节时值合法率仅有 72.4% 与 88.6%；而 ABCTokenizer 将音高、时值及小节线作为不可分原子 Token，生成乐谱的小节合法率高达 *96.8%*。
 
 == 序列生成模型架构与对比机理
 
 为了深入探讨不同深度网络对离散符号音乐的表征能力，本节从动力学视角对比经典循环神经网络（RNN）、长短期记忆网络（LSTM）及基于自注意力机制的因果解码器架构（GPT2ABC）。
 
-=== 循环神经网络（RNN）的时序马尔可夫瓶颈
+=== 循环神经网络的时序局限
 
 经典循环神经网络采用单步隐藏状态递归传递机制对音乐上下文进行压缩。设在离散时间步 $t$，当前输入音符经嵌入查找得到向量 $bold(x)_t in bb(R)^d$，上一时刻网络隐藏状态为 $bold(h)_(t-1) in bb(R)^H$，则系统的隐状态更新方程为：
 
@@ -703,7 +686,7 @@ $ (partial bold(h)_t) / (partial bold(h)_k) = product_(j=k+1)^t (partial bold(h)
 
 当参数矩阵 $bold(W)_(h h)$ 的最大奇异值小于 1 时，时序距离超过一定步长后梯度信号将迅速坍缩为零向量。在音乐实际生成场景中，这表现为典型的“小节遗忘症”：模型仅能根据前两至三个音符拟合局部转移概率，无法维持跨越数小节的调式中心与规整的节拍强弱周期。
 
-=== 长短期记忆网络（LSTM）的恒定误差轮联机制
+=== 长短期记忆网络的状态传递
 
 为克服标准 RNN 的梯度消失，LSTM 引入了由专用乘法门控调控的细胞内部状态 $bold(c)_t in bb(R)^H$。系统在时间步 $t$ 的状态转移方程如下：
 
@@ -729,13 +712,13 @@ $ (partial bold(c)_t) / (partial bold(c)_(t-1)) = "diag"(bold(f)_t) $
 
 本文构建的 GPT2ABC 基于仅解码器（Decoder-only）Transformer 拓扑结构，彻底废除时序循环递归，将音乐符号序列建模转变为基于因果掩码的多头自注意力关联图计算。
 
-==== 连续几何表示与可学习位置编码
+==== 几何表示与位置编码
 
 对于由 ABCTokenizer 编码得到的索引序列 $(x_1, x_2, dots, x_T)$，模型首先通过词表查找矩阵 $bold(W)_E in bb(R)^{|V| times d_"model"}$ 将离散符号投射至连续表示空间，得到词嵌入张量 $bold(E) in bb(R)^{T times d_"model"}$。为保留时间序列的绝对时序顺序，引入参数化位置嵌入矩阵 $bold(W)_P in bb(R)^{T_"max" times d_"model"}$，取前 $T$ 个位置得到 $bold(P) in bb(R)^{T times d_"model"}$。模型的初始隐状态表征为两者的线性叠加：
 
 $ bold(H)^{(0)} = bold(E) + bold(P) $
 
-==== 多头因果自注意力机制（Multi-Head Causal Self-Attention）
+==== 多头因果自注意力机制
 
 设第 $l$ 层的输入特征矩阵为 $bold(H)^{(l-1)} in bb(R)^{T times d_"model"}$。为实现稳定的深层梯度反向流动，本模型采用前置层归一化（Pre-LayerNorm）策略。归一化后的状态 $bold(X) = "LN"(bold(H)^{(l-1)})$ 被线性投影至 $h$ 个平行的查询、键、值注意子空间，每个子空间的投影维度为 $d_k = d_"model" / h$。对于第 $m$ 个注意力头：
 
@@ -757,7 +740,7 @@ $ bold(H)'^{(l)} = "MHA"("LN"(bold(H)^{(l-1)})) + bold(H)^{(l-1)} $
 
 该机制赋予了模型跨越长序列直连任意历史位置的信息捕获能力：无论前导小节的调性标记距离当前音符有多远，其键向量与当前查询向量的内积关联均能在 $cal(O)(1)$ 的网络深度上直接交互，完全规避了循环网络的递归衰减瓶颈。
 
-==== 位置逐点前馈网络与参数解耦优化
+==== 位置前馈网络与参数绑定
 
 在自注意力子层之后，每个位置的表示独立经过两层全连接前馈变换，中间采用高斯误差线性单元（GELU）激活函数：
 
@@ -777,9 +760,9 @@ $ bold(H)^{(l)} = "FFN"("LN"(bold(H)'^{(l)})) + bold(H)'^{(l)} $
 
 $ P(x_(t+1) | x_(<=t)) = "softmax"("LN"(bold(H)_t^{(N)}) bold(W)_E^top) $
 
-== 训练目标与生成调控策略
+== 训练目标与采样调控
 
-=== 自回归最大似然估计与评估准则
+=== 自回归最大似然估计
 
 给定由训练集导出的符号序列 $(x_1, x_2, dots, x_T)$，模型的目标是在参数集合 $theta$ 下最大化真实数据联合分布的对数似然。依据概率链式法则，该优化问题转化为逐词条件似然的最小化经验交叉熵损失：
 
@@ -791,7 +774,7 @@ $ "PPL" = exp(cal(L)_"test") = ( product_(t=1)^T 1 / (P_theta (x_t | x_(<t))) )^
 
 困惑度反映了模型在每个时间步预测下一个音乐 Token 时的平均等效候选选择分支数。在词表规模 $|V| = 91$ 的设定下，更低的 PPL 直接反映模型对音乐上下文（如和声走向、调式音阶分布）具有更高的确信度与预测准确性。
 
-=== 随机采样与生成调控策略
+=== 随机采样与生成调控
 
 在推理阶段，若单纯采用贪婪搜索（Greedy Search，即 $x_(t+1) = "arg max"_w P(w)$），生成序列极易退化陷入高度单调的局部音符自循环回路；而完全非约束的随机采样则可能采样到长尾低概率非法记号。为此，本文设计联合调控采样策略，在输出 Logits 向量 $bold(z)_t$ 层面协同运用温度缩放与动态核截断：
 
@@ -807,7 +790,7 @@ $ V^(p) = "arg min"_(V' subset V) { |V'| | sum_(w in V') P_tau (w | x_(<=t)) >= 
 
 丢弃所有 $w in.not V^(p)$ 的非核心候选，在归一化后执行多项式抽样。这一双重机制既保留了生成音乐在调式骨架内的严谨性，又赋予其丰富的旋律发展变化。
 
-== 实验设计与综合对比评测
+== 实验设计与结果分析
 
 === 实验环境与基准配置
 
@@ -836,12 +819,12 @@ $ V^(p) = "arg min"_(V' subset V) { |V'| | sum_(w in V') P_tau (w | x_(<=t)) >= 
 实验选用的基准语料来源于 TheSession.org 公开数据库中经过清洗整理的传统民谣乐谱语料库（涵盖爱尔兰、苏格兰及北欧传统舞曲，包括 Reel、Jig、Polka 等丰富曲式）。语料库经 ABCTokenizer 过滤清洗后共收录 45,850 首完整曲目，包含 7,366,503 个训练 Token 与 818,501 个验证 Token，词表大小收敛至 91 个具有完备乐理语义的 Token。数据集按 8:1:1 比例严格划分训练集、验证集与测试集。
 
 在模型对比维度，本研究构建了以下四类覆盖经典循环网络与前沿自注意力架构的代表性序列基准（统一采用本文优胜的 ABCTokenizer）：
-1. **Vanilla RNN**：经典单层简单循环网络，隐层维度设定为 $H=512$，表征最基础的一阶马尔可夫记忆能力；
-2. **LSTM**：双层门控长短期记忆网络，隐层维度设定为 $H=512$，具备跨小节细胞状态长期记忆能力；
-3. **Standard Transformer**：采用与 GPT2ABC 相同的 12 层因果解码器配置，但从零随机高斯初始化权重，不采用嵌入绑定与 Pre-LN 结构；
-4. **GPT2ABC**：本文提出的因果 Transformer 架构，融合权重绑定、Pre-LN 残差连接与专用分词系统，代表自注意力机制的最佳工程配置。
+1. *Vanilla RNN*：经典单层简单循环网络，隐层维度设定为 $H=512$，表征最基础的一阶马尔可夫记忆能力；
+2. *LSTM*：双层门控长短期记忆网络，隐层维度设定为 $H=512$，具备跨小节细胞状态长期记忆能力；
+3. *Standard Transformer*：采用与 GPT2ABC 相同的 12 层因果解码器配置，但从零随机高斯初始化权重，不采用嵌入绑定与 Pre-LN 结构；
+4. *GPT2ABC*：本文提出的因果 Transformer 架构，融合权重绑定、Pre-LN 残差连接与专用分词系统，代表自注意力机制的最佳工程配置。
 
-=== 主实验结果与深度对比分析
+=== 实验结果与对比分析
 
 在相同的 50 轮训练周期下，基于统一分词器的四种模型架构在测试集上的最终收敛指标如@tab-main-results 所示。训练收敛过程中的测试损失轨迹与困惑度演化曲线分别绘制于@fig-loss-curve 与@fig-perplexity-curve 中，二者的联合对比综合展示于@fig-traning-curve。
 
@@ -879,17 +862,17 @@ $ V^(p) = "arg min"_(V' subset V) { |V'| | sum_(w in V') P_tau (w | x_(<=t)) >= 
 
 结合上述定量数据与时序轨迹，各架构的表现呈现出极具信息量的阶梯式分化，可归纳为以下深层结论：
 
-==== 自注意力机制对长程音乐上下文的建模飞跃
+==== 长程上下文建模能力分析
 
 从宏观性能阶梯来看，GPT2ABC 取得了显著优于所有对比模型的生成精度。在测试损失指标上，GPT2ABC 的最终损失降至 0.9055，相比从头训练的标准 Transformer（1.2140）降低了 25.41%，相比双层 LSTM（1.5230）降低了 40.54%，相比 Vanilla RNN（1.9845）大幅降低了 54.37%。反映在信息论困惑度上，GPT2ABC 取得了 2.4732（约 2.47）的优异水平。在包含 91 个离散词元的音乐表示空间中，这一指标表明模型在每个时间步预测下一个音符或控制符时，等效候选分支仅在 2.47 个左右，高度契合传统民谣在骨干音级与主和弦音（如主音、三音与五音）间的三岔发展倾向，既保持了调式和声的强确定性，又保留了适度的旋律变化自由度。
 
 RNN 与 LSTM 的劣势从深层机理上印证了递归隐状态在表征离散符号音乐时的局限性。音乐并非平稳马尔可夫链，乐谱开头的调式声明（例如 `K:D`）及拍号（`M:4/4`）在物理上距离乐曲中段相隔数百个符号，但其乐理约束力却必须不衰减地贯穿整曲。循环网络在不断吸收局部音符的过程中，必须将早期关键全局配置与当前瞬时旋律持续压缩在固定的隐状态张量内，这种动力学瓶颈必然导致远距离梯度的严重弥散与信息丢失。反观 Transformer 架构，自注意力层允许任意两个时步之间以 $cal(O)(1)$ 的计算路径直接建立相似度连接，使得网络在生成第 200 个音符时，依然能够无损地查阅第 1 小节的调式信息，从而在全局调性一致性与小节拍数封闭性上展现出压倒性优势。
 
-==== 参数效率与网络容量的悖论
+==== 参数效率与网络容量分析
 
 在参数规模的横向比对中，LSTM 展现出了显著的“容量低效性”。如@tab-main-results 所示，为了维持较宽的时序状态通道，LSTM 的参数量高达 5,849,435（约 5.85M），是 GPT2ABC（2.52M）的 2.3 倍之多。然而，其测试损失与困惑度却全面落后于参数量仅为其一半的 Transformer 模型。这一现象揭示了全连接门控机制在特征提取上的冗余：LSTM 依赖巨大的全连接变换矩阵进行门控状态混合，其矩阵参数量随隐层宽度呈二次方增长（$4 times (H^2 + H d)$），但其时序计算机制仍然是一维线性的；而 Transformer 依靠多头注意力机制对特征空间进行投影拆解，参数主要集中于低秩子空间的投射变换，能够在更少参数预算下挖掘多尺度的跨节拍呼应关系。
 
-=== 资源开销与训练吞吐量评估
+=== 计算资源开销与推理延迟
 
 为进一步评估各模型在实际工程落地与算力约束下的可行性，@tab-resource-cost 详细统计了各系统在第 50 轮收敛状态下的参数总量、运行时显存占用（GPU Memory Footprint）、自回归单步推断延迟以及每 10 个 Epoch 所耗费的物理墙上时钟时间。
 
@@ -912,8 +895,8 @@ RNN 与 LSTM 的劣势从深层机理上印证了递归隐状态在表征离散�
 
 资源消耗与计算开销的对比分析客观展现了不同架构的性能帕累托前沿与工程折中特性（Trade-offs）：
 
-1. **训练并行吞吐与门控时序瓶颈的权衡**：在训练耗时维度，自注意力矩阵的高度并行张量化特性得到了充分体现。GPT2ABC 在 RTX 4090 上的 10 轮平均训练耗时为 174.2 秒，其训练速度相比双层 LSTM（284.6 秒）提升了约 38.8%。LSTM 受限于严格的时序依赖步进更新（$bold(h)_t$ 必须等待 $bold(h)_(t-1)$ 完成计算），无法充分发挥 GPU 张量核心的大规模矩阵计算流水线效率；然而，由于 12 层 Transformer 具备更高的每步 FLOPs 理论计算量，其训练耗时仍显著高于网络结构极简的一阶循环网络 Vanilla RNN（92.4 秒）。
-2. **显存开销与自回归推理延迟的现实劣势**：自注意力机制的优异生成质量是以计算与存储开销为代价的。如@tab-resource-cost 所示，在反向传播过程中，为保留多层因果注意力图（$T times T$ 矩阵），GPT2ABC 的显存占用达到了 148.5 MB，不仅显著高于结构极其轻量化的 Vanilla RNN（38.5 MB），亦高于 LSTM（114.2 MB）；同时，在无额外投机采样（Speculative Decoding）优化时，GPT2ABC 在单步自回归生成的推断延迟为 2.92 ms/Token，相较于纯隐状态传递的 Vanilla RNN（0.62 ms/Token）和 LSTM（1.15 ms/Token）存在约 2.5 至 4.7 倍的推理时延劣势。
+1. *训练并行吞吐与门控时序瓶颈的权衡*：在训练耗时维度，自注意力矩阵的高度并行张量化特性得到了充分体现。GPT2ABC 在 RTX 4090 上的 10 轮平均训练耗时为 174.2 秒，其训练速度相比双层 LSTM（284.6 秒）提升了约 38.8%。LSTM 受限于严格的时序依赖步进更新（$bold(h)_t$ 必须等待 $bold(h)_(t-1)$ 完成计算），无法充分发挥 GPU 张量核心的大规模矩阵计算流水线效率；然而，由于 12 层 Transformer 具备更高的每步 FLOPs 理论计算量，其训练耗时仍显著高于网络结构极简的一阶循环网络 Vanilla RNN（92.4 秒）。
+2. *显存开销与自回归推理延迟的现实劣势*：自注意力机制的优异生成质量是以计算与存储开销为代价的。如@tab-resource-cost 所示，在反向传播过程中，为保留多层因果注意力图（$T times T$ 矩阵），GPT2ABC 的显存占用达到了 148.5 MB，不仅显著高于结构极其轻量化的 Vanilla RNN（38.5 MB），亦高于 LSTM（114.2 MB）；同时，在无额外投机采样（Speculative Decoding）优化时，GPT2ABC 在单步自回归生成的推断延迟为 2.92 ms/Token，相较于纯隐状态传递的 Vanilla RNN（0.62 ms/Token）和 LSTM（1.15 ms/Token）存在约 2.5 至 4.7 倍的推理时延劣势。
 
 上述数据充分证明：GPT2ABC 并非在所有硬件指标上均具备绝对优势，其以适度的显存与自回归单步延迟为代价，换取了最具决定性的调性长程一致性与压倒性的低困惑度表现，在符号音乐高保真生成任务中确立了最优的综合效益平衡点。
 
@@ -923,17 +906,17 @@ RNN 与 LSTM 的劣势从深层机理上印证了递归隐状态在表征离散�
 
 在模型构建与架构对比层面，从动力学状态转移视角对比了 RNN 与 LSTM 的时序瓶颈，形式化推导了 GPT2ABC 的因果掩码自注意力机制、输入表示融合与前置层归一化残差流，并在统一分词器下严格证明了 GPT2ABC 在测试损失（0.9055）与困惑度（2.4732）上显著超越循环基线与从头训练的 Transformer。同时，实验客观揭示了模型在训练显存占用（148.5 MB）与自回归单步推断延迟（2.92 ms/tok）上的物理开销折中，确立了其在序列并行训练吞吐与长程音乐语义建模上的最佳帕累托平衡，为后续章节进一步探讨模型尺度扩展律（Scaling Law）与计算音乐学客观评估奠定了坚实的建模基础。
 
-= 符号音乐生成中的模型规模扩展定律与计算音乐学评测
+= 模型扩展定律与受控前缀生成研究
 
 == 引言与问题定义
 
-=== 符号音乐序列建模的尺度困境与泛化瓶颈
+=== 符号音乐建模的尺度困境
 
 在深度符号音乐生成领域，传统研究长期受限于小规模循环神经网络（如门控循环单元 GRU、长短期记忆网络 LSTM）或浅层注意力架构。正如第三章实证研究所揭示的，尽管门控机制能够有效减缓反向传播过程中的梯度弥散现象，使验证集困惑度从 Vanilla RNN 的 7.28 显著降低至 LSTM 的 4.59，但基于隐状态迭代传递的循环拓扑结构在数学本质上存在长程记忆容量的信息瓶颈。当音乐序列长度拓展至包含多个曲式乐段的数百个 Token 时，浅层模型往往表现出调式漂移、小节时值不守恒以及远距离音程失序等根本性缺陷。
 
 然而，在试图通过堆叠网络层数与扩增隐层维度来提升模型容量时，符号音乐计算领域面临着独特的“尺度困境（Scale Dilemma）”。与自然语言处理（NLP）领域动辄数千亿 Token 的海量网页抓取语料不同，高保真、带严密音理标注的符号音乐语料在物理世界中极其稀缺。以国际公认的高质量民间音乐语料库（TheSession 45,850 首曲目）为例，其离散符号总规模仅约 824 万 Token。在如此有限的数据尺度下，盲目增大神经网络容量往往会引发严重的经验风险最小化失效，使模型迅速跌入过拟合的灾难性深渊。如何在有限数据规模与计算硬件边界内，建立系统性的网络规模扩展准则，并定量揭示计算资源、模型参数量与音乐生成质量之间的内在物理规律，构成了当前计算音乐学与深度生成模型交叉领域亟待突破的核心学术瓶颈。
 
-=== 从自然语言扩展定律到计算音乐学的跨领域映射
+=== 扩展定律在符号音乐中的映射
 
 2020年，OpenAI 在自然语言建模领域提出了里程碑式的神经语言模型扩展定律（Scaling Laws for Neural Language Models, Kaplan et al.）。该项研究通过横跨多个数量级的海量实验，系统论证了自回归 Transformer 语言模型的交叉熵测试损失与非嵌入模型参数量 $N$、训练数据规模 $D$ 以及总计算量 $C$ 之间严格服从幂律（Power-Law）缩放关系，且这一演进趋势在宏观尺度上表现出高度的确定性与可预测性。
 
@@ -943,26 +926,9 @@ RNN 与 LSTM 的劣势从深层机理上印证了递归隐状态在表征离散�
 
 第二，*强语法刚性约束与物理代数守恒定律*。自然语言具备极高的句法容错空间与语义模糊性，个别词汇的微小错漏通常不会导致整句语义坍塌；然而，符号音乐具有极度严苛的局部与全局数学守恒律——每一个小节内的音符与休止符时值相加必须严格守恒等于拍号所声明的比例（如 $4/4$ 拍必须恒等于 $8$ 个八分音符），调号声明（如 $K:G$）必须对全局半音阶升降产生绝对的音级偏置。模型参数扩展能否自发促使网络在没有任何硬编码规则干预下“涌现”出对这些物理代数守恒定律的内生掌握，是自然语言 Scaling Law 所不曾触及的核心命题。
 
-=== 核心研究目标与本章组织架构
+== 扩展定律理论建模与参数边界
 
-针对上述核心科学问题，本章旨在构建符号音乐领域首个全闭环、轻量级、从底层算子到宏观音乐学量化评估的模型规模扩展定律实验支撑体系。本章的核心研究工作与章节组织安排如下：
-
-在第二节中，深入剖析神经语言模型扩展定律的数学形式，严密推导非嵌入参数量、临界过拟合比值以及算力约束下的最优分配前沿，建立符号音乐固有信息熵下界假说；
-
-在第三节中，针对有限音乐语料易诱发过拟合的理论危机，严格基于十二平均律的循环群代数对称性，形式化提出无损的 12 半音移调数据增强理论，将有效训练数据规模无损扩增至近 1 亿 Token 级别；
-
-在第四节中，面向硬件显存物理边界，设计包含 Nano (0.24M)、Mini (1.15M)、Base (9.59M)、Medium (25.4M)、Large (85.4M) 直至 Limit (808M) 的六阶参数空间阶梯，完成纯 C/CUDA 原生底层算子与静态/动态显存预算的严密推导；
-
-在第五节中，系统展示跨尺度训练的实证结果，拟合双对数坐标下的经验幂律函数，定量测算符号音乐在非嵌入参数维度上的标度指数 $alpha_N$ 与残余理论熵界，并客观探讨模型扩展带来的边际效益递减；
-
-在第六节中，提出超越单一交叉熵损失的“双轨扩展律（Dual-Track Scaling Law）”，从 MusPy 9 维计算音乐学特征演化雷达分布以及小节时值语法合规率两个层面，系统论证大模型在音乐认知结构上的涌现效应，并深入剖析当前模型在休止符与节拍算术上的现实局限性；
-
-第七节总结本章全部核心发现与理论贡献。
-
-
-== 符号音乐模型规模扩展定律的理论基础与数学建模
-
-=== 交叉熵损失与非嵌入参数量的幂律泛化假说
+=== 参数量与损失的幂律假说
 
 设符号音乐序列由离散符号集合构成的随机过程 $bold(x) = (x_1, x_2, dots, x_T)$ 所描述，其中每一个时间步的音符或语法标记均取自大小为 $V$ 的有限音乐词表 $cal(V)$。自回归语言模型的目标在于通过参数为 $theta$ 的神经网络，逼近序列的真实联合概率分布：
 
@@ -988,7 +954,7 @@ $ N = L dot (4(d^2 + d) + (d dot 4d + 4d) + (4d dot d + d) + 4d) = L dot (12 d^2
 
 方程 @eq-transformer-params-exact 表明，非嵌入参数规模与网络隐层宽度 $d$ 呈严格的二次方依赖关系，而与深度 $L$ 呈严格的线性依赖关系。这一代数特性构成了后文构建几何等比参数梯队的设计基石。
 
-=== 数据集规模与过拟合临界边界的解析推导
+=== 数据规模与过拟合临界推导
 
 仅靠扩大模型参数规模 $N$ 无法孤立实现测试损失的单调改善。当训练语料的有效规模 $D$（以参与训练的独立序列或总 Token 数计）不足以支撑网络巨大的假设空间时，模型将不可避免地利用其极高的自由度对有限训练样本中的偶然特征与噪声进行记忆，导致泛化差距（Generalization Gap）急剧恶化。
 
@@ -1010,7 +976,7 @@ $ D_2 / D_1 approx 85^0.74 approx 26.6 "倍" $
 
 在民间音乐原始语料仅有约 824 万 Token 的严酷现实下，若直接全参数训练一个 85M 规模的模型，网络在遍历 2 至 3 个轮次（Epoch）后便会由于数据多样性耗尽而发生剧烈过拟合。这从理论物理机制上严密证实了：在开展大规模音乐模型扩展实验之前，必须在语料维度实施严谨而庞大的数据扩增工程。
 
-=== 算子级计算预算分配与帕累托最优前沿
+=== 计算预算分配与最优前沿
 
 在算力受限的真实科研场景中，决定实验可行性的终极硬约束是训练所消耗的总浮点运算量（Total Floating-Point Operations, FLOPs），记为 $C$。对于自回归因果 Transformer 模型，每个时间步的单个 Token 在前向传播（Forward Pass）中所消耗的浮点运算量约为 $2N$ FLOPs（每个参数执行一次乘法与一次加法）；在反向传播（Backward Pass）中，由于需要同时计算对激活值的偏导与对权重矩阵的梯度，其计算量严格为前向传播的两倍，即 $4N$ FLOPs。因此，模型在处理全量训练 Token $D$ 的完整生命周期内，总浮点运算预算可精确表述为：
 
@@ -1022,7 +988,7 @@ $ min_(N, D) cal(L)(N, D) quad "s.t." quad 6 N D = C $
 
 其解析解揭示了一个反直觉的深刻结论（Chinchilla 标度定律核心假说）：最优分配前沿要求模型参数规模 $N$ 与训练数据量 $D$ 应当以大致相等的比例协同扩展，即 $N_"opt" prop C^0.50, D_"opt" prop C^0.50$。更关键的是，在大模型与小模型的效率对比中，大模型展现出了极其优异的*高样本利用效率（Sample Efficiency）*——一个更大参数量的模型在仅遍历极少量数据步数时所达到的损失水平，往往远远超过一个小模型运行至完全过拟合收敛时的渐近极限。这一推论为我们在单卡加速硬件上高效勘测 85M 乃至更高规格模型的幂律轨迹提供了坚实的算力经济学依据。
 
-=== 符号音乐固有信息熵下界假说
+=== 符号音乐信息熵下界假说
 
 在方程 @eq-scaling-law-N 中，理论渐近损失 $cal(L)_oo$ 具有深刻的物理学与信息论内涵。在香农信息论框架下，若生成任务的目标系统包含完全不可预测的随机过程（例如真正的热力学白噪声），则任何确定性算法都无法消除该过程的条件熵。
 
@@ -1030,9 +996,9 @@ $ min_(N, D) cal(L)(N, D) quad "s.t." quad 6 N D = C $
 符号音乐是由物理声学律制（如十二平均律）、调式五度循环圈（Circle of Fifths）以及强节拍骨架高度决定的代数系统。在已知前序小节的调式、拍号以及前半句动机的情况下，终止式小节的主音收束概率在统计学上呈现极强的尖峰分布（Peak Distribution）。因此，符号音乐语言模型的真实不可约熵界 $cal(L)_oo^"Music"$ 必然显著低于自然语言，其理论下界预计收敛于 $0.7 tilde 0.9$ nats 区间。这一假说将在本章后续的实证拟合中得到完整验证。
 
 
-== 数据集规模协同扩展与十二平均律对称移调增强
+== 十二平均律对称移调数据增强
 
-=== 语料规模与模型容量失配的理论危机
+=== 语料容量失配分析
 
 上一节的理论推导已经确立了过拟合临界边界公式 $D prop N^0.74$。表 @tab-data-crisis 对比了在原始数据集（45,850 首民间曲目，共计 8,242,118 Token）条件下，各级模型参数量与所需支撑语料之间的理论失配程度。
 
@@ -1057,11 +1023,11 @@ $ min_(N, D) cal(L)(N, D) quad "s.t." quad 6 N D = C $
 
 从表 @tab-data-crisis 可以清晰地看出，当模型规模跨越至 85.39M（Large 规格）时，原始数据规模已存在高达 20 倍以上的严重匮乏。如果不引入创新的数据扩增手段，大参数量模型必将在训练初期便陷入对原始曲目的死记硬背，使 Scaling Law 的标度测量完全失真。
 
-=== 基于十二平均律循环群的无损音高移调理论
+=== 基于循环群的无损移调理论
 
 为了在不破坏音乐内在语法逻辑与旋律美感的前提下将数据规模扩大一个数量级，本研究提出了一种严格基于现代声学与乐理十二平均律代数对称性的无损移调增强理论。
 
-==== 十二平均律循环群 $ZZ_12$ 的代数结构
+==== 循环群代数结构
 
 现代物理声学中，一个纯八度（Octave）被等比分割为 12 个半音（Semitones），任意两相邻半音之间的声学振动频率比严格恒定为：
 
@@ -1075,7 +1041,7 @@ $ bb(G)_"Pitch" = (ZZ_12, +) = (\{0, 1, 2, dots, 11\}, +_(mod 12)) $
 
 $ cal(T)_k (p) = p + k, quad k in \{-5, -4, dots, 0, dots, 5, 6\} $ <eq-transposition-op>
 
-==== 旋律音程不变性定理与证明
+==== 旋律音程不变性证明
 
 *定理 1（旋律相对音程差分不变性）*：若旋律序列 $bold(P) = (p_1, p_2, dots, p_m)$ 经由移调算子 $cal(T)_k$ 映射为新序列 $bold(P)' = (p'_1, p'_2, dots, p'_m)$，则原旋律的相邻音程阶差向量 $Delta bold(P)$ 与轮廓跳进方向在变换后严格守恒。
 
@@ -1089,7 +1055,7 @@ $ Delta p'_i = p'_(i+1) - p'_i = cal(T)_k (p_(i+1)) - cal(T)_k (p_i) = (p_(i+1) 
 
 由上式可知，对任意时间步 $i$，皆有 $Delta p'_i equiv Delta p_i$。因此，旋律在移调后保持了严格等价的音程跃迁结构。根据格式塔心理学与音乐认知理论，人类感知对旋律的认同本质上是对相对音程差分模式的感知，而非对绝对物理基频的记忆。故移调操作在音乐美学上属于完全无损的真实等价变换。 $square$
 
-==== 小节时值代数守恒定理
+==== 小节时值守恒证明
 
 *定理 2（节拍时间轴同构不变性）*：移调算子 $cal(T)_k$ 作用于音符集合时，其作用域仅限制于音高标量维，与时间轴变量（音符持续时值 $d$ 及小节线位置 $|$）相互正交，因而在变换过程中严格维持所有小节的拍数时值守恒定律。
 
@@ -1103,7 +1069,7 @@ $ sum_(j=a)^b Phi(cal(M)_k (n_j)) = sum_(j=a)^b d_j equiv "Meter"(cal(B)) $
 
 故变换后的小节拍数算术完整性在代数上获得 100% 的绝对守恒保障。 $square$
 
-=== 端到端 12 半音移调数据增强流水线与亿级 Token 构建
+=== 增强流水线与亿级 Token 库构建
 
 基于上述代数理论，本系统在数据预处理阶段设计了端到端的全自动音高移调引擎。该引擎在纯文本流水线中执行以下四步级联处理：
 
@@ -1119,12 +1085,12 @@ $ sum_(j=a)^b Phi(cal(M)_k (n_j)) = sum_(j=a)^b d_j equiv "Meter"(cal(B)) $
 
 $ D_"augmented" = 45,850 "首" times 12 "个调性" = 550,200 "首完整独立乐曲" $
 
-其对应的离散 Token 总规模突破至 **$98,905,416$ Token（近 1 亿 Token）**。这一庞大的数据池彻底粉碎了表 @tab-data-crisis 中揭示的过拟合瓶颈，为支撑高达 85M 乃至更高参数模型的极限 Scaling Law 训练构筑了坚不可摧的语料基石。
+其对应的离散 Token 总规模突破至 *$98,905,416$ Token（近 1 亿 Token）*。这一庞大的数据池彻底粉碎了表 @tab-data-crisis 中揭示的过拟合瓶颈，为支撑高达 85M 乃至更高参数模型的极限 Scaling Law 训练构筑了坚不可摧的语料基石。
 
 
-== 面向单卡算力约束的六阶参数梯队与底层引擎设计
+== 多尺度参数梯队与底层训练引擎
 
-=== 六阶模型架构超参数矩阵设计
+=== 六阶参数梯队超参数矩阵
 
 为了在离散参数空间中清晰、平滑地拟合幂律曲线，模型规模必须跨越多个数量级，并在对数坐标轴上呈现大致均匀的几何等比分布。受限于实验室计算设备的显存边界，本系统构建了由轻量调试级直至硬件极限级的六阶模型参数矩阵，如表 @tab-scaling-ladder 所示。
 
@@ -1149,11 +1115,11 @@ $ D_"augmented" = 45,850 "首" times 12 "个调性" = 550,200 "首完整独立�
 
 该阶梯设计的核心特征在于：从中等规模的 Base（9.59M）到 Large（85.39M）再到 Limit（808.20M），非嵌入参数量实现了每步约 $8.9 tilde 9.5$ 倍的跨数量级阶跃，在双对数坐标轴上构成了横跨近三个数量级（$10^6 tilde 10^7 tilde 10^8$）的等间距采样点；注意力单头维度 $d_k = d / h$ 在主流模型中严格锁定为 64，贴合现代 GPU Tensor Core 在 32 线程倍数下的最佳硬件吞吐特性。
 
-=== 显存预算的严密物理拆解
+=== 显存预算物理拆解
 
 在训练 85.39M 乃至更高规模的模型时，必须对显存消耗进行精确到字节级别的理论对账，以确保在高并发 CUDA 训练时不发生内存溢出（OOM）。
 
-==== 静态显存分析（Static Memory）
+==== 静态显存分析
 
 在单精度浮点（FP32，每个标量占据 4 字节）训练机制下，静态显存完全由参数量 $N$ 决定，且在训练全过程中保持恒定不变。其物理组成包含三大部分：
 
@@ -1169,7 +1135,7 @@ $ M_"static" = (4 + 4 + 8) times N = 16 N "字节" $ <eq-static-exact>
 
 对于 Large 规格（$N = 85.39 "M"$）：$M_"static" = 16 times 85.39 times 10^6 "B" approx bold(1.366 "GB")$。对于 Limit 规格（$N = 808.20 "M"$）：$M_"static" = 16 times 808.20 times 10^6 "B" approx bold(12.931 "GB")$，静态显存即已占据显存的绝大部分。
 
-==== 动态激活显存分析（Dynamic Activations）
+==== 动态激活显存分析
 
 为榨取极端算力吞吐，本系统的训练引擎并未引入牺牲算力换显存的激活检查点重计算（Activation Checkpointing），而是将反向传播所需的中间激活状态完整缓存于显存中。
 
@@ -1186,17 +1152,17 @@ $ M_"total" = 1.37 "GB (静态)" + 6.60 "GB (动态)" approx bold(7.97 "GB") qua
 
 这一理论推导与系统运行时在监控中捕获的硬件显存读数（7974 MiB）在数学上高度吻合，证明整个 12 层大型网络正在进行纯粹的全参数端到端无损训练。
 
-=== 纯 C/CUDA 原生扩展算子优化与吞吐量保障
+=== 纯 C/CUDA 原生算子优化
 
 为了消除高级语言在自回归小算子调用中产生的重型开销，本系统采用底层 C++ 与原生 CUDA 重写了全套多态训练引擎（`train.cu`）。其关键底层算子优化包括：
 1. *cuBLAS Row-Major GEMM 规范化映射*：针对 GPU 底层 cuBLAS 默认为列优先而 C 内存布局为行优先的冲突，利用代数恒等式 $C = A B <=> C^T = B^T A^T$ 在入口处实施无开销对偶映射；
 2. *自适应多头因果注意力内核*：编写跨 Warp 并行归约核函数，单 Block 内聚合 64 线程协作完成 Softmax 最大值搜索与指数累加；
-3. *融合 Pre-LayerNorm 与偏置更新*：将均值、方差统计与仿射变换融合为单次内存遍历算子，大幅减少访存通信开销。实测在专用加速卡上，85.39M 模型的持续吞吐量稳定维持在 **332 ~ 350 Token/s**。
+3. *融合 Pre-LayerNorm 与偏置更新*：将均值、方差统计与仿射变换融合为单次内存遍历算子，大幅减少访存通信开销。实测在专用加速卡上，85.39M 模型的持续吞吐量稳定维持在 *332 ~ 350 Token/s*。
 
 
-== 符号音乐扩展定律的实证检验与幂律拟合
+== 扩展定律实证检验与幂律拟合
 
-=== 跨尺度验证损失与困惑度收敛曲线分析
+=== 跨尺度验证损失与收敛动态
 
 在完成十二平均律数据增强与训练底座构建后，我们在完全相同的超参数协议下，系统性地对 Nano (0.24M)、Mini (1.15M)、Base (9.59M)、Medium (25.40M) 以及 Large (85.39M) 等梯队进行了端到端全量训练。
 
@@ -1208,7 +1174,7 @@ $ M_"total" = 1.37 "GB (静态)" + 6.60 "GB (动态)" approx bold(7.97 "GB") qua
 如@fig-ppl-trajectories 所示，随着模型规模的阶梯式提升，验证集困惑度与收敛动态呈现出规律性跃迁：
 - 极小规模的 Nano（0.24M）最终收敛验证集损失停留在 $cal(L) = 1.9845$（$"PPL" = 7.28$），模型受制于容量，对复杂长程小节的拟合能力迅速饱和；
 - 随着隐层宽度与注意力头数的扩展，Base（9.59M）将损失推进至 $1.3120$（$"PPL" = 3.71$）；
-- 当规模跃升至 Large（85.39M）时，模型的学习效率展现出质的突破，最终收敛于 **$cal(L)_"val" = 0.9055$、$"PPL" = 2.47$**。
+- 当规模跃升至 Large（85.39M）时，模型的学习效率展现出质的突破，最终收敛于 *$cal(L)_"val" = 0.9055$、$"PPL" = 2.47$*。
 
 在 Large 模型的最优步数处，训练损失为 $0.8940$，验证损失为 $0.9055$，泛化差距微小，证实扩增后的近 1 亿 Token 语料库完全承载住了 8500 万参数网络的假设空间，未出现有害过拟合。
 
@@ -1229,7 +1195,7 @@ $ M_"total" = 1.37 "GB (静态)" + 6.60 "GB (动态)" approx bold(7.97 "GB") qua
   caption: [符号音乐生成模型参数尺度（$N$）与验证困惑度（PPL）扩展特征],
 ) <tab:scaling_laws>
 
-=== 双对数坐标下的幂律回归拟合与边际效益递减
+=== 双对数幂律拟合与边际收益
 
 根据各尺度模型最终取得的最优验证集损失，我们将实验观测数据汇总于表 @tab-scaling-empirical-data，并执行基于非线性最小二乘法的经验幂律函数回归拟合。
 
@@ -1257,35 +1223,35 @@ $ M_"total" = 1.37 "GB (静态)" + 6.60 "GB (动态)" approx bold(7.97 "GB") qua
 
 $ cal(L)(N) = ((3.12 times 10^3) / N)^0.142 + 0.725 $ <eq-fitted-scaling-law>
 
-其拟合优度判定系数达到 **$R^2 = 0.9951$**，表明在跨越三个数量级的空间内，自回归符号音乐模型的预测误差高度服从幂律法则。
+其拟合优度判定系数达到 *$R^2 = 0.9951$*，表明在跨越三个数量级的空间内，自回归符号音乐模型的预测误差高度服从幂律法则。
 
 #figure(
   image("fig/loglog_scaling_fit.svg", width: 88%),
   caption: [符号音乐扩展定律在双对数坐标系下的经验幂律拟合与外推曲线],
 ) <fig-loglog-scaling-plot>
 
-==== 音乐标度指数 $alpha_N$ 与算力边际递减的客观辩证
+==== 标度指数与边际效应讨论
 
-在通用自然语言上，Kaplan 等人测得的参数标度指数约为 $alpha_N^"NLP" approx 0.076$；而在本文的符号音乐任务中，实测标度指数达到 **$alpha_N^"Music" = 0.142$**。
+在通用自然语言上，Kaplan 等人测得的参数标度指数约为 $alpha_N^"NLP" approx 0.076$；而在本文的符号音乐任务中，实测标度指数达到 *$alpha_N^"Music" = 0.142$*。
 
 音乐标度指数显著高于自然语言，证明符号音乐在中小尺度区间对模型规模的扩张更为敏感，参数扩张所带来的收益显著高于开放域文本。其内在机理在于符号音乐仅有 91 个离散 Token，词汇本身的记忆负担极低，参数容量几乎全部聚焦于学习调式和弦连接、旋律骨架排列等纯代数结构规则。
 
-然而，实验数据亦揭示出不可忽视的**边际效益递减（Diminishing Returns）**：如@tab:scaling_laws 所示，从 LSTM (2.33M) 跨越至 Large (85.4M) 时，PPL 激进下降了 2.40；但进一步扩展至 XL (302.85M) 时，计算量剧增 3.5 倍，PPL 仅微幅降低 0.20（$2.47 \to 2.27$）。这表明单轨符号音乐在低熵下界（$cal(L)_oo = 0.725 "nats"$）的硬约束下，中等规模（约 85M）已接近无噪声信道容量，盲目向数亿乃至十亿规模扩展将带来严重的算力效能不经济性。
+然而，实验数据亦揭示出不可忽视的*边际效益递减（Diminishing Returns）*：如@tab:scaling_laws 所示，从 LSTM (2.33M) 跨越至 Large (85.4M) 时，PPL 激进下降了 2.40；但进一步扩展至 XL (302.85M) 时，计算量剧增 3.5 倍，PPL 仅微幅降低 0.20（$2.47 \to 2.27$）。这表明单轨符号音乐在低熵下界（$cal(L)_oo = 0.725 "nats"$）的硬约束下，中等规模（约 85M）已接近无噪声信道容量，盲目向数亿乃至十亿规模扩展将带来严重的算力效能不经济性。
 
-=== 样本效率验证：大模型的高样本效率实证
+=== 样本利用效率对比
 
 实证日志进一步揭示了大模型在训练过程中的*样本效率优势（Sample Efficiency Advantage）*。以达到相同困惑度阈值（如 $"PPL" = 5.0$）为例：
 - Nano 模型（0.24M）消耗了全部 3000 步生命周期仍无法稳定达成；
-- 而 Large 模型（85.39M）仅用了不到 **500 步** 便轻松击穿该阈值。
+- 而 Large 模型（85.39M）仅用了不到 *500 步* 便轻松击穿该阈值。
 
 这证实了扩展定律的核心推论：在给定生成质量目标下，以合理的学习率调度训练较大规模模型并适时早停，能够以远少于小模型的样本吞吐量达成超越其极限的生成质量。
 
 
-== 从交叉熵到计算音乐学：客观音乐特征的尺度涌现
+== 客观音乐特征的尺度涌现评估
 
-=== 双轨扩展律假说（Dual-Track Scaling Law）的构建
+=== 双轨扩展律假说体系
 
-传统的 Scaling Law 研究普遍存在过度执着于机器学习统计指标（Loss 与 PPL）的学术局限，忽略了生成结果在音乐学维度的真实表现。为此，本研究提出了**“双轨扩展律（Dual-Track Scaling Law in Symbolic Music）”**假说体系，如图 4.3 所示。
+传统的 Scaling Law 研究普遍存在过度执着于机器学习统计指标（Loss 与 PPL）的学术局限，忽略了生成结果在音乐学维度的真实表现。为此，本研究提出了*“双轨扩展律（Dual-Track Scaling Law in Symbolic Music）”*假说体系，如图 4.3 所示。
 
 #figure(
   image("fig/dual_track_framework.svg", width: 88%),
@@ -1294,7 +1260,7 @@ $ cal(L)(N) = ((3.12 times 10^3) / N)^0.142 + 0.725 $ <eq-fitted-scaling-law>
 
 该假说表明：随着模型参数规模沿第一轨（统计学习层）按幂律单调下降，系统在第二轨（认知计算层）将自发经历从“局部音符拼贴”到“全局曲式涌现”的质变跃迁。
 
-=== 9 维客观音乐统计特征随模型规模的演化轨迹
+=== 九维客观特征演化与局限分析
 
 为了量化不同模型在音乐学认知维度的演进，我们从各尺度模型中各独立采样 1,000 首完整生成的 ABC 乐谱，并利用 MusPy 计算音乐学评估工具箱（`metrics_eval.py`），对生成的乐谱与原始真实数据集进行全量 9 维音乐学指标对比。
 
@@ -1356,10 +1322,10 @@ $ cal(L)(N) = ((3.12 times 10^3) / N)^0.142 + 0.725 $ <eq-fitted-scaling-law>
 ) <tab:muspy_metrics_full>
 
 表 @tab:muspy_metrics_full 揭示了客观的特征演化规律：
-1. *调式与音级分布的高保真拟合*：随着参数量扩展，GPT-2 XL 的独特音级数均值精准达到 **7.1520**（真实数据集为 7.1732），调式一致性达到 **0.9935**（真实数据集为 0.9922），音级熵为 **2.6060**（高度吻合真实值 2.6061），表明深层自注意力机制彻底内化了自然大调七声音阶的物理排他律；
+1. *调式与音级分布的高保真拟合*：随着参数量扩展，GPT-2 XL 的独特音级数均值精准达到 *7.1520*（真实数据集为 7.1732），调式一致性达到 *0.9935*（真实数据集为 0.9922），音级熵为 *2.6060*（高度吻合真实值 2.6061），表明深层自注意力机制彻底内化了自然大调七声音阶的物理排他律；
 2. *客观暴露的音乐学缺陷与局限性*：
-   - **休止符与呼吸感缺失（Rest & Phrasing Deficiency）**：GPT-2 Large 的空白节拍率（Empty Beat Rate）为 **0.0000**，XL 亦仅有 **0.0001**，均低于真实数据集的 0.0007。其根源在于训练语料中 98% 为连绵不绝的民间舞曲（Reels/Jigs），导致自回归模型在概率分布上极度排斥生成休止符 `z`，呈现出“动能连绵但缺乏人声呼吸”的典型器乐风格偏差；
-   - **音域冒险偏置**：GPT-2 Large 的音高跨度均值为 **19.2273** 半音，略微超出真实曲目的 18.1658 半音，偶现跨越八度的高音跳进，反映出较大容量注意力层在局部生成时对极值音高的探索倾向。
+   - *休止符与呼吸感缺失（Rest & Phrasing Deficiency）*：GPT-2 Large 的空白节拍率（Empty Beat Rate）为 *0.0000*，XL 亦仅有 *0.0001*，均低于真实数据集的 0.0007。其根源在于训练语料中 98% 为连绵不绝的民间舞曲（Reels/Jigs），导致自回归模型在概率分布上极度排斥生成休止符 `z`，呈现出“动能连绵但缺乏人声呼吸”的典型器乐风格偏差；
+   - *音域冒险偏置*：GPT-2 Large 的音高跨度均值为 *19.2273* 半音，略微超出真实曲目的 18.1658 半音，偶现跨越八度的高音跳进，反映出较大容量注意力层在局部生成时对极值音高的探索倾向。
 
 #figure(
   table(
@@ -1378,14 +1344,14 @@ $ cal(L)(N) = ((3.12 times 10^3) / N)^0.142 + 0.725 $ <eq-fitted-scaling-law>
   caption: [生成音乐在编译器可解析性、小节时值算术守恒及结构反复符号配对上的语法遵守率对比],
 ) <tab:syntax_compliance>
 
-如@tab:syntax_compliance 所示，尽管 GPT-2 XL 的小节时值合法率高达 **98.4%**，但仍有 **1.6%** 的生成小节存在微小的时值溢出或欠缺（Large 模型则有 **3.2%** 的缺陷率）。这客观证实了纯因果注意力网络在没有硬编码加法计算器的前提下，对严格时值算术的掌握逼近但未能完全达到绝对数学无误，揭示了统计自回归生成与离散物理规则之间的现实折中。
+如@tab:syntax_compliance 所示，尽管 GPT-2 XL 的小节时值合法率高达 *98.4%*，但仍有 *1.6%* 的生成小节存在微小的时值溢出或欠缺（Large 模型则有 *3.2%* 的缺陷率）。这客观证实了纯因果注意力网络在没有硬编码加法计算器的前提下，对严格时值算术的掌握逼近但未能完全达到绝对数学无误，揭示了统计自回归生成与离散物理规则之间的现实折中。
 
 
 == 本章小结
 
 本章系统确立并验证了符号音乐生成领域中的模型规模扩展定律（Scaling Laws），全面打破了传统音乐生成局限于经验性盲目尝试的学术困境。本章的核心研究工作与创新贡献可凝练归纳为以下四点：
 
-1. *确立了符号音乐参数扩展定律的数学形式与边际边界*：严密论证了非嵌入参数量与自回归交叉熵损失之间的幂律关系，实测测定符号音乐领域的参数标度指数为 **$alpha_N = 0.142$**，判定系数达到 $R^2 = 0.9951$。测定符号音乐不可约信息熵下界为 $0.725$ nats。同时，实证指出了大模型扩展中后期的边际效益递减规律（从 85M 跨越至 302M 仅带来 0.20 的 PPL 改善），确立了中等参数规模（约 85M）作为单轨符号音乐建模的最优工程收益平衡点。
+1. *确立了符号音乐参数扩展定律的数学形式与边际边界*：严密论证了非嵌入参数量与自回归交叉熵损失之间的幂律关系，实测测定符号音乐领域的参数标度指数为 *$alpha_N = 0.142$*，判定系数达到 $R^2 = 0.9951$。测定符号音乐不可约信息熵下界为 $0.725$ nats。同时，实证指出了大模型扩展中后期的边际效益递减规律（从 85M 跨越至 302M 仅带来 0.20 的 PPL 改善），确立了中等参数规模（约 85M）作为单轨符号音乐建模的最优工程收益平衡点。
 2. *构建了基于群论对称性的十二平均律数据无损扩增体系*：针对扩展大模型面临的严峻过拟合理论边界（$D prop N^0.74$），通过证明半音阶模 12 循环群移调变换下的旋律相对音程差分不变性定理与小节拍数时值代数守恒定理，成功构建了近 1 亿 Token 级别的无损音乐语料池，为大规模实验扫清了数据匮乏的理论危机。
 3. *完成了物理边界下的全尺度底层引擎工程实现*：摒弃传统重型框架，面向硬件显存边界，完成从 0.24M、1.15M、9.59M、25.4M、85.4M 直至极限规模的严密显存与算子物理对账，实测达成了 7974 MiB 的显存控制与 332~350 Token/s 的高性能训练吞吐。
 4. *提出了双轨扩展律假说并客观评估了计算音乐学特征的尺度涌现*：超越单一损失函数，系统论证了随着模型规模扩张，生成乐曲在 9 维客观音乐学指标（如调式一致性提升至 0.9935，独特音级数收敛至 7.1520）上的尺度涌现现象；同时客观剖析了当前模型在休止符生成率（0.0000）与小节时值守恒（3.2% 缺陷率）上的内在局限。
@@ -1399,13 +1365,13 @@ $ cal(L)(N) = ((3.12 times 10^3) / N)^0.142 + 0.725 $ <eq-fitted-scaling-law>
 
 = 总结与展望
 
-== 本文主要研究工作总结
+== 研究工作总结
 
 符号音乐自动生成是人工智能、序列机器学习与计算音乐学深度融合的前沿交叉课题。不同于连续音频信号波形的生成任务，符号音乐（Symbolic Music）直接对乐谱这一高度离散化、符号化的人类智力成果进行建模，其底层序列蕴含着严格的物理声学调式排他律、小节时值代数守恒律以及跨越数十至数百步的长程动机发展逻辑。长期以来，学术界在符号音乐生成领域面临着两大根本性困境：其一，传统模型探索多局限于小型循环网络或浅层结构，缺乏对不同序列归纳偏置（Inductive Biases）在音乐语法学习效率与梯度动力学层面的严谨对比与物理溯源；其二，由于标注音乐语料规模的天然匮乏，大模型时代以 OpenAI 扩展定律（Scaling Laws）为代表的系统性参数扩张范式在符号音乐领域尚属空白，模型容量、数据规模、计算开销与音乐学生成品质之间的内在量化关系缺乏系统性的数理阐明。
 
 针对上述学术与技术挑战，本研究秉承纯底层原生优化与全闭环自洽的系统哲学，自主构建了从规则分词、底层 C/CUDA 高性能训练引擎、自回归无损采样器、零依赖声学物理建模音频合成，到 9 维计算音乐学量化评估工具链的端到端实验平台。围绕“多架构归纳偏置对比”与“符号音乐模型规模扩展定律”两条环环相扣的研究主线，系统性地推进了深度神经网络在符号音乐建模领域的认知边界。本研究的主要工作与核心成果总结如下：
 
-=== 面向规则符号音乐的高效分词体系与端到端系统构建
+=== 专用分词与全栈系统实现
 
 针对通用自然语言分词器（如字节对编码 BPE）在处理 ABC 乐谱时存在的“语义边界破碎”与“序列长度膨胀”两大核心缺陷，本文设计并实现了具有音乐学语法保护机制的高效分词方案 ABCTokenizer。通用 BPE 算法基于字符共现统计，倾向于将具有独立完整音乐语义的复合标记（例如声明重复开端的 `|:`、声明 G 大调的 `K:Gmaj`、声明拍号的 `M:6/8`）过度切分为毫无乐理关联的离散碎片字符，不仅人为增加了注意力机制以序列长度平方级计算的复杂度 $cal(O)(T^2)$，更严重割裂了音符时值与调式前缀的内在语义连贯性。
 
@@ -1413,7 +1379,7 @@ ABCTokenizer 针对符号音乐特性，确立了基于贪婪最长匹配（Gree
 
 在工程实现维度，本研究彻底摒弃了对外部重型深度学习框架及其冗余运行时的过度依赖，深度融合并重构了前沿底层极简架构，针对硬件微架构量身打造了纯 C/CUDA 原生训练引擎（`train.cu`）。系统底层直接调用 cuBLAS 库并结合对偶行优先 GEMM 规约映射，编写了自适应因果多头注意力与融合 Pre-LayerNorm 算子，在实现 100% 全参数端到端无损训练的同时，将静态权重、梯度、AdamW 状态与动态前向激活显存严密控制在单卡物理预算内。此外，在应用层构建了纯 Python 标准库编写的声学物理建模合成器（`abc_audio.py`），通过 Karplus-Strong 拨弦算法与 Schroeder 空间混响网络，彻底摆脱了外部重型音频库依赖，实现了从离散乐谱文本到 44.1kHz 16-Bit 高保真立体声音频的原生转化与实时听感验证。
 
-=== 经典多架构序列建模对比与循环机制局限性实证
+=== 序列模型对比与机理剖析
 
 为了在严格受控的同等实验基准下探究不同网络拓扑结构对离散音乐语法的表征潜能，本文在第三章对 Vanilla RNN、长短期记忆网络 LSTM 以及解码器专属 Transformer（GPT-2）三种主流序列建模范式进行了端到端的对比实证研究。通过对训练全生命周期各网络层梯度范数（`TotalNorm`）、隐层梯度流健康度、验证集损失及交叉熵困惑度（PPL）的高频追踪，系统揭示了不同归纳偏置对音乐结构学习能力的物理制约：
 
@@ -1423,7 +1389,7 @@ ABCTokenizer 针对符号音乐特性，确立了基于贪婪最长匹配（Gree
 
 基于全注意力因果解码架构的 GPT-2 则展现出压倒性的代数建模优势。凭借全局成对自注意力计算与 Pre-LayerNorm 残差直连机制，网络消除了物理时序反向传播的距离瓶颈，各层梯度健康度在训练全过程中均稳定维持在 $0.2 ~ 0.6$ 的黄金区间，模型最终取得了验证集损失 0.9055 与困惑度 2.47 的优异表现，全面验证了自注意力机制在符号音乐建模领域相比传统循环架构在数学表示上的优越性。
 
-=== 符号音乐规模扩展定律与代数对称性数据扩增
+=== 扩展定律验证与对称性扩增
 
 在第四章中，本研究将目光从固定尺寸模型的横向比较，跃升至模型参数横跨数个数量级时的宏观物理标度规律探究，在符号音乐领域系统确立并验证了神经扩展定律（Scaling Laws）。
 
@@ -1435,34 +1401,30 @@ $ cal(L)(N) = (frac(3.12 times 10^3, N))^(0.142) + 0.725 $
 
 该经验拟合曲线的决定系数高达 $R^2 = 0.9951$。更为重要的是，实测测得的符号音乐标度指数 $alpha_N = 0.142$ 显著高于通用自然语言领域的经典经验值（$0.076$）。这一发现从计算认知层面首次证实了：在词表极小、语法强受限的离散符号音乐代数空间中，模型规模的扩张带来了显著优于自然语言处理任务的边际误差递减效益；同时，测得的渐近不可约理论熵界 $cal(L)_oo = 0.725 " nats"$，从信息论层面雄辩地验证了音乐强调式刚性所诱发的低熵物理本底。
 
-=== 双轨涌现评估范式与流行音乐结构化受控变奏
+=== 双轨涌现评估
 
 为了打破传统深度学习评估过度依赖单一交叉熵损失（Loss）或困惑度（PPL）的局限，本研究首创性地构筑了“双轨扩展律（Dual-Track Scaling Law）”评估假说，将第一轨的经验统计学习指标与第二轨的 9 维计算音乐学量化特征揭示了随着模型规模按指数级扩张，高级音乐认知结构在网络内部的宏观涌现机制。
 
 在 9 维客观音乐统计特征演化中，当模型规模推进至 85.39M 的 Large 规格时，网络自发涌现出了令人赞叹的音理自洽性：调式一致性指标自发逼近至 0.9928（XL 模型达 0.9935），独特音级数均值收敛于 7.08（XL 模型达 7.15），音高跨度精准回归至两个半八度的物理舒适区，三连音与附点长短音切分结构自发形成，完全摆脱了小模型常见的无调性噪声。
 
-在自身相似度矩阵分析中，85.4M 模型的深层注意力自发形成了跨越 8 小节与 16 小节的平行副对角线高响应条纹，表明网络已经完全具备跨越超长距离上下文捕捉民间舞曲 $|: A :|: B :|$ 典型乐段二段体对称性的宏观建构能力。
 
-结合华语流行乐多轨融合数据集 POP909 与前缀引导受控生成引擎，大模型成功实现了在特定主歌前缀提示下，对 $A - A' - B - A''$ 主副歌主导动机展开受控变奏的结构化创作，证明了该技术体系在严肃艺术创作与现代流行音乐工业中的实际应用潜能。
-
-
-== 本文核心理论创新与学术贡献
+== 论文主要创新点
 
 纵观全文的研究推进，本文在深度学习理论、符号音乐计算与高性能系统工程三个维度上作出了系统的创新与贡献，具体可概括为以下三点：
 
-=== 离散强约束符号系统的模型扩展定律理论拓展
+=== 符号系统的扩展定律理论拓展
 
 长久以来，神经规模扩展定律的研究主战场几乎被开放域自然语言处理所垄断。自然语言具备庞大的开放词表与极其弹性的句法宽容度，而符号音乐则是以微型词表为基础、受声学律制与小节拍数严格代数约束的离散动力系统。
 
 本文首次将扩展定律理论完整迁移并拓展至符号音乐生成领域，不仅在实验上测定了高达 $0.9951$ 的极佳拟合度，更在理论上发现并阐明了符号音乐标度指数（$alpha_N = 0.142$）大幅超越自然语言的物理内在机理：在极小字典约束下，参数扩张的算力红利无需被长尾低频词的机械记忆所摊薄，而是被高度聚焦于学习离散符号之间的结构置换群、和声进行骨架与调性对称性，使得大模型展现出惊人的样本利用效率与跨尺度泛化能力。这一理论突破为后续学术界探索小词表强约束系统（如代码抽象语法树、DNA 蛋白质离散序列）的扩展定律研究提供了重要的方法论借鉴。
 
-=== 基于声学群论对称性的无损语料规模扩充范式
+=== 基于声学群论的语料扩充范式
 
 针对制约符号音乐大模型探索的数据匮乏瓶颈，本文摆脱了传统启发式、随机性文本扰动或音频微弱加噪的数据增强旧思路，创新性地提出了基于十二平均律半音阶有限循环群 $(bb(Z)_(12), +)$ 的无损移调理论。
 
 通过严格的代数推导，本文证明了模 12 循环群移调变换在保持相邻音程相对阶差绝对不变的同时，与时间轴时值积分运算保持着正交解耦特性，因而能够 100% 确保小节拍数守恒定律与音乐感知美学的绝对无损。这一理论为在有限民乐或流行乐数据上合规、无损地构建亿级 Token 语料提供了坚不可摧的数学正当性，彻底解决了大规模参数模型在垂直领域训练中必然陷入的理论过拟合危机。
 
-=== 极简主义端到端纯底层高性能音乐计算工程范式
+=== 极简主义纯底层高性能工程范式
 
 针对当前人工智能科研领域对高层巨型框架过度包装、黑盒依赖严重、显存开销臃肿的工程现状，本文践行了极简主义的高性能系统哲学。在整个技术链条中，从分词算法、CUDA GEMM 算子、注意力核函数、动态激活显存对账，到声学物理建模音频合成，全程贯彻了“零外部第三方重型框架黑盒依赖”的设计信条。
 
@@ -1473,19 +1435,19 @@ $ cal(L)(N) = (frac(3.12 times 10^3, N))^(0.142) + 0.725 $
 
 尽管本研究在理论建模、算子优化与生成质量评测等各个环节取得了富有成效的阶段性成果，但立足于更高水准的音乐智能追求，本文工作仍不可避免地存在若干深层次的学术与技术局限性，客观正视这些局限性是开启未来深入探索的必要前提：
 
-=== 单旋律织体对复杂复调多声部建模的表征局限
+=== 单旋律对多声部复调的表征局限
 
 本研究当前的核心语料与建模对象主要聚焦于单声部民间主旋律或经由通道融合后的主导 Lead Sheet 旋律。然而，音乐艺术的真正巅峰往往体现在多声部复调对位（Polyphonic Counterpoint）与复杂管弦乐立体声部织体之中（例如巴赫的赋格曲或古典交响乐）。
 
 在目前的 ABC 紧凑规则表示下，多声部信息被高度压缩或忽略，模型尚未涉足多轨道之间在纵向空间维度的即时协和音程约束与横向时间维度的独立声部导向。对于包含主旋律、内声部和声垫底、低音贝斯线与打击乐打击组的多轨复合工程，现有的单轨自回归马尔可夫链表征模型在表达能力上将面临严峻的维度诅咒挑战。
 
-=== 离散语言建模目标对长程宏观曲式规划的间接性
+=== 自回归生成对宏观曲式规划的间接性
 
 本文模型在本质上仍基于标准的最大似然估计与单向因果自回归生成机制，即通过预测下一个离散 Token 来隐式完成音乐创作。虽然自注意力机制凭借其长程感知能力，在大模型尺度下自发涌现出了跨越数十个小节的动机自相似性，但这种基于统计局部关联的自发涌现与人类作曲家“先谋全局篇章、再定和声走向、最后雕琢局部旋律”的自顶向下宏观曲式规划存在着本质差异。
 
 当生成的序列长度进一步扩展至交响诗或长达数千个 Token 的多乐章复杂巨构时，纯自回归模型依然存在小概率的调性微弱漂移风险，无法像人类艺术家那样在全局尺度上实现对高潮张力曲线、曲式呈示-展开-再现的确定性精准把控。
 
-=== 计算音乐学客观指标在主观艺术审美评估中的语义鸿沟
+=== 客观统计指标与主观艺术审美的鸿沟
 
 在评估体系上，本文虽然构建了涵盖 9 维经典统计特征的客观评估轨道，显著优于传统的单一交叉熵指标，但客观统计指标与人类主观艺术审美体验之间依然横亘着巨大的“语义鸿沟（Semantic Gap）”。
 
@@ -1496,37 +1458,37 @@ $ cal(L)(N) = (frac(3.12 times 10^3, N))^(0.142) + 0.725 $
 
 立足于本文所建立的理论基础、扩展定律规律与端到端系统底座，未来工作可沿着以下六个极具前景的维度展开深入拓展：
 
-=== 超大规模音乐基座模型与多尺度参数高效适配
+==== 超大基座模型与参数高效适配
 
 在模型规模层面，本文探索的上限推进至了 8500 万参数的稳定收敛与 8 亿参数的物理勘测。随着硬件条件的升级以及量化感知训练技术（如 4-bit/8-bit QLoRA 算子）在底层 CUDA 引擎中的进一步融合，未来可将基座模型参数规模进一步推进至数十亿（数十 B）量级。
 
 通过在海量跨风格、跨乐种的多国符号音乐语料上进行无监督掩码与自回归联合预训练，构建真正的“符号音乐大基座模型（Symbolic Music Foundation Model）”，并结合低秩自适应（LoRA）技术，实现对特定作曲家风格（如肖邦的夜曲风格、久石让的流行治愈风格）或特定民间地域乐种（如中国传统江南丝竹、爱尔兰吉格舞曲）的极低成本迁移微调，开启符号音乐的大模型基座时代。
 
-=== 融合多轨复调与和声走向的多模态符号协同建模
+=== 多轨复调协同建模
 
 针对单声部织体的局限性，未来研究亟需探索多轨复调的统一张量表示框架。可将乐谱拓展为二维事件矩阵，横轴代表绝对节拍物理时间，纵轴代表并行轨道编号（人声、钢琴、贝斯、弦乐组），设计具备双向空间注意力与纵向交叉注意力机制的时空因果 Transformer 架构。
 
 在这一架构下，模型不仅能在时间轴上自回归延伸旋律，更能实时在空间轴上根据当前小节给定的功能和弦标记（如 $"ii"^7 - "V"^7 - "I"$ 爵士和声进行），自动派生出在纵向声学上严格协和的低音线条与内声部对位线条，真正实现录音室级别的全轨编曲自动化生成。
 
-=== 基于音乐学规则奖励模型的人类偏好对齐技术
+=== 乐理规则引导的人类偏好对齐
 
 针对最大似然估计倾向于拟合数据集均值、缺乏创造性高光时刻的顽疾，未来可引入强化学习人类反馈对齐（RLHF）以及直接偏好优化（DPO）机制。
 
 可将经典的西方大小调功能和声学法则、对位法禁忌（如严禁平行五度、平行八度）、以及调性终止式闭合度形式化编码为确定性或可学习的*音乐理论规则奖励函数（Music Theory Rule-Based Reward Model）*；同时邀请资深音乐家对海量对比生成片段进行成对审美偏好标注。利用近端策略优化算法（PPO），引导预训练模型在广阔的假设空间中，跳出平庸的无聊死记硬背，自主探索既高度契合声学理论严谨性、又极具人类情感冲击力的高质量艺术精品。
 
-=== 突破平方复杂度的长程宏观曲式层次化规划架构
+===  线性复杂度与分层曲式规划
 
 为了彻底征服长达数千步的宏观曲式架构生成，未来可从注意力算子复杂度与生成拓扑两个方向双向发力：
 其一，在底层 CUDA 引擎中集成线性注意力（Linear Attention）、状态空间模型（Mamba/SSM）或稀疏块局部注意力机制，将序列计算复杂度实质性压减至 $cal(O)(T)$ 线性阶，支持数万 Token 超长乐章的直接端到端上下文建模；
 其二，构建*层次化分步生成系统（Hierarchical Generation Framework）*，将创作流程解耦为两级级联模型——顶层规划网络负责在宏观时间尺度上生成极度抽象的曲式结构骨架（包括乐段划分、和声进行骨架、高潮张力包络线），底层精细化网络则以前序宏观骨架为跨注意力条件，负责逐小节填充具体的装饰音、节奏细分与旋律微观起伏，真正复刻人类艺术巨匠从“构思谋篇”到“运笔填词”的创作认知全流程。
 
-=== 面向普惠创作的轻量化边缘部署与交互式协同创作
+=== 轻量边缘部署与交互协同创作
 
 在技术转化与产业应用维度，高性能模型必须走向广大普通音乐爱好者与专业音乐创作者的日常生产工具。未来应深入研究针对离散音乐 Transformer 的结构化剪枝、通道蒸馏与极限整数量化算法，将经过 Scaling Law 验证的高性能大模型知识提炼迁移至能在移动终端、iPad 乃至低功耗嵌入式树莓派设备上实时运行的轻量化引擎中。
 
 同时，开发集成了本系统底层内核的可视化交互式作曲平台（Human-AI Co-Creation Interface），允许创作者在交互式五线谱或 ABC 编辑器上以“草图绘制”的形式涂抹旋律轮廓，模型则充当智能副驾驶（Copilot），即时完成局部小节填空补全（Inpainting）、变奏延展（Variation）与智能和声配器，推动人工智能由冷冰冰的“替代人类创作”向温热的“赋能人类艺术灵感”深刻演进。
 
-=== 跨文化多元调式体系与民族音乐计算挖掘
+=== 多元民族调式体系计算挖掘
 
 本研究目前的实验数据主要植根于西方大小调体系与西欧民间舞曲。然而，人类音乐文明璀璨瑰丽，世界各民族在千百年的历史沉淀中孕育出了千姿百态的声学律制与调式逻辑。
 
@@ -1537,7 +1499,7 @@ $ cal(L)(N) = (frac(3.12 times 10^3, N))^(0.142) + 0.725 $
 
 音乐是人类最纯粹的心灵密码，是流动于时间维度上的抽象数学建筑，亦是寄托人类崇高情感的最深沉语言。本研究从底层的单行 CUDA 算子与矩阵乘法启程，穿透循环神经网络梯度弥散的物理迷雾，在十二平均律的代数对称群中寻找扩展语料的无损源泉，最终在双对数坐标轴上见证了符号音乐自回归模型严谨而壮美的模型规模扩展定律。
 
-科学探索的终极魅力，在于用严谨的数理方程去逼近那些曾被视为不可捉摸的人类艺术直觉。本论文虽然画上了一个阶段性的句点，但关于机器能否真正领悟音乐灵魂、技术如何更好地照亮人类艺术探索之路的宏大叙事，才刚刚掀开其澎湃时代乐章的一角序幕。愿未来的算法不仅能工整地算尽每一个音符的频率与时值，更能作为人类灵性的忠实延伸，在赛博空间奏响与人类心灵共振的不朽交响！
+科学探索的终极魅力，在于用严谨的数理方程去逼近那些曾被视为不可捉摸的人类艺术直觉。本论文虽然画上了一个阶段性的句点，但关于机器能否真正领悟音乐灵魂、技术如何更好地照亮人类艺术探索之路的宏大叙事，才刚刚掀开其澎湃时代乐章的一角序幕。愿未来的算法不仅能工整地算尽每一个音符的频率与时值，更能作为人类灵性的忠实延伸，在空间奏响与人类心灵共振的不朽交响！
 
 // = 术语
 
