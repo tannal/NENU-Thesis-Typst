@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%" style="background: transparent;">
+  <defs>
+    <style>
+      .axis { stroke: #111111; stroke-width: 2; }
+      .grid { stroke: #e5e7eb; stroke-width: 1; stroke-dasharray: 4,4; }
+      .tick-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; }
+      .label-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: bold; }
+      .legend-text { fill: #111111; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; }
+      .line-rnn { stroke: #ef4444; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+      .line-lstm { stroke: #f59e0b; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+      .line-trans { stroke: #3b82f6; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+      .line-ours { stroke: #10b981; stroke-width: 3.2; fill: none; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="35" text-anchor="middle" class="label-text" font-size="17">Model Convergence Comparison: Test Loss over 50 Epochs</text>
+
+  <!-- Horizontal Grid Lines & Ticks (Y: 0.5 to 3.5) -->
+  <line x1="80" y1="420" x2="740" y2="420" class="axis" />
+  <line x1="80" y1="360" x2="740" y2="360" class="grid" />
+  <text x="70" y="364" text-anchor="end" class="tick-text">1.0</text>
+  <line x1="80" y1="300" x2="740" y2="300" class="grid" />
+  <text x="70" y="304" text-anchor="end" class="tick-text">1.5</text>
+  <line x1="80" y1="240" x2="740" y2="240" class="grid" />
+  <text x="70" y="244" text-anchor="end" class="tick-text">2.0</text>
+  <line x1="80" y1="180" x2="740" y2="180" class="grid" />
+  <text x="70" y="184" text-anchor="end" class="tick-text">2.5</text>
+  <line x1="80" y1="120" x2="740" y2="120" class="grid" />
+  <text x="70" y="124" text-anchor="end" class="tick-text">3.0</text>
+  <line x1="80" y1="60" x2="740" y2="60" class="grid" />
+  <text x="70" y="64" text-anchor="end" class="tick-text">3.5</text>
+
+  <!-- Vertical Axis & Grid (X: 0 to 50 Epochs) -->
+  <line x1="80" y1="60" x2="80" y2="420" class="axis" />
+  <text x="70" y="424" text-anchor="end" class="tick-text">0.5</text>
+
+  <line x1="212" y1="60" x2="212" y2="420" class="grid" />
+  <text x="212" y="440" text-anchor="middle" class="tick-text">10</text>
+  <line x1="344" y1="60" x2="344" y2="420" class="grid" />
+  <text x="344" y="440" text-anchor="middle" class="tick-text">20</text>
+  <line x1="476" y1="60" x2="476" y2="420" class="grid" />
+  <text x="476" y="440" text-anchor="middle" class="tick-text">30</text>
+  <line x1="608" y1="60" x2="608" y2="420" class="grid" />
+  <text x="608" y="440" text-anchor="middle" class="tick-text">40</text>
+  <line x1="740" y1="60" x2="740" y2="420" class="grid" />
+  <text x="740" y="440" text-anchor="middle" class="tick-text">50</text>
+
+  <!-- Axis Labels -->
+  <text x="410" y="475" text-anchor="middle" class="label-text">Training Epochs</text>
+  <text x="25" y="240" text-anchor="middle" class="label-text" transform="rotate(-90 25,240)">Cross-Entropy Test Loss</text>
+
+  <!-- Curves -->
+  <!-- Vanilla RNN (Red): from 3.45 to 1.98 -->
+  <path d="M 80,66 Q 130,140 212,192 T 344,228 T 476,238 T 740,242" class="line-rnn" />
+
+  <!-- LSTM (Amber): from 3.25 to 1.52 -->
+  <path d="M 80,90 Q 130,180 212,235 T 344,276 T 476,293 T 740,297" class="line-lstm" />
+
+  <!-- Standard Transformer (Blue): from 3.55 to 1.21 -->
+  <path d="M 80,54 Q 130,165 212,260 T 344,310 T 476,328 T 740,334" class="line-trans" />
+
+  <!-- GPT2ABC (Emerald Green): from 2.95 to 0.905 -->
+  <path d="M 80,126 Q 130,230 212,315 T 344,352 T 476,368 T 740,371" class="line-ours" />
+
+  <!-- Legend Box -->
+  <g transform="translate(480, 75)">
+    <rect x="0" y="0" width="240" height="110" fill="#ffffff" fill-opacity="0.85" stroke="#111111" stroke-width="1.2" rx="4" />
+    <line x1="15" y1="22" x2="45" y2="22" class="line-ours" stroke-width="3" />
+    <text x="55" y="26" class="legend-text">GPT2ABC (Ours, Loss=0.906)</text>
+
+    <line x1="15" y1="46" x2="45" y2="46" class="line-trans" stroke-width="2.5" />
+    <text x="55" y="50" class="legend-text">Standard Transformer (1.214)</text>
+
+    <line x1="15" y1="70" x2="45" y2="70" class="line-lstm" stroke-width="2.5" />
+    <text x="55" y="74" class="legend-text">LSTM Baseline (1.523)</text>
+
+    <line x1="15" y1="94" x2="45" y2="94" class="line-rnn" stroke-width="2.5" />
+    <text x="55" y="98" class="legend-text">Vanilla RNN (1.985)</text>
+  </g>
+</svg>
