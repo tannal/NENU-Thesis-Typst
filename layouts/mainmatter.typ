@@ -109,11 +109,11 @@
     first-line-indent: first-line-indent,
     spacing: spacing,
   )
-  show cite: set text(font: "Times New Roman")
+  show cite: set text(font: ("Times New Roman", "Liberation Serif", "DejaVu Serif"))
 
   // FIXME Reference: https://github.com/Dherse/codly/issues/73 由于 Typst 的更新导致的 BUG，后续更新 codly 可以解决
   // show raw: set text(font: fonts.等宽, )
-  show raw: set text(font: (name: "Monaco Nerd Font Mono", covers: "latin-in-cjk"), size: font-size.小四)
+  show raw: set text(font: ("DejaVu Sans Mono", "Courier New", "Consolas", "Liberation Mono", "Menlo"), size: font-size.小四)
   show raw.where(block: true): set par(first-line-indent: 0pt)
   show smartquote: set text(font: fonts.楷体)
   //? 3.2 脚注样式
@@ -136,6 +136,15 @@
   show figure: show-figure.with(extra-prefixes: (algorithm: "alg:"))
   //? 3.4 设置 equation 的编号和假段落首行缩进
   show math.equation.where(block: true): show-equation
+  //! 修复 i-figured 重命名标签后，正文 @ 引用的编号不一致问题
+  show ref: it => {
+    let t = str(it.target)
+    if t.starts-with("fig-") { ref(label("fig:" + t)) }
+    else if t.starts-with("tab") { ref(label("tbl:" + t)) }
+    else if t.starts-with("eq-") { ref(label("eqt:" + t)) }
+    else if t.starts-with("algo") { ref(label("alg:" + t)) }
+    else { it }
+  }
   //? 3.5 表格表头置顶
   show figure.where(
     kind: table,
