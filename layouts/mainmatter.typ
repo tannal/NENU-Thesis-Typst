@@ -1,3 +1,4 @@
+#let _builtin-numbering = numbering
 #import "@preview/i-figured:0.2.4"
 #import "../utils/style.typ": font-family, font-size
 #import "../utils/custom-numbering.typ": custom-numbering
@@ -25,7 +26,7 @@
   // 标题字体与字号
   heading-font: auto,
   heading-size: auto,
-  heading-weight: ("bold", "bold", "bold", "bold"),
+  heading-weight: ("bold", "bold", "bold", "regular"),
   heading-above: (48pt, 6pt, 6pt, 0pt),
   heading-below: (24pt, 0pt),
   heading-pagebreak: (true, false),
@@ -135,13 +136,17 @@
   ))
   show figure: show-figure.with(extra-prefixes: (algorithm: "alg:"))
   //? 3.4 设置 equation 的编号和假段落首行缩进
-  show math.equation.where(block: true): show-equation
+  // 公式按章编号，避免 i-figured 的二次计数
+  set math.equation(numbering: (..nums) => {
+    let vals = nums.pos()
+    if vals.len() == 0 { return none }
+    _builtin-numbering("(1-1)", counter(heading).get().first(), vals.first())
+  })
   //! 修复 i-figured 重命名标签后，正文 @ 引用的编号不一致问题
   show ref: it => {
     let t = str(it.target)
     if t.starts-with("fig-") { ref(label("fig:" + t)) }
     else if t.starts-with("tab") { ref(label("tbl:" + t)) }
-    else if t.starts-with("eq-") { ref(label("eqt:" + t)) }
     else if t.starts-with("algo") { ref(label("alg:" + t)) }
     else { it }
   }
