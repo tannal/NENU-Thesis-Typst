@@ -11,8 +11,8 @@
 从语法结构上看，一份标准的 ABC 符号乐谱由头部元数据声明（Metadata Headers）与正文乐谱事件流（Score Body）两个紧密耦合的部分构成。头部元数据以行首特征字母加冒号定义全曲的声学物理与调性基底：`X:` 代表曲目索引序号，`T:` 代表乐曲标题，`M:` 代表拍号节拍（如 `M:4/4`、`M:6/8`），`L:` 代表基准时值长度（如 `L:1/8`），`Q:` 代表演奏拍速（如 `Q:1/4=120`），`K:` 代表全局调号（如 `K:G`、`K:Dmaj`）。正文部分则利用拉丁字母 A 至 G 表征自然音高，借助大写字母代表中音八度、小写字母代表高音八度，以及后缀撇号 `'` 与逗号 `,` 实现跨越多个八度的离散音高覆盖。升降变音记号通过前缀符号直观指定，其中 `^` 代表升半音，`_` 代表降半音，`=` 代表还原记号；音符时值则以基准时值 $L$ 为基数，通过后缀整数或分数（如 `2` 代表两倍时值，`/2` 或 `/` 代表二分之一时值）进行算术缩放。小节线采用单竖线 `|`、双复线 `||` 或终止线 `|]` 标识，民间音乐核心的二段体循环结构则通过重复记号 `|:` 与 `:|` 以及第一、第二变奏跳跃记号 `[1` 和 `[2` 严格界定。
 
 #figure(
-  image("fig/abc_structure.svg", width: 90%),
-  caption: [ABC 记谱法在元数据、时间轴、音高轴与宏观曲式维度上的多维语义表征架构],
+  image("fig/fig-abc-structure.svg", width: 100%),
+  caption: [ABC 记谱法的谱头、正文与四层语义结构],
 ) <fig-abc-structure>
 
 图 @fig-abc-structure 展示了 ABC 记谱法在多维层面的语义耦合关系。正是这种高度紧凑、富含结构规则且计算开销极低的有理数表达体系，为后续构建基于自回归语言模型的离散音乐生成引擎提供了理想的数学载体。
@@ -38,6 +38,11 @@ $ bold(y)_t = "softmax"(bold(W)_(h y) bold(h)_t + bold(b)_y) $ <eq-rnn-forward-y
 
 其中 $bold(W)_(h h) in bb(R)^(h times h)$ 为隐藏状态自循环转移矩阵，$bold(W)_(x h) in bb(R)^(h times d)$ 为输入投影矩阵，$bold(W)_(h y) in bb(R)^(V times h)$ 为输出预测矩阵，$bold(b)_h$ 与 $bold(b)_y$ 分别为对应的可学习偏置项。从信息论与状态机视角审视，隐状态向量 $bold(h)_t$ 构成了对历史序列序列上下文 $x_(<=t)$ 的有损紧凑编码，模型依靠其单步更新机制维持对整个曲调演变历程的追踪。
 
+#figure(
+  image("fig/fig-rnn-unrolled.svg", width: 100%),
+  caption: [循环网络的展开表示与梯度上界随时序跨度的衰减],
+) <fig-rnn-unrolled>
+
 在模型参数优化阶段，网络依赖沿时间反向传播算法（Backpropagation Through Time, BPTT）计算损失函数关于权重矩阵的偏导数。设全序列的总标量损失为各时间步交叉熵损失之和 $cal(L) = sum_(t=1)^T cal(L)_t$。当考察终端时刻 $T$ 的损失 $cal(L)_T$ 对遥远历史时刻 $k$（其中 $k << T$）的隐藏状态自循环权重矩阵 $bold(W)_(h h)$ 的梯度贡献时，根据多元微分链式法则，误差梯度信号在时间轴上的逆向传播可严格展开为跨时间步雅可比矩阵（Jacobian Matrix）的连续连乘积：
 
 $ frac(partial cal(L)_T, partial bold(W)_(h h)) = sum_(k=1)^T frac(partial cal(L)_T, partial bold(h)_T) paren(product_(j=k+1)^T frac(partial bold(h)_j, partial bold(h)_(j-1))) frac(partial bold(h)_k, partial bold(W)_(h h)) $ <eq-bptt-chain-rule>
@@ -56,11 +61,17 @@ $ norm(product_(j=k+1)^T frac(partial bold(h)_j, partial bold(h)_(j-1)))_2 <= pr
 
 $ lim_(Delta t -> oo) (gamma dot rho)^(Delta t) = bold(0) $ <eq-gradient-vanishing-limit>
 
-这一极限即为深度学习理论中著名的“梯度弥散（Gradient Vanishing）定理”。在符号音乐生成的应用场景中，这一物理失效带来了灾难性后果：民间舞曲或古典乐段中核心的平行乐句、调式回归与小节线反复通常跨越数十乃至上百个离散音符 Token（即 $Delta t > 100$）。当梯度弥散发生时，网络深层的权重更新信号完全被局部短程噪声所淹没，模型根本无法感知上百步之前的调号声明或起始动机，因而不可避免地陷入调式漂移与结构失忆。相反地，若初始化或训练扰动导致 $rho > 1 / gamma$，连乘项将以指数级发生爆炸（Gradient Explosion），导致数值溢出与训练坍塌。这种严重的非线性动力学不稳定性，使得朴素循环神经网络在长程结构音乐生成任务上遭遇了不可逾越的理论天花板。
+这一极限即为深度学习理论中著名的“梯度弥散（Gradient Vanishing）定理”。在符号音乐生成的应用场景中，这一失效带来明显的建模困难：民间舞曲或古典乐段中核心的平行乐句、调式回归与小节线反复通常跨越数十乃至上百个离散音符 Token（即 $Delta t > 100$）。当梯度弥散发生时，网络深层的权重更新信号完全被局部短程噪声所淹没，模型根本无法感知上百步之前的调号声明或起始动机，因而不可避免地陷入调式漂移与结构失忆。相反地，若初始化或训练扰动导致 $rho > 1 / gamma$，连乘项将以指数级发生爆炸（Gradient Explosion），导致数值溢出与训练坍塌。这种严重的非线性动力学不稳定性，使得朴素循环神经网络在长程结构音乐生成任务上遭遇了不可逾越的理论天花板。
 
 === 长短期记忆网络的门控机制
 
-为了彻底打破乘性雅可比链式传递引发的指数衰减诅咒，Hochreiter 与 Schmidhuber 于 1997 年开创性地提出了长短期记忆网络（Long Short-Term Memory, LSTM）@hochreiter1997long。LSTM 的革命性突破在于其在传统的非线性隐藏状态 $bold(h)_t$ 之外，引入了一条具备恒等直连特性的内部存储通道——细胞状态（Cell State, $bold(C)_t in bb(R)^h$），并通过三个可微的门控机制（遗忘门、输入门、输出门）对该通路的信息流动实施精细的动态调控。
+#figure(
+  image("fig/fig-lstm-gate.svg", width: 100%),
+  caption: [LSTM 的四个门与加性细胞状态更新],
+) <fig-lstm-gate>
+
+
+为打破乘性雅可比链式传递引发的指数衰减诅咒，Hochreiter 与 Schmidhuber 于 1997 年开创性地提出了长短期记忆网络（Long Short-Term Memory, LSTM）@hochreiter1997long。LSTM 的改进在于在传统的非线性隐藏状态 $bold(h)_t$ 之外，引入了一条具备恒等直连特性的内部存储通道——细胞状态（Cell State, $bold(C)_t in bb(R)^h$），并通过三个可微的门控机制（遗忘门、输入门、输出门）对该通路的信息流动实施精细的动态调控。
 
 在时间步 $t$，LSTM 单元接收当前时刻输入 $bold(x)_t$、上一时刻隐藏状态 $bold(h)_(t-1)$ 以及上一时刻细胞状态 $bold(C)_(t-1)$。系统运算按照如下完备代数方程组执行：
 
@@ -78,11 +89,11 @@ $ bold(h)_t = bold(o)_t dot.o tanh(bold(C)_t) $ <eq-lstm-hidden-output>
 
 其中 $sigma(z) = frac(1, 1 + exp(-z))$ 为 Sigmoid 激活函数，其输出值域严格限制在 $(0, 1)$ 之间，在物理上等价于可平滑调节的阀门开度；$dot.o$ 表示向量逐元素积（Hadamard Product）；$[bold(h)_(t-1), bold(x)_t] in bb(R)^(h+d)$ 为向量拼接操作。
 
-方程 @eq-lstm-cell-update 构成了 LSTM 克服梯度弥散的数学灵魂所在。与朴素 RNN 强行通过稠密矩阵乘法更新全部隐状态不同，细胞状态 $bold(C)_t$ 的更新是一个线性的*加性操作（Additive Operation）*。考察误差梯度从 $t$ 时刻的细胞状态向 $t-1$ 时刻细胞状态的反向传递雅可比矩阵：
+方程 @eq-lstm-cell-update 构成 LSTM 缓解梯度弥散的核心机制。与朴素 RNN 强行通过稠密矩阵乘法更新全部隐状态不同，细胞状态 $bold(C)_t$ 的更新是一个线性的*加性操作（Additive Operation）*。考察误差梯度从 $t$ 时刻的细胞状态向 $t-1$ 时刻细胞状态的反向传递雅可比矩阵：
 
 $ frac(partial bold(C)_t, partial bold(C)_(t-1)) = bold("diag")(bold(f)_t) $ <eq-lstm-additive-grad>
 
-从方程 @eq-lstm-additive-grad 可以清晰地看到，若遗忘门激活向量 $bold(f)_t$ 的元素饱和接近于 $1$，则雅可比矩阵退化为一个恒等映射矩阵，误差梯度便能像在超导通道中一样，跨越任意长的时间间隔近乎无损地逆向流淌回遥远的历史时刻。这种加性恒等流动机制使得 LSTM 第一次具备了稳定捕捉数百步音乐依赖模式的能力 @eck2002finding @liang2017automatic，并直接孕育了民谣音乐生成领域的早期里程碑工作 folk-rnn @sturm2016music。
+从方程 @eq-lstm-additive-grad 可以清晰地看到，若遗忘门激活向量 $bold(f)_t$ 的元素饱和接近于 $1$，则雅可比矩阵退化为一个恒等映射矩阵，误差梯度便能沿直接通路跨越较长的时间间隔近乎无损地逆向流淌回遥远的历史时刻。这种加性恒等流动机制使得 LSTM 第一次具备了稳定捕捉数百步音乐依赖模式的能力 @eck2002finding @liang2017automatic，并直接孕育了民谣音乐生成领域的早期里程碑工作 folk-rnn @sturm2016music。
 
 
 == 因果自注意力与大语言模型
@@ -91,7 +102,7 @@ $ frac(partial bold(C)_t, partial bold(C)_(t-1)) = bold("diag")(bold(f)_t) $ <eq
 
 尽管 LSTM 凭借门控机制显著延缓了梯度弥散，但其基于时间步严格串行的递归计算本质，使得其在现代大规模并行处理器（如 GPU）上无法实现跨序列位置的并发计算；更为关键的是，即便引入加性细胞通路，当序列长度超越千步时，将无限维度的音乐历史硬性压缩入有限维度隐向量 $bold(h)_t$ 的物理限制，依然会导致长程音乐动机记忆的渐进式退化。
 
-2017 年，Vaswani 等人提出了革命性的 Transformer 架构 @vaswani2017attention，彻底摒弃了循环与卷积拓扑，建立在完全基于全局成对注意力（Self-Attention）的全新计算范式之上。在单向自回归音乐生成任务中，为了保证时间因果性（即在预测当前音符 $x_t$ 时，网络严禁感知未来的后序音符 $x_(>t)$），系统采用了纯解码器（Decoder-only）架构，这也正是 OpenAI GPT 系列大模型的核心基石 @radford2019language。针对长程音乐建模，该机制还进一步延伸至相对位置偏置的 Music Transformer @huang2018music 与稀疏自注意力机制 @child2019generating。
+2017 年，Vaswani 等人提出了 Transformer 架构 @vaswani2017attention，不再依赖循环与卷积拓扑，建立在完全基于全局成对注意力（Self-Attention）的全新计算范式之上。在单向自回归音乐生成任务中，为了保证时间因果性（即在预测当前音符 $x_t$ 时，网络严禁感知未来的后序音符 $x_(>t)$），系统采用了纯解码器（Decoder-only）架构，这也正是 OpenAI GPT 系列大模型的核心基石 @radford2019language。针对长程音乐建模，该机制还进一步延伸至相对位置偏置的 Music Transformer @huang2018music 与稀疏自注意力机制 @child2019generating。
 
 设输入序列经过词表嵌入矩阵 $bold(W)_(t e) in bb(R)^(V times d)$ 与可学习位置编码矩阵 $bold(W)_(p e) in bb(R)^(T times d)$ 映射后，得到初始表征张量 $bold(X)_0 in bb(R)^(T times d)$。在每一层解码器块中，输入张量首先通过三个独立的线性权重矩阵投影生成查询（Query, $bold(Q)$）、键（Key, $bold(K)$）与值（Value, $bold(V)$）矩阵：
 
@@ -124,11 +135,16 @@ $ bold(X)_("out") = bold(X)_("mid") + "MLP"("LayerNorm"(bold(X)_("mid"))) $ <eq-
 
 $ "MLP"(bold(Z)) = "GELU"(bold(Z) bold(W)_(f c 1) + bold(b)_(f c 1)) bold(W)_(f c 2) + bold(b)_(f c 2) $ <eq-mlp-gelu>
 
-由于自注意力机制在任意两个时间步 $i$ 与 $j$ 之间建立的信息交互路径长度恒定为 $cal(O)(1)$，它彻底消除了距离衰减壁垒，使长程复杂动机的发展与曲式结构呼应在数学上获得了最直接的表征通道 @geerlings2020interacting。在工程训练方面，现代 Transformer 广泛结合解耦权重衰减（AdamW）优化算法 @loshchilov2017decoupled 与前沿无锁纯原生算子栈 @karpathy2024llmc，进一步释放了自回归注意力的训练吞吐潜力。
+由于自注意力机制在任意两个时间步 $i$ 与 $j$ 之间建立的信息交互路径长度恒定为 $cal(O)(1)$，它消除了距离衰减壁垒，使长程复杂动机的发展与曲式结构呼应在数学上获得了最直接的表征通道 @geerlings2020interacting。在工程训练方面，现代 Transformer 广泛结合解耦权重衰减（AdamW）优化算法 @loshchilov2017decoupled 与前沿无锁纯原生算子栈 @karpathy2024llmc，进一步释放了自回归注意力的训练吞吐潜力。
 
-===  预训练大语言模型演进
+#figure(
+  image("fig/fig-attention-mask.svg", width: 100%),
+  caption: [因果自注意力的可见性结构：位置 $i$ 只能访问 $j <= i$ 的前缀],
+) <fig-attention-mask>
 
-基于上述 Decoder-only 架构的深度语言模型，在经过数万亿级 Token 的海量文本语料无监督预训练后，展现出了惊人的泛化与上下文学习（In-Context Learning）能力 @brown2020language。在开源大模型技术演进中，Meta 提出的 LLaMA 家族（LLaMA-1、LLaMA-2、LLaMA-3）代表了当今开源基础语言模型的事实标准 @touvron2023llama @touvron2023llama2。
+=== 预训练大语言模型演进
+
+基于上述 Decoder-only 架构的深度语言模型，在经过数万亿级 Token 的海量文本语料无监督预训练后，展现出较强的泛化与上下文学习（In-Context Learning）能力 @brown2020language。在开源大模型技术演进中，Meta 提出的 LLaMA 家族（LLaMA-1、LLaMA-2、LLaMA-3）代表了当今开源基础语言模型的事实标准 @touvron2023llama @touvron2023llama2。
 
 与标准 GPT 架构相比，现代高性能大语言模型在底层算子层面融合了三项关键的架构改进：
 第一，*均方根层归一化（RMSNorm）*。相较于传统 LayerNorm 依赖均值与方差的双重统计，RMSNorm 移除了对隐状态均值的零中心化计算，仅利用均方根标量实施缩放：
@@ -141,7 +157,7 @@ $ "RMSNorm"(bold(x)) = frac(bold(x), "RMS"(bold(x))) dot.o bold(g), quad "RMS"(b
 
 === 参数高效微调与 LoRA 理论
 
-直接对数十亿参数规模的大语言模型（如 LLaMA-7B）针对垂直领域的 ABC 音乐语料进行全参数微调，面临着难以逾越的工程与理论阻碍。从计算物理层面审视，全参数更新需要为全部 70 亿个参数分配等量的梯度显存，并在 AdamW 优化器中存储两倍于参数量的一阶动量与二阶动量张量，仅优化器状态即需耗费高达 $84 "GB"$ 的超大显存空间，远超单张消费级 GPU 的承载极限；从泛化理论层面审视，由于高保真标注音乐语料规模相对有限，盲目更新全部权重极易引发过拟合灾难性遗忘，破坏预训练阶段所习得的深层通用序列特征表示。
+直接对数十亿参数规模的大语言模型（如 LLaMA-7B）针对垂直领域的 ABC 音乐语料进行全参数微调，面临着难以逾越的工程与理论阻碍。从计算物理层面审视，全参数更新需要为全部 70 亿个参数分配等量的梯度显存，并在 AdamW 优化器中存储两倍于参数量的一阶动量与二阶动量张量，仅优化器状态即需耗费高达 $84 "GB"$ 的超大显存空间，远超单张消费级 GPU 的承载极限；从泛化理论层面审视，由于高保真标注音乐语料规模相对有限，盲目更新全部权重容易引发过拟合与灾难性遗忘，破坏预训练阶段所习得的深层通用序列特征表示。
 
 为攻克该难题，参数高效微调（PEFT）系列方法相继被提出，如适配器调优（Adapter Tuning）@houlsby2019adapter、前缀微调（Prefix-Tuning）@li2021prefix 等。在此基础上，Hu 等人于 2022 年提出了低秩自适应（Low-Rank Adaptation, LoRA）参数高效微调框架 @hu2022lora。该理论基于一个深刻的经验数学假设——预训练模型在针对特定下游垂直任务实施适配时，其密集权重矩阵的变化量 $Delta bold(W)$ 具有远低于全维度矩阵秩的*“内在秩（Intrinsic Rank）”* @aghajanyan2021intrinsic。
 
@@ -157,11 +173,11 @@ $ bold(h) = bold(W)_0 bold(x) + frac(alpha, r) dot bold(B) bold(A) bold(x) $ <eq
 
 $ bold(A) ~ cal(N)(0, sigma^2 bold(I)), quad bold(B) equiv bold(0) $ <eq-lora-init>
 
-该初始化策略确保了在训练第 0 步时，恒有 $Delta bold(W) = bold(B) bold(A) equiv bold(0)$，即初始状态下模型的输入输出行为与纯净预训练基线完全严格等价，彻底消除了微调介入初期的冷启动扰动。参数缩放因子 $alpha / r$ 则充当了自适应学习率解耦控制系数，保证在调整低秩维度 $r$ 时无需重新搜索优化器超参数。同时，这一低秩增量亦支持跨任务算术组合与解耦融合 @ilharco2023editing。
+该初始化策略确保了在训练第 0 步时，恒有 $Delta bold(W) = bold(B) bold(A) equiv bold(0)$，即初始状态下模型的输入输出行为与纯净预训练基线完全严格等价，消除了微调介入初期的冷启动扰动。参数缩放因子 $alpha / r$ 则充当了自适应学习率解耦控制系数，保证在调整低秩维度 $r$ 时无需重新搜索优化器超参数。同时，这一低秩增量亦支持跨任务算术组合与解耦融合 @ilharco2023editing。
 
 #figure(
-  image("fig/lora_architecture.svg", width: 85%),
-  caption: [低秩自适应（LoRA）在前向传播中的参数解耦与并联计算机制],
+  image("fig/fig-lora.svg", width: 100%),
+  caption: [LoRA 的低秩旁路：冻结主干权重，仅训练分解矩阵],
 ) <fig-lora-architecture>
 
 图 @fig-lora-architecture 直观展示了 LoRA 的参数旁路机制。以隐藏维度为 $d = 4096$ 的标准自注意力查询投影层为例，全参数更新需要维护 $d^2 approx 1.68 times 10^7$ 个浮点数；而当选定低秩维度 $r = 16$ 时，可训练参数量骤降至 $2 times d times r approx 1.31 times 10^5$ 个。参数压缩比高达：
@@ -181,7 +197,7 @@ $ cal(L)(N) = (frac(N_c, N))^(alpha_N) + cal(L)_oo $ <eq-ch2-kaplan-n>
 
 式中 $alpha_N$ 称为参数标度指数（Scaling Exponent），在几何上直接对应于双对数坐标系（Log-Log Plot）下损失下降曲线的渐近斜率；$N_c$ 为特征尺度标度常数；$cal(L)_oo$ 为当模型容量趋于无穷大时、由目标序列自身的内在不可约信息熵所决定的理论下界。
 
-在扩展定律的理论推导与经验拟合中，对参数规模 $N$ 的统计标准具有极其严密的规范约束。系统必须将词表嵌入矩阵（Token Embedding）与位置编码矩阵（Position Embedding）从总参数量中剥离排除，仅统计直接参与序列内部时空多维特征提取与非线性推理的 Transformer 骨干层参数。其核心数学根据在于：嵌入参数在物理上仅承担离散标识符与连续向量之间的静态查找表（Lookup Table）功能，其参数膨胀并不直接提升网络解决复杂因果长程依赖与时序组合爆炸的能力。对于包含 $L$ 层解码器、隐层维度为 $d$ 的标准因果模型，非嵌入参数量的解析表达严格定义为：
+在扩展定律的理论推导与经验拟合中，对参数规模 $N$ 的统计标准具有严格的规范约束。系统必须将词表嵌入矩阵（Token Embedding）与位置编码矩阵（Position Embedding）从总参数量中剥离排除，仅统计直接参与序列内部时空多维特征提取与非线性推理的 Transformer 骨干层参数。其核心数学根据在于：嵌入参数在物理上仅承担离散标识符与连续向量之间的静态查找表（Lookup Table）功能，其参数膨胀并不直接提升网络解决复杂因果长程依赖与时序组合爆炸的能力。对于包含 $L$ 层解码器、隐层维度为 $d$ 的标准因果模型，非嵌入参数量的解析表达严格定义为：
 
 $ N = L dot (12 d^2 + 13 d) $ <eq-ch2-exact-nonemb>
 
@@ -205,7 +221,7 @@ $ D_("min") prop N^(0.74) $ <eq-ch2-dmin>
 
 $ H(cal(X)) = lim_(T -> oo) frac(1, T) H(X_1, X_2, dots, X_T) $ <eq-ch2-entropy-rate>
 
-对于开放域通用自然语言，由于日常会话包含极其广袤的世界常识不确定性、语用模糊性以及多义词发散性，其实测测得的不可约熵界通常在 $1.5 ~ 1.8 " nats"$ 之间浮动。而在符号音乐体系中，音符序列受到西方十二平均律协和和声体系、调式五度循环调性中心（Tonal Center）以及强小节对称律动的严格物理制约。在给定前序调号与前半句动机后，终止式主音的收束在统计上呈现高度确定的尖峰概率分布。因此，符号音乐语言模型的真实不可约物理熵界 $cal(L)_oo^("Music")$ 必然显著低于自然语言，其理论下界收敛于更低区间（如第四章在实测拟合中严格测定的 $0.725 " nats"$），展现出符号音乐高度自洽的理性代数美感。为进一步捕获音乐在长程动机与曲式反复中的自相似结构，结合自相似矩阵（Self-Similarity Matrix, SSM）的可视化与拓扑分析方法 @foote2000visualizing，亦构成了剖析离散符号长程动机关联的重要分析工具。
+对于开放域通用自然语言，由于日常会话包含广泛的世界常识不确定性、语用模糊性以及多义词发散性，其实测测得的不可约熵界通常在 $1.5 ~ 1.8 " nats"$ 之间浮动。而在符号音乐体系中，音符序列受到西方十二平均律协和和声体系、调式五度循环调性中心（Tonal Center）以及强小节对称律动的严格物理制约。在给定前序调号与前半句动机后，终止式主音的收束在统计上呈现高度确定的尖峰概率分布。因此，符号音乐语言模型的真实不可约物理熵界 $cal(L)_oo^("Music")$ 必然显著低于自然语言，其理论下界收敛于更低区间（如第四章在实测拟合中严格测定的 $0.725 " nats"$），展现出符号音乐高度自洽的理性代数美感。为进一步捕获音乐在长程动机与曲式反复中的自相似结构，结合自相似矩阵（Self-Similarity Matrix, SSM）的可视化与拓扑分析方法 @foote2000visualizing，亦构成了剖析离散符号长程动机关联的重要分析工具。
 
 
 == 生成评估与计算音乐学指标
